@@ -3,12 +3,16 @@ import Section from '@/components/Section'
 import Status from '@/components/Status'
 import Stat from '@/components/Stat'
 import { Book, Question } from '@/types'
+import StatusClass from '@/classes/Status'
+import { UpdateBookOptions } from './Client'
+import { useEffect, useRef } from 'react'
+import { handleErrorOnClient } from '@/util/handleErrorOnClient'
+import { handleGenerationSuccess } from '@/util/handleGenerationSuccess'
 
 interface Props {
 	book: Book
 	updateBook: (book: Book) => void
 }
-
 const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 	const updateQuestion = (question: Question) => {
 		const newQuestions = book.reflect.questions.map((item) => {
@@ -41,19 +45,25 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 		})
 	}
 
+	const { generateReflect } = useRegenerateReflect(updateBook, book)
+
 	return (
 		<Section title="Reflect">
 			<Section.Center>
 				<div className="flex flex-col justify-center space-y-4 w-fit m-auto">
 					{book.reflect.questions.map((question, index) => (
 						<div
-							className={`card w-96 bg-base-100 shadow-xl transition-all duration-300 border-2 border-transparent ${
-								question.selected && 'border-green-500'
+							className={`card w-96 bg-base-100 shadow-xl transition-all duration-300 border-2 ${
+								question.selected && 'border-green-600'
 							}`}
 						>
-							<div className="card-body">
+							<div className="card-body pt-8 pb-4">
 								<article className="prose">
 									<textarea
+										disabled={
+											book.reflect.status.generating
+												.inProgress
+										}
 										value={question.text}
 										className="w-full"
 										onChange={(e) =>
@@ -68,22 +78,32 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 									<div className="flex flex-row items-center">
 										{question.fromPage && (
 											<div className="badge badge-outline badge-default">
-												chapter {question.page}
+												page {question.page}
 											</div>
 										)}
 										<div className="flex flex-row ml-auto space-x-4">
 											<div className="card-actions justify-end">
 												<button
+													disabled={
+														book.reflect.status
+															.generating
+															.inProgress
+													}
 													onClick={() => {
 														deleteQuestion(question)
 													}}
-													className="btn btn-outline btn-error"
+													className="btn btn-sm btn-outline btn-error"
 												>
-													Remove
+													Delete
 												</button>
 											</div>
 											<div className="card-actions justify-end">
 												<button
+													disabled={
+														book.reflect.status
+															.generating
+															.inProgress
+													}
 													onClick={() => {
 														updateQuestion({
 															...question,
@@ -91,7 +111,7 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 																!question.selected,
 														})
 													}}
-													className="btn btn-outline btn-success"
+													className="btn btn-sm btn-outline btn-success"
 												>
 													{question.selected
 														? 'Deselect'
@@ -116,9 +136,25 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 						.length.toString()}
 					desc="Select 5 questions total"
 				/>
+				{/* <div className="mt-4">
+					<article className="prose pb-2">
+						<h4>Include Chapters:</h4>
+					</article>
+					<div className="w-fit grid grid-cols-3 gap-2 items-center justify-center">
+						{book.pages.chapters.map((page) => (
+							<button className="badge bg-transparent border-black border-1 hover:badge-neutral hover:text-white">
+								{page.title}
+							</button>
+						))}
+					</div>
+				</div> */}
 
-				<button disabled={true} className="btn btn-info btn-wide mt-12">
-					Regenerate
+				<button
+					disabled={book.reflect.status.generating.inProgress}
+					onClick={generateReflect}
+					className="btn btn-info btn-wide mt-12"
+				>
+					Generate More
 				</button>
 			</Section.Right>
 		</Section>
@@ -126,3 +162,74 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 }
 
 export default Reflect
+
+const useRegenerateReflect = (
+	updateBook: (book: Book, options?: UpdateBookOptions) => void,
+	book: Book
+) => {
+	// Use a ref to store the current book
+	const bookRef = useRef(book)
+
+	// Update the ref whenever the book changes
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	const generateReflect = async () => {
+		console.log('generate reflect')
+
+		// UPDATE STATE ON CLIENT
+		const newStatus = new StatusClass(book.reflect.status)
+		newStatus.beginGenerating()
+
+		await updateBook(
+			{
+				...bookRef.current,
+				reflect: {
+					...bookRef.current.reflect,
+					status: newStatus.toObject(),
+				},
+			},
+			{
+				clientOnly: true,
+			}
+		)
+
+		const res = await fetch('/api/generate/reflect', {
+			method: 'POST',
+			body: JSON.stringify({
+				book: book,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		// SUCCESS --> update the state with the new generated description
+		if (res.status === 200) {
+			const { data } = await res.json()
+			const newBook: Book = {
+				...bookRef.current,
+				reflect: data,
+			}
+			handleGenerationSuccess(newBook, updateBook)
+		} else {
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+			const newStatus = new StatusClass(bookRef.current.reflect.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			updateBook({
+				...book,
+				reflect: {
+					...book.reflect,
+					status: newStatus.toObject(),
+				},
+			})
+		}
+	}
+
+	return {
+		generateReflect,
+	}
+}

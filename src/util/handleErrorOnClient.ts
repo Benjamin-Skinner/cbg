@@ -25,6 +25,7 @@ export async function handleErrorOnClient(
 	updateBook: (book: Book) => void,
 	status: Status
 ) {
+	throw new Error('This function is deprecated')
 	console.log('GENERATION ERROR')
 	const { error, code } = await res.json()
 	console.error(`${code}: ${error}`)

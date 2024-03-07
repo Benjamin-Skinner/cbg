@@ -242,12 +242,18 @@ const useGenerateOutline = (
 			}
 			handleGenerationSuccess(newBook, updateBook)
 		} else {
-			handleErrorOnClient(
-				res,
-				bookRef.current,
-				updateBook,
-				book.outline.status
-			)
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+			const newStatus = new StatusClass(bookRef.current.outline.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			updateBook({
+				...book,
+				outline: {
+					...book.outline,
+					status: newStatus.toObject(),
+				},
+			})
 		}
 	}
 

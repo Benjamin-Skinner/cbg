@@ -136,7 +136,7 @@ const Recall: React.FC<Props> = ({ book, updateBook }) => {
 						.length.toString()}
 					desc="Select 5 questions total"
 				/>
-				<div className="mt-4">
+				{/* <div className="mt-4">
 					<article className="prose pb-2">
 						<h4>Include Chapters:</h4>
 					</article>
@@ -147,7 +147,7 @@ const Recall: React.FC<Props> = ({ book, updateBook }) => {
 							</button>
 						))}
 					</div>
-				</div>
+				</div> */}
 
 				<button
 					disabled={book.recall.status.generating.inProgress}
@@ -214,12 +214,18 @@ const useRegenerateRecall = (
 			}
 			handleGenerationSuccess(newBook, updateBook)
 		} else {
-			handleErrorOnClient(
-				res,
-				bookRef.current,
-				updateBook,
-				bookRef.current.recall.status
-			)
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+			const newStatus = new StatusClass(bookRef.current.recall.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			updateBook({
+				...book,
+				recall: {
+					...book.recall,
+					status: newStatus.toObject(),
+				},
+			})
 		}
 	}
 

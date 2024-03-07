@@ -292,12 +292,20 @@ const useGenerateDescription = (
 			}
 			handleGenerationSuccess(newBook, updateBook)
 		} else {
-			handleErrorOnClient(
-				res,
-				bookRef.current,
-				updateBook,
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+			const newStatus = new StatusClass(
 				bookRef.current.description.status
 			)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			updateBook({
+				...book,
+				description: {
+					...book.description,
+					status: newStatus.toObject(),
+				},
+			})
 		}
 	}
 
