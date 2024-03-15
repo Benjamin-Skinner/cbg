@@ -47,6 +47,16 @@ class PageClass {
 		}
 	}
 
+	addImageOption(option: ImageOption) {
+		this.image.imageOptions.push(option)
+	}
+
+	removeImageOption(imageId: string) {
+		this.image.imageOptions = this.image.imageOptions.filter(
+			(option) => option.url !== imageId
+		)
+	}
+
 	setTitle(title: string) {
 		this.title = title
 	}

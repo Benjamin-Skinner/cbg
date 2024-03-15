@@ -72,7 +72,7 @@ export type ImageIdeas = {
 }
 
 export type ImageOption = {
-	id: string
+	url: string
 }
 
 export type Page = {

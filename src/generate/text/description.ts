@@ -1,4 +1,5 @@
 import StatusClass from '@/classes/Status'
+import generateText from './openai'
 
 import {
 	Book,
@@ -69,33 +70,45 @@ export default generateDescription
 async function generateHardcoverDescription(
 	book: Book
 ): Promise<HardcoverDescription> {
-	const firstDescription =
-		"Embark on a globe-trotting adventure with Wonders of the World, a captivating children's book that showcases the most extraordinary natural and human-made marvels across the globe. This enchanting journey hellps young readers appreciate the incredible diversity and beauty of our planet. "
+	// Generate the description
+	const prompt = `Generate a 140 word description for a children's book with the title '${book.title}'. The output should have three paragraphs, each separated by a newline character.`
+	const description = await generateText(prompt)
 
-	const secondDescription =
-		'Each page bursts with vibrant illustrations and engaging facts about these awe-inspiring wonders. Discover the towering peaks of the Himalayas, the ancient mysteries of Stonehenge, and the architectural splendors of the Roman Colosseum. Learn about the cultural, historical, and geographical significance of each wonder, from the Great Wall of China to the serene beauty of the Taj Mahal.!'
+	let paragraphs = description.split('\n')
+	paragraphs = paragraphs.filter((p) => p.length > 0)
 
-	const thirdDescription =
-		'This book not only educates but also inspires a deep appreciation for the remarkable achievements of both nature and humankind. Prepare to be amazed and embark on an unforgettable journey through the Wonders of the World!'
+	if (paragraphs.length !== 3) {
+		throw new Error(
+			'Description was generated with incorrect number of paragraphs'
+		)
+	}
 
 	return {
-		first: firstDescription,
-		second: secondDescription,
-		third: thirdDescription,
+		first: paragraphs[0],
+		second: paragraphs[1],
+		third: paragraphs[2],
 	}
 }
 
 async function generateSoftcoverDescription(
 	book: Book
 ): Promise<SoftcoverDescription> {
-	const firstDescription =
-		"SOFTCOVER Embark on a globe-trotting adventure with Wonders of the World, a captivating children's book that showcases"
+	// Generate the description
+	const prompt = `Generate a 100 word description for a children's book with the title '${book.title}'. The output should have two paragraphs, each separated by a newline character.`
+	const description = await generateText(prompt)
 
-	const secondDescription =
-		'SOFTCOVER Embark on a globe-trotting adventure witrk on an unforgettable, SOFTCOVER Embark on a globe-trotting adventure witrk on an unforgettable, SOFTCOVER Embark on a globe-trotting adventure witrk on an unforgettable'
+	let paragraphs = description.split('\n')
+	paragraphs = paragraphs.filter((p) => p.length > 0)
+
+	// There should be two paragraphs
+	if (paragraphs.length !== 2) {
+		throw new Error(
+			'Description was generated with incorrect number of paragraphs'
+		)
+	}
 
 	return {
-		first: firstDescription,
-		second: secondDescription,
+		first: paragraphs[0],
+		second: paragraphs[1],
 	}
 }

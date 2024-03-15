@@ -4,7 +4,7 @@ interface Props {
 
 const PllaceholderFullcover: React.FC<Props> = ({ size }) => {
 	return (
-		<div role="status" className={`animate-pulse w-full h-[200px]`}>
+		<div role="status" className={`w-full h-[200px]`}>
 			<div
 				className={`flex items-center justify-center bg-gray-300 w-full h-[200px]`}
 			>

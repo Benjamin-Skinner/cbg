@@ -42,9 +42,9 @@ const Chapter: React.FC<Props> = ({
 							<div className="card-body w-full">
 								<div className="m-auto w-5/6 p-2 pb-8">
 									<ImagePicker
-										title={title}
-										id="p1"
-										image={page.image.image}
+										page={page}
+										bookId={book.id}
+										updatePage={updatePage}
 									/>
 								</div>
 								<article className="prose m-auto text-md px-6 w-full h-full">
@@ -92,9 +92,9 @@ const Chapter: React.FC<Props> = ({
 								<div className="card-body w-full">
 									<div className="m-auto w-full p-2 pb-8">
 										<ImagePicker
-											image={page.image.image}
-											title={title}
-											id="p1"
+											page={page}
+											bookId={book.id}
+											updatePage={updatePage}
 										/>
 									</div>
 								</div>
@@ -241,7 +241,6 @@ const useGeneratePageText = (
 		// SUCCESS --> update the state with the new generated description
 		if (res.status === 200) {
 			const { data } = await res.json()
-			console.log(data)
 			console.log('GENERATION SUCCESS')
 
 			await updatePage(data, {

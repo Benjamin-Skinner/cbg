@@ -133,7 +133,7 @@ const PageCard: React.FC<PageCardProps> = ({
 							type="text"
 							value={page.title}
 							placeholder="(Page name)"
-							className="font-bold w-full cursor-row-resize"
+							className="font-bold w-full"
 							onChange={(e) => {
 								const newPages = [...pages]
 								newPages[index].title = e.target.value

@@ -5,7 +5,6 @@ export function ensureParams(
 	params: Record<string, any>,
 	requiredParams: string[]
 ): ValidatorFunction {
-	console.log(params, requiredParams)
 	const missingParams = requiredParams.filter((param) => !(param in params))
 
 	if (missingParams.length > 0) {

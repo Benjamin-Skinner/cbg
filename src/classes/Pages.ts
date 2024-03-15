@@ -35,6 +35,16 @@ class PagesClass {
 			chapters: this.chapters.map((chapter) => chapter.toObject()),
 		}
 	}
+
+	// static fromObject(pages: BookPages) {
+	// 	const newPages = new PagesClass()
+	// 	newPages.intro = pages.intro
+	// 	newPages.conclusion = pages.conclusion
+	// 	newPages.chapters = pages.chapters.map((chapter) =>
+	// 		PageClass.fromObject(chapter)
+	// 	)
+	// 	return newPages
+	// }
 }
 
 export default PagesClass

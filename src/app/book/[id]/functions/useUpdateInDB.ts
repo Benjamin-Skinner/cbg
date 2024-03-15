@@ -22,7 +22,6 @@ const useUpdateinDB = (
 	 */
 	const updateInDB = async (book: Book) => {
 		console.log('UPDATING IN DATABASE')
-		console.log(book.outline)
 		// Update in database
 		try {
 			const res = await fetch(`/api/book/${book.id}`, {

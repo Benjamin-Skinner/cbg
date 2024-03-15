@@ -1,8 +1,9 @@
 import { Book, BookPages, Outline } from '@/types'
 import StatusClass from '@/classes/Status'
 import OutlineClass from '@/classes/Outline'
-import AllPagesClass from '@/classes/AllPages'
 import PagesClass from '@/classes/Pages'
+import { getFullBookDescription } from '@/util/book'
+import generateText from './openai'
 
 /**
  * @function generateOutline
@@ -29,28 +30,12 @@ async function generateOutline(book: Book): Promise<{
 	const newStatus = new StatusClass(book.outline.status)
 
 	try {
-		const newTitles = [
-			'First Chapter',
-			'Pandas',
-			'JAGUARS',
-			'pigs',
-			'pigs',
-			'Parrots',
-			'Snakes',
-			'Gorillas',
-			'Monkeys',
-			'Cheetahs',
-			'Leopards',
-			'Elephants',
-			'Butterflies',
-			'Crocodiles',
-			'Ants',
-		]
+		const newTitles = await getOutlineGPT(book)
 
 		// Generate new pages from old pages and new chapter titles
 		const pages = new PagesClass(newTitles, book.pages)
 
-		console.log(pages.toObject())
+		// console.log(pages.toObject())
 
 		// Create new outline object from the old outline
 		const newOutline = new OutlineClass(book.outline)
@@ -83,3 +68,20 @@ async function generateOutline(book: Book): Promise<{
 }
 
 export default generateOutline
+
+async function getOutlineGPT(book: Book) {
+	const description = getFullBookDescription(book)
+	const prompt = `Generate a list of chapters for a book with the title "${book.title}" and the following description: "${description}". Return the list as an array in JSON format. There should be 15 chapters. Here is an example for a book called 'Journey Through the Jungle':
+    [
+        Tigers, Monkeys, Elephants, Snakes, Parrots, Crocodiles, Butterflies, Ants, Leopards, Toucans, Frogs, Chameleons, Gorillas
+    ]
+    `
+
+	const outlineJson = await generateText(prompt)
+
+	const outline = JSON.parse(outlineJson)
+	if (outline.length !== 15) {
+		throw new Error('Outline is not the correct length')
+	}
+	return outline
+}
