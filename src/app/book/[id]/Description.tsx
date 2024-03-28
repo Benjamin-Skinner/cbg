@@ -8,12 +8,11 @@ import Section from '@/components/Section'
 import { countWords } from '@/util/wordCount'
 import StatusClass from '@/classes/Status'
 import { UpdateBookOptions } from './Client'
-import { handleErrorOnClient } from '@/util/handleErrorOnClient'
 import { handleGenerationSuccess } from '@/util/handleGenerationSuccess'
 
 interface Props {
 	book: Book
-	updateBook: (book: Book) => void
+	updateBook: (book: Book, options?: UpdateBookOptions) => void
 }
 
 const Description: React.FC<Props> = ({ book, updateBook }) => {
@@ -260,18 +259,13 @@ const useGenerateDescription = (
 		const newStatus = new StatusClass(book.description.status)
 		newStatus.beginGenerating()
 
-		await updateBook(
-			{
-				...bookRef.current,
-				description: {
-					...bookRef.current.description,
-					status: newStatus.toObject(),
-				},
+		await updateBook({
+			...bookRef.current,
+			description: {
+				...bookRef.current.description,
+				status: newStatus.toObject(),
 			},
-			{
-				clientOnly: true,
-			}
-		)
+		})
 		const res = await fetch('/api/generate/description', {
 			method: 'POST',
 			body: JSON.stringify({

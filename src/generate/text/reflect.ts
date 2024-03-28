@@ -73,7 +73,13 @@ async function generateOneQuestion(book: Book) {
     Question: If you could paint the sky with the Northern Lights, what colors and patterns would you choose?
 
     Page: Mount Everest is the highest mountain in the world, located in Asia. Reaching the top is like touching the sky! It's so high, it's often hidden in the clouds. Climbing Everest is hard and dangerous, but some brave people still do it for the amazing view from the top. The mountain is covered with ice and snow all year round. It's a stunning, majestic peak that truly showcases the grandeur of our planet.
-    Question: Pretend you're climbing Mount Everest. What challenges would you face?
+    Question: If you climbed Mount Everest, what do you think you would see from the top?
+
+    Page: The Amazon Rainforest is a large forest, stretching across several countries in South America. It's so big, it's nearly as large as the entire United States! The rainforest is full of life, with millions of different species of plants and animals. Some we have yet to discover! The trees are so tall and dense, it's like a green blanket covering the earth. Inside, it's like a huge, bustling city of nature, full of sounds, colors, and creatures.
+    Question: If you were an explorer in the Amazon, what creature would you hope to discover?
+
+    Page: Parrots are colorful birds that love to talk and mimic sounds. Imagine having feathers as bright as a rainbow! Parrots can talk just like you! They can even copy the sound of your laughter or a ringing phone. Parrots have strong beaks that help them crack open nuts. They love to swing on branches and show off their fancy feathers. Parrots are social birds, and they enjoy chatting with their feathered friends.
+    Question: Imagine if you were a parrot, what words would you want to learn to say?
 
     Page: ${page.text.content}
     Question:`

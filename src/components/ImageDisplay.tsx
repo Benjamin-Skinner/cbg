@@ -21,9 +21,9 @@ const ImageDisplay: React.FC<Props> = ({ backcover, image }) => {
 						<Image
 							src={image}
 							alt="image"
-							className="w-full h-full"
-							height={500}
-							width={500}
+							className="rounded-lg aspect-square object-cover"
+							height={400}
+							width={400}
 						/>
 					</div>
 				)}

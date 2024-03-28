@@ -1,5 +1,6 @@
 import { Book } from '@/types'
 import { Dispatch, SetStateAction } from 'react'
+import { Field } from '../Client'
 
 const useUpdateinDB = (
 	doneSaving: () => void,
@@ -20,7 +21,7 @@ const useUpdateinDB = (
 	 *
 	 * @remarks
 	 */
-	const updateInDB = async (book: Book) => {
+	const updateInDB = async (book: Book, fields: Field[]) => {
 		console.log('UPDATING IN DATABASE')
 		// Update in database
 		try {
@@ -28,6 +29,7 @@ const useUpdateinDB = (
 				method: 'PUT',
 				body: JSON.stringify({
 					book,
+					fields: fields,
 				}),
 				headers: {
 					'Content-Type': 'application/json',

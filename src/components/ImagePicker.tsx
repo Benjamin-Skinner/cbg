@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
-import { UploadIcon } from './Icons'
+import { UploadIcon, XIcon } from './Icons'
 import ImageCard from './ImageCard'
 import ImageDisplay from './ImageDisplay'
 import type { PutBlobResult } from '@vercel/blob'
@@ -23,6 +23,7 @@ const ImagePicker: React.FC<Props> = ({
 }) => {
 	const inputFileRef = useRef<HTMLInputElement>(null)
 	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState('')
 
 	const [currImageOptions, setCurrImageOptions] = useState(
 		page.image.imageOptions
@@ -70,6 +71,61 @@ const ImagePicker: React.FC<Props> = ({
 		)
 	}
 
+	const uploadImage = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		setLoading(true)
+
+		if (!inputFileRef.current?.files) {
+			setLoading(false)
+			throw new Error('No file selected')
+		}
+
+		const file = inputFileRef.current.files[0]
+
+		const response = await fetch(
+			`/api/image/upload?page=${page.key}&bookId=${bookId}`,
+			{
+				method: 'POST',
+				body: file,
+			}
+		)
+
+		if (response.status !== 200) {
+			const { error, code } = await response.json()
+			setError(error)
+			setLoading(false)
+			return
+		}
+
+		const newBlob = (await response.json()) as PutBlobResult
+
+		setCurrImageOptions(
+			currImageOptions.concat({
+				url: newBlob.url,
+				progress: 100,
+				error: '',
+			})
+		)
+		// remove file
+		inputFileRef.current.value = ''
+
+		// Update book on client
+		updatePage(
+			{
+				...page,
+				image: {
+					...page.image,
+					imageOptions: currImageOptions.concat({
+						url: newBlob.url,
+					}),
+				},
+			},
+			{ clientOnly: true }
+		)
+
+		setLoading(false)
+	}
+
 	return (
 		<>
 			<div
@@ -81,86 +137,46 @@ const ImagePicker: React.FC<Props> = ({
 			</div>
 			<dialog id={page.key} className="modal w-5/6 m-auto">
 				<div className="modal-box w-full max-w-full h-full">
-					<div className="flex flex-row justify-between items-start ">
+					<div className="flex flex-row items-start">
 						<article className="prose">
 							<h3>Select Image for "{page.title}"</h3>
 						</article>
-						<form
-							onSubmit={async (event) => {
-								setLoading(true)
-								event.preventDefault()
-
-								if (!inputFileRef.current?.files) {
-									setLoading(false)
-									throw new Error('No file selected')
-								}
-
-								const file = inputFileRef.current.files[0]
-
-								const response = await fetch(
-									`/api/image/upload?page=${page.key}&bookId=${bookId}`,
-									{
-										method: 'POST',
-										body: file,
-									}
-								)
-
-								const newBlob =
-									(await response.json()) as PutBlobResult
-
-								setCurrImageOptions(
-									currImageOptions.concat({
-										url: newBlob.url,
-									})
-								)
-								// remove file
-								inputFileRef.current.value = ''
-
-								// Update book on client
-								updatePage(
-									{
-										...page,
-										image: {
-											...page.image,
-											imageOptions:
-												currImageOptions.concat({
-													url: newBlob.url,
-												}),
-										},
-									},
-									{ clientOnly: true }
-								)
-
-								setLoading(false)
-							}}
-						>
-							{/* <label
-								htmlFor="file"
-								className="btn btn-ghost btn-sm m-auto mt-0"
-							>
-								Upload a file
-								<UploadIcon size={6} />
-							</label> */}
-							<div className="flex flex-row">
+						{/* <span className="loading loading-spinner loading-lg"></span> */}
+						<form onSubmit={uploadImage}>
+							<div className="flex flex-row mr-auto ml-8">
 								<input
 									id="file"
 									name="file"
 									ref={inputFileRef}
 									type="file"
 									required
-									className=""
+									className="max-w-56"
+									accept="image/png, image/jpeg, image/webp"
 								/>
-								<button type="submit">Upload</button>
+								<button
+									type="submit"
+									className="btn btn-ghost btn-sm mt-0"
+								>
+									Upload
+									<UploadIcon size={6} />
+								</button>
 							</div>
 						</form>
 
-						<div className="modal-action mt-0">
+						<div className="modal-action mt-0 ml-auto">
 							<form method="dialog">
 								<button className="btn">Close</button>
 							</form>
 						</div>
 					</div>
-					<div className="grid grid-cols-3 pb-[700px] gap-y-14 pt-8 gap-x-8">
+					<p
+						className={`${
+							error === '' ? 'invisible' : ''
+						} text-red-400 italic`}
+					>
+						{error}
+					</p>
+					<div className="grid grid-cols-3 pb-[700px] gap-y-14 pt-4 gap-x-8">
 						{currImageOptions.map((image, index) => (
 							<ImageCard
 								selected={page.image.image === image.url}
@@ -187,3 +203,34 @@ const ImagePicker: React.FC<Props> = ({
 }
 
 export default ImagePicker
+
+interface ErrorBannerProps {
+	message: string
+	setError: (message: string) => void
+}
+
+const ErrorBanner: React.FC<ErrorBannerProps> = ({ message, setError }) => {
+	return (
+		<div className="transition-all duration-500 fixed opacity-70 z-50 w-full">
+			<div role="alert" className="alert alert-error w-11/12 m-auto">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					className="stroke-current shrink-0 h-6 w-6"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth="2"
+						d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+					/>
+				</svg>
+				<span>Warning: {message}</span>
+				<button onClick={() => setError('')}>
+					<XIcon size={6} />
+				</button>
+			</div>
+		</div>
+	)
+}

@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	images: {
-		domains: ['cdn.midjourney.com', 'cdn.discordapp.com'],
 		remotePatterns: [
 			{
 				protocol: 'https',
@@ -17,7 +16,7 @@ const nextConfig = {
 			},
 			{
 				protocol: 'https',
-				hostname: '3oxizjh63oqnxdxr.public.blob.vercel-storage.com',
+				hostname: 'v0qjrdg3gu2tx1zw.public.blob.vercel-storage.com',
 				port: '',
 				pathname: '/**',
 			},

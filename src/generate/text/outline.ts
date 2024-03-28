@@ -71,17 +71,22 @@ export default generateOutline
 
 async function getOutlineGPT(book: Book) {
 	const description = getFullBookDescription(book)
-	const prompt = `Generate a list of chapters for a book with the title "${book.title}" and the following description: "${description}". Return the list as an array in JSON format. There should be 15 chapters. Here is an example for a book called 'Journey Through the Jungle':
-    [
-        Tigers, Monkeys, Elephants, Snakes, Parrots, Crocodiles, Butterflies, Ants, Leopards, Toucans, Frogs, Chameleons, Gorillas
-    ]
-    `
+	const prompt = `Generate a list of chapters for a book with the title "${book.title}" and the following description: "${description}". Return the list as an array in JSON format. There should be 13 chapters. Each chapter should have a specific noun as the title, and should be one to three words. Topics must not repeat. Base the chapters on the following examples:
+    Title: Journey Through the Jungle
+    chapters: ["Tigers", "Monkeys", "Elephants", "Snakes", "Parrots", "Crocodiles", "Butterflies", "Ants", "Leopards", "Toucans", "Frogs", "Chameleons", "Gorillas"]
+
+    Title: Wonders of the World
+    chapters: ["Pyramids", "Great Wall", "Taj Mahal", "Eiffel Tower", "Colosseum", "Machu Picchu", "Great Barrier Reef", "Northern Lights", "Mount Everest", "Amazon Rainforest", "Parthenon", "Grand Canyon", "Hagia Sophia"]
+
+    Title: ${book.title}`
 
 	const outlineJson = await generateText(prompt)
 
 	const outline = JSON.parse(outlineJson)
-	if (outline.length !== 15) {
-		throw new Error('Outline is not the correct length')
+	if (outline.chapters.length !== 13) {
+		throw new Error(
+			'Generated outline is not the correct length. Please try again'
+		)
 	}
-	return outline
+	return outline.chapters
 }

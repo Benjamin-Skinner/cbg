@@ -8,9 +8,11 @@ import { Book } from '@/types'
 import BookPagesClass from '@/classes/BookPages'
 import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
+import sleep from '@/util/sleep'
 
 export async function POST(request: Request) {
 	try {
+		// throw new Error('Something went wrong')
 		const { searchParams } = new URL(request.url)
 		const pageKey = searchParams.get('page')
 		const bookId = searchParams.get('bookId')
@@ -58,7 +60,7 @@ export async function POST(request: Request) {
 			e.message || 'An error occurred',
 			500,
 			'INTERNAL_SERVER_ERROR'
-		)
+		).toResponse()
 	}
 }
 

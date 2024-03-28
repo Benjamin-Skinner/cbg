@@ -8,6 +8,6 @@ export async function handleGenerationSuccess(
 	console.log('GENERATION SUCCESS')
 	console.log(newBook)
 	updateBook(newBook, {
-		clientOnly: true,
+		clientOnly: false,
 	})
 }

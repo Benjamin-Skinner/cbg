@@ -71,8 +71,42 @@ export type ImageIdeas = {
 	status: Status
 }
 
+// For completed images
 export type ImageOption = {
 	url: string
+	error: string
+	type: 'manual' | 'midjourney'
+}
+
+// For images that are being generated
+export type ImageOptionGenerating = {
+	messageId: string
+	progress: number
+	completed: boolean
+	upscales: UpscaleJob[]
+}
+
+export type UpscaleJob = {
+	messageId: string
+	completed: boolean
+	progress: number
+	url: string
+}
+
+export type ImageProgressUpdate = {
+	messageId: string
+	progress: number
+	pageKey: string
+}
+
+export type ImageOptionUpdate = {
+	option: ImageOption
+	pageKey: string
+}
+
+export type ImageUpdate = {
+	progressUpdates: ImageProgressUpdate[]
+	newOptions: ImageOptionUpdate[]
 }
 
 export type Page = {
@@ -89,6 +123,7 @@ export type Page = {
 		image: string
 		imageOptions: ImageOption[]
 		prompt: string
+		generatingImages: ImageOptionGenerating[]
 	}
 }
 
@@ -119,12 +154,25 @@ export type OutlinePage = {
 	key: string
 }
 
-// export type CBGError = {
-// 	code: string
-// 	message: string
-// }
-
 export type ValidatorFunction = {
 	isError: boolean
 	error?: CBGError
+}
+
+export type GenerateImageResponse = {
+	success: boolean
+	messageId: string
+	createdAt: string
+}
+
+export type MidjourneyResponse = {
+	messageId: string
+	prompt: string
+	uri: string
+	progress: number
+	createdAt: string
+	updatedAt: string
+	buttons: string[]
+	originatingMessageId: string
+	ref: string
 }

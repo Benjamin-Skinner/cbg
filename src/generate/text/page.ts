@@ -87,7 +87,7 @@ Subject: ${page.title}`
 }
 
 async function getIntroText(page: Page, book: Book): Promise<string> {
-	const prompt = `When I give you the title of a book, write an introductory page for the book in 70 words. Use simple words and phrases that are perfect for reading aloud. Base it closely on the following examples. Only use human characters:
+	const prompt = `When I give you the title of a book, write an introductory page for the book in as close to 70 words as possible. Use simple words and phrases that are perfect for reading aloud. Base the introduction closely on the following examples. Only use human characters:
 
 Title: Journey Through the Jungle
 Deep in the heart of a lush, green jungle, a family set up their cozy campsite. All around, the air buzzed with the sounds of chirping birds and rustling leaves. "Do you hear the whispers of the jungle?" asked Dad, his eyes sparkling with excitement. "Let's explore and uncover the incredible wonders of this wonderful world." The children huddled closer, ready to embark on a journey through the fascinating jungle.

@@ -39,7 +39,7 @@ const ImageCard: React.FC<Props> = ({
 						alt="image option"
 						width={400}
 						height={400}
-						className="rounded-lg aspect-squar"
+						className="rounded-lg aspect-square object-cover"
 					/>
 				)}
 			</figure>
@@ -65,6 +65,15 @@ const ImageCard: React.FC<Props> = ({
 						<OpenInNewWindowIcon size={4} />
 					</button>
 				</div>
+				<progress
+					className={`${
+						image?.progress === 100 || image?.progress === 0
+							? 'hidden'
+							: ''
+					} progress progress-info w-56 m-auto mt-4`}
+					value={image?.progress || 0}
+					max="100"
+				></progress>
 			</div>
 		</div>
 	)

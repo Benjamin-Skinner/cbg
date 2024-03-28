@@ -125,7 +125,13 @@ const Chapter: React.FC<Props> = ({
 					</button>
 				</div>
 				{isImage ? (
-					<Images page={page} />
+					<Images
+						page={page}
+						updatePage={updatePage}
+						book={book}
+						intro={intro}
+						conclusion={conclusion}
+					/>
 				) : (
 					<Text
 						page={page}
@@ -242,6 +248,7 @@ const useGeneratePageText = (
 		if (res.status === 200) {
 			const { data } = await res.json()
 			console.log('GENERATION SUCCESS')
+			console.log(data)
 
 			await updatePage(data, {
 				clientOnly: true,
@@ -275,24 +282,245 @@ const useGeneratePageText = (
 }
 interface ImageProps {
 	page: Page
+	updatePage: (page: Page, options?: UpdateBookOptions) => void
+	book: Book
+	intro: boolean
+	conclusion: boolean
 }
 
-const Images: React.FC<ImageProps> = ({ page }) => {
-	const [imagePrompt, setImagePrompt] = React.useState<string>(
-		'Watercolor clip art of a tiger. Hyper realistic. Naturalistic.'
+const Images: React.FC<ImageProps> = ({
+	page,
+	updatePage,
+	book,
+	intro,
+	conclusion,
+}) => {
+	const { generateImagePrompt } = useGenerateImagePrompt(
+		updatePage,
+		book,
+		page,
+		intro,
+		conclusion
 	)
+
+	const { generateImages } = useGenerateImages(
+		updatePage,
+		book,
+		page,
+		intro,
+		conclusion
+	)
+
 	return (
 		<div>
 			<Status status={page.image.status} />
 
-			<button disabled={true} className="btn btn-info btn-wide mt-12">
-				Regenerate
+			<button
+				onClick={generateImagePrompt}
+				className="btn btn-info btn-wide mt-12"
+			>
+				Regenerate Midjourney Prompt
 			</button>
 			<textarea
-				value={imagePrompt}
+				value={page.image.prompt}
+				onChange={(e) =>
+					updatePage({
+						...page,
+						image: {
+							...page.image,
+							prompt: e.target.value,
+						},
+					})
+				}
 				className="textarea h-48 w-full mt-12 leading-5"
 			/>
-			<button className="btn btn-info btn-wide mt-12">Regenerate</button>
+			<button
+				onClick={generateImages}
+				className="btn btn-info btn-wide mt-12"
+			>
+				Generate Images
+			</button>
 		</div>
 	)
+}
+
+const useGenerateImagePrompt = (
+	updatePage: (page: Page, options: UpdateBookOptions) => void,
+	book: Book,
+	page: Page,
+	intro: boolean,
+	conclusion: boolean
+) => {
+	// Use a ref to store the current book
+	const bookRef = useRef(book)
+	const pageRef = useRef(page)
+
+	// Update the ref whenever the book changes
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	// Update the ref whenever the page changes
+	useEffect(() => {
+		pageRef.current = page
+	}, [page])
+
+	const generateImagePrompt = async () => {
+		console.log('GENERATING IMAGE PROMPT for page ' + pageRef.current.title)
+		// ?
+		const newStatus = new StatusClass(pageRef.current.image.status)
+		newStatus.beginGenerating()
+
+		// Update the book with the new status
+		await updatePage(
+			{
+				...pageRef.current,
+				image: {
+					...pageRef.current.image,
+					status: newStatus.toObject(),
+				},
+			},
+			{
+				clientOnly: true,
+			}
+		)
+
+		const res = await fetch('/api/generate/image-prompt', {
+			method: 'POST',
+			body: JSON.stringify({
+				book: book,
+				page: page,
+				intro: intro,
+				conclusion: conclusion,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		// SUCCESS --> update the state with the new generated prompt
+		if (res.status === 200) {
+			const { data } = await res.json()
+			console.log('GENERATION SUCCESS')
+
+			await updatePage(data, {
+				clientOnly: true,
+			})
+		} else {
+			console.log('GENERATION ERROR')
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+
+			const newStatus = new StatusClass(pageRef.current.image.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			await updatePage(
+				{
+					...pageRef.current,
+					image: {
+						...pageRef.current.image,
+						status: newStatus.toObject(),
+					},
+				},
+				{
+					clientOnly: false,
+				}
+			)
+		}
+	}
+
+	return {
+		generateImagePrompt,
+	}
+}
+
+const useGenerateImages = (
+	updatePage: (page: Page, options: UpdateBookOptions) => void,
+	book: Book,
+	page: Page,
+	intro: boolean,
+	conclusion: boolean
+) => {
+	// Use a ref to store the current book
+	const bookRef = useRef(book)
+	const pageRef = useRef(page)
+
+	// Update the ref whenever the book changes
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	// Update the ref whenever the page changes
+	useEffect(() => {
+		pageRef.current = page
+	}, [page])
+
+	const generateImages = async () => {
+		console.log('GENERATING IMAGES for page ' + pageRef.current.title)
+		// ?
+		const newStatus = new StatusClass(pageRef.current.image.status)
+		newStatus.beginGenerating()
+
+		// Update the book with the new status
+		await updatePage(
+			{
+				...pageRef.current,
+				image: {
+					...pageRef.current.image,
+					status: newStatus.toObject(),
+				},
+			},
+			{
+				clientOnly: true,
+			}
+		)
+
+		const res = await fetch('/api/generate/image', {
+			method: 'POST',
+			body: JSON.stringify({
+				book: book,
+				page: page,
+				intro: intro,
+				conclusion: conclusion,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		// SUCCESS --> update the state with the new generated prompt
+		if (res.status === 200) {
+			const { data } = await res.json()
+			console.log('GENERATION SUCCESS')
+			console.log(data)
+
+			await updatePage(data, {
+				clientOnly: true,
+			})
+		} else {
+			console.log('GENERATION ERROR')
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+
+			const newStatus = new StatusClass(pageRef.current.image.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			await updatePage(
+				{
+					...pageRef.current,
+					image: {
+						...pageRef.current.image,
+						status: newStatus.toObject(),
+					},
+				},
+				{
+					clientOnly: false,
+				}
+			)
+		}
+	}
+
+	return {
+		generateImages,
+	}
 }

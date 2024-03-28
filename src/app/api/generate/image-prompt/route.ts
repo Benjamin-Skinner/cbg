@@ -1,12 +1,12 @@
 import { ensureParams } from '@/util/ensureParams'
-import sleep from '@/util/sleep'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
 import StatusClass from '@/classes/Status'
-import { Page } from '@/types'
+import { Page, RandR } from '@/types'
 import { Book } from '@/types'
-import generatePageText from '@/generate/text/page'
 import updatePage from '@/functions/updatePage'
+import generateImagePrompt from '@/generate/text/imagePrompt'
+import { sleep } from 'openai/core.mjs'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -27,20 +27,18 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
-	await sleep(5000)
-
 	try {
 		// Set status as generating
-		const newStatus = new StatusClass(params.page.text.status)
+		const newStatus = new StatusClass(params.page.image.status)
 		newStatus.beginGenerating()
 
 		// Update the page with the new status; Book is now generating
 		const newPage = params.page
-		newPage.text.status = newStatus.toObject()
+		newPage.image.status = newStatus.toObject()
 		await updatePage(params.book, newPage, params.intro, params.conclusion)
 
-		// Generate new text
-		const page = await generatePageText(
+		// Generate new prompt
+		const page = await generateImagePrompt(
 			params.book,
 			newPage,
 			params.intro,
