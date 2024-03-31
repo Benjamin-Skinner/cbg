@@ -5,7 +5,7 @@ import Section from '@/components/Section'
 import Status from '@/components/Status'
 import Stat from '@/components/Stat'
 import ImagePicker from '@/components/ImagePicker'
-import { Page, Book } from '@/types'
+import { Page, Book, PageImage } from '@/types'
 import { countWords } from '@/util/wordCount'
 import StatusClass from '@/classes/Status'
 import { UpdateBookOptions } from './Client'
@@ -244,7 +244,7 @@ const useGeneratePageText = (
 			},
 		})
 
-		// SUCCESS --> update the state with the new generated description
+		// SUCCESS --> update the state with the new generated text
 		if (res.status === 200) {
 			const { data } = await res.json()
 			console.log('GENERATION SUCCESS')
@@ -311,6 +311,59 @@ const Images: React.FC<ImageProps> = ({
 		conclusion
 	)
 
+	const updateImages = async () => {
+		console.log('UPDATING IMAGES for page ' + page.title)
+
+		const res = await fetch('/api/image/update', {
+			method: 'POST',
+			body: JSON.stringify({
+				page: page,
+				intro: intro,
+				conclusion: conclusion,
+				book: book,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		console.log(res)
+
+		// SUCCESS --> update the state with the new generated prompt
+		if (res.status === 200) {
+			const images: PageImage = await res.json()
+			console.log(images)
+
+			const newPage = {
+				...page,
+				image: images,
+			}
+
+			await updatePage(newPage, {
+				clientOnly: true,
+			})
+		} else {
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+
+			const newStatus = new StatusClass(page.image.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			await updatePage(
+				{
+					...page,
+					image: {
+						...page.image,
+						status: newStatus.toObject(),
+					},
+				},
+				{
+					clientOnly: false,
+				}
+			)
+		}
+	}
+
 	return (
 		<div>
 			<Status status={page.image.status} />
@@ -320,6 +373,12 @@ const Images: React.FC<ImageProps> = ({
 				className="btn btn-info btn-wide mt-12"
 			>
 				Regenerate Midjourney Prompt
+			</button>
+			<button
+				onClick={updateImages}
+				className="btn btn-info btn-wide mt-12"
+			>
+				Update Images
 			</button>
 			<textarea
 				value={page.image.prompt}

@@ -1,5 +1,5 @@
 import StatusClass from './Status'
-import { ImageOption, Page } from '@/types'
+import { ImageOption, Page, ImageOptionGenerating } from '@/types'
 import { v4 as uuid } from 'uuid'
 
 /*
@@ -21,6 +21,7 @@ class PageClass {
 		status: StatusClass
 		image: string
 		imageOptions: ImageOption[]
+		generatingImages: ImageOptionGenerating[]
 		prompt: string
 	}
 
@@ -43,6 +44,7 @@ class PageClass {
 			status: imageStatus,
 			image: '',
 			imageOptions: [],
+			generatingImages: [],
 			prompt: '',
 		}
 	}
@@ -75,6 +77,7 @@ class PageClass {
 				status: this.image.status.toObject(),
 				image: this.image.image,
 				imageOptions: this.image.imageOptions,
+				generatingImages: this.image.generatingImages,
 				prompt: this.image.prompt,
 			},
 		}
@@ -97,6 +100,7 @@ class PageClass {
 			status: new StatusClass(page.image.status),
 			image: page.image.image,
 			imageOptions: page.image.imageOptions,
+			generatingImages: page.image.generatingImages,
 			prompt: page.image.prompt,
 		}
 		return newPage

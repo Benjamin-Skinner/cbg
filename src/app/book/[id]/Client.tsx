@@ -34,6 +34,10 @@ const Client: React.FC<Props> = ({ bookData }) => {
 	// The book state
 	const [book, setBook] = useState(bookData)
 
+	useEffect(() => {
+		console.log(book)
+	}, [book])
+
 	// Whether a save is in progress or not
 	const [saving, setSaving] = useState(false)
 	// The last time the book was saved

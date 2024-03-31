@@ -43,6 +43,8 @@ export async function POST(request: Request) {
 		newPages.addImageOption(
 			{
 				url: blob.url,
+				error: '',
+				type: 'manual',
 			},
 			pageKey
 		)
@@ -52,7 +54,7 @@ export async function POST(request: Request) {
 			pages: newPages.toObject(),
 		}
 
-		await updateBook(newBook)
+		await updateBook(newBook, [])
 
 		return NextResponse.json(blob)
 	} catch (e: any) {
@@ -96,7 +98,7 @@ export async function DELETE(request: Request) {
 			pages: newPages.toObject(),
 		}
 
-		await updateBook(newBook)
+		await updateBook(newBook, [])
 
 		return NextResponse.json({
 			url: url,

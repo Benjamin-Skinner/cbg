@@ -82,7 +82,7 @@ export type ImageOption = {
 export type ImageOptionGenerating = {
 	messageId: string
 	progress: number
-	completed: boolean
+	completed: boolean // whether the UpscaleJobs have been created or whether the image is ready
 	upscales: UpscaleJob[]
 }
 
@@ -91,22 +91,8 @@ export type UpscaleJob = {
 	completed: boolean
 	progress: number
 	url: string
-}
-
-export type ImageProgressUpdate = {
-	messageId: string
-	progress: number
-	pageKey: string
-}
-
-export type ImageOptionUpdate = {
-	option: ImageOption
-	pageKey: string
-}
-
-export type ImageUpdate = {
-	progressUpdates: ImageProgressUpdate[]
-	newOptions: ImageOptionUpdate[]
+	button: 'U1' | 'U2' | 'U3' | 'U4'
+	error: string
 }
 
 export type Page = {
@@ -118,13 +104,15 @@ export type Page = {
 		status: Status
 		content: string
 	}
-	image: {
-		status: Status
-		image: string
-		imageOptions: ImageOption[]
-		prompt: string
-		generatingImages: ImageOptionGenerating[]
-	}
+	image: PageImage
+}
+
+export type PageImage = {
+	status: Status
+	image: string
+	imageOptions: ImageOption[]
+	prompt: string
+	generatingImages: ImageOptionGenerating[]
 }
 
 export type Description = {
@@ -175,4 +163,6 @@ export type MidjourneyResponse = {
 	buttons: string[]
 	originatingMessageId: string
 	ref: string
+	status?: string
+	error?: string
 }

@@ -13,7 +13,7 @@ import clientPromise from '@/util/db'
  *
  * @remarks
  */
-export async function updateBook(book: Book, fields: string[]) {
+export async function updateBook(book: Book, fields: string[] = []) {
 	const client = await clientPromise
 	const db = client.db()
 	const books = db.collection('books')
