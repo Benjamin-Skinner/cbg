@@ -103,7 +103,7 @@ const Chapter: React.FC<Props> = ({
 					)}
 				</div>
 			</Section.Center>
-			<Section.Right>
+			<Section.Right sectionName="page">
 				<div role="tablist" className="tabs tabs-boxed mb-8">
 					<button
 						onClick={() => setIsImage(false)}
@@ -311,58 +311,13 @@ const Images: React.FC<ImageProps> = ({
 		conclusion
 	)
 
-	const updateImages = async () => {
-		console.log('UPDATING IMAGES for page ' + page.title)
-
-		const res = await fetch('/api/image/update', {
-			method: 'POST',
-			body: JSON.stringify({
-				page: page,
-				intro: intro,
-				conclusion: conclusion,
-				book: book,
-			}),
-			headers: {
-				'Content-Type': 'application/json',
-			},
-		})
-
-		console.log(res)
-
-		// SUCCESS --> update the state with the new generated prompt
-		if (res.status === 200) {
-			const images: PageImage = await res.json()
-			console.log(images)
-
-			const newPage = {
-				...page,
-				image: images,
-			}
-
-			await updatePage(newPage, {
-				clientOnly: true,
-			})
-		} else {
-			const { error, code } = await res.json()
-			console.error(`${code}: ${error}`)
-
-			const newStatus = new StatusClass(page.image.status)
-			newStatus.setError(error)
-			newStatus.clearGenerating()
-			await updatePage(
-				{
-					...page,
-					image: {
-						...page.image,
-						status: newStatus.toObject(),
-					},
-				},
-				{
-					clientOnly: false,
-				}
-			)
-		}
-	}
+	const { updateImages } = useUpdateImages(
+		updatePage,
+		book,
+		page,
+		intro,
+		conclusion
+	)
 
 	return (
 		<div>
@@ -371,6 +326,7 @@ const Images: React.FC<ImageProps> = ({
 			<button
 				onClick={generateImagePrompt}
 				className="btn btn-info btn-wide mt-12"
+				disabled={page.image.status.generating.inProgress}
 			>
 				Regenerate Midjourney Prompt
 			</button>
@@ -381,6 +337,7 @@ const Images: React.FC<ImageProps> = ({
 				Update Images
 			</button>
 			<textarea
+				disabled={page.image.status.generating.inProgress}
 				value={page.image.prompt}
 				onChange={(e) =>
 					updatePage({
@@ -394,6 +351,7 @@ const Images: React.FC<ImageProps> = ({
 				className="textarea h-48 w-full mt-12 leading-5"
 			/>
 			<button
+				disabled={page.image.status.generating.inProgress}
 				onClick={generateImages}
 				className="btn btn-info btn-wide mt-12"
 			>
@@ -581,5 +539,85 @@ const useGenerateImages = (
 
 	return {
 		generateImages,
+	}
+}
+
+const useUpdateImages = (
+	updatePage: (page: Page, options: UpdateBookOptions) => void,
+	book: Book,
+	page: Page,
+	intro: boolean,
+	conclusion: boolean
+) => {
+	// Use a ref to store the current book
+	const bookRef = useRef(book)
+	const pageRef = useRef(page)
+
+	// Update the ref whenever the book changes
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	// Update the ref whenever the page changes
+	useEffect(() => {
+		pageRef.current = page
+	}, [page])
+
+	const updateImages = async () => {
+		console.log('UPDATING IMAGES for page ' + page.title)
+
+		const res = await fetch('/api/image/update', {
+			method: 'POST',
+			body: JSON.stringify({
+				page: page,
+				intro: intro,
+				conclusion: conclusion,
+				book: book,
+			}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		})
+
+		// SUCCESS --> update the state with the new images
+		if (res.status === 200) {
+			const images: PageImage = await res.json()
+			console.log(images)
+
+			const newPage = {
+				...page,
+				image: images,
+			}
+
+			console.log('new page received ')
+			console.log(newPage)
+
+			await updatePage(newPage, {
+				clientOnly: true,
+			})
+		} else {
+			const { error, code } = await res.json()
+			console.error(`${code}: ${error}`)
+
+			const newStatus = new StatusClass(page.image.status)
+			newStatus.setError(error)
+			newStatus.clearGenerating()
+			await updatePage(
+				{
+					...pageRef.current,
+					image: {
+						...pageRef.current.image,
+						status: newStatus.toObject(),
+					},
+				},
+				{
+					clientOnly: false,
+				}
+			)
+		}
+	}
+
+	return {
+		updateImages,
 	}
 }

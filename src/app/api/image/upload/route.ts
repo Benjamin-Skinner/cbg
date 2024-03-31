@@ -67,11 +67,17 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+	console.log('DELETE IMAGE API ROUTE')
 	try {
 		const { searchParams } = new URL(request.url)
 		const pageKey = searchParams.get('page')
 		const bookId = searchParams.get('bookId')
 		const url = searchParams.get('url')
+		const type = searchParams.get('type')
+
+		console.log('pageKey', pageKey)
+		console.log('url', url)
+		console.log('type', type)
 
 		if (!pageKey) {
 			throw new Error('No page provided')
@@ -87,18 +93,24 @@ export async function DELETE(request: Request) {
 
 		const book = await getBookById(bookId)
 
-		await del(url)
+		// If the image is stored in Vercel, delete it
+		if (type === 'manual') await del(url)
 
 		// update the database
 		const newPages = new BookPagesClass(book.pages)
 		newPages.removeImageOption(url, pageKey)
+
+		console.log(
+			'newPages',
+			newPages.toObject().chapters[0].image.imageOptions
+		)
 
 		const newBook = {
 			...book,
 			pages: newPages.toObject(),
 		}
 
-		await updateBook(newBook, [])
+		await updateBook(newBook)
 
 		return NextResponse.json({
 			url: url,
@@ -108,6 +120,6 @@ export async function DELETE(request: Request) {
 			e.message || 'An error occurred',
 			500,
 			'INTERNAL_SERVER_ERROR'
-		)
+		).toResponse()
 	}
 }

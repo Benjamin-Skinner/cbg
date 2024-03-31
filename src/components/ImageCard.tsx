@@ -4,6 +4,8 @@ import PlaceholderBackcover from './PlaceholderBackcover'
 import { OpenInNewWindowIcon } from './Icons'
 import { ImageOption } from '@/types'
 import Image from 'next/image'
+import mj_logo from '@/assets/midjourney.png'
+import { UploadIcon } from './Icons'
 
 interface Props {
 	selected: boolean
@@ -28,6 +30,19 @@ const ImageCard: React.FC<Props> = ({
 				selected ? 'border-green-600' : 'border-transparent'
 			}`}
 		>
+			<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
+				{image?.type === 'midjourney' ? (
+					<Image
+						src={mj_logo}
+						className="rounded-full"
+						alt="Midjourney logo"
+						width={30}
+						height={30}
+					/>
+				) : (
+					<UploadIcon size={4} />
+				)}
+			</div>
 			<figure className="">
 				{backcover ? (
 					<PlaceholderBackcover size={400} />
@@ -61,11 +76,16 @@ const ImageCard: React.FC<Props> = ({
 							Select
 						</button>
 					</div>
-					<button className="btn btn-ghost btn-sm text-gray-500 ml-auto">
+					<button
+						className="btn btn-ghost btn-sm text-gray-500 ml-auto"
+						onClick={() => {
+							window.open(image?.url || '', '_blank')
+						}}
+					>
 						<OpenInNewWindowIcon size={4} />
 					</button>
 				</div>
-				<progress
+				{/* <progress
 					className={`${
 						image?.progress === 100 || image?.progress === 0
 							? 'hidden'
@@ -73,7 +93,7 @@ const ImageCard: React.FC<Props> = ({
 					} progress progress-info w-56 m-auto mt-4`}
 					value={image?.progress || 0}
 					max="100"
-				></progress>
+				></progress> */}
 			</div>
 		</div>
 	)

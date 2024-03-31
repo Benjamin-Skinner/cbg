@@ -1,5 +1,6 @@
 import StatusClass from './Status'
 import { ImageOption, Page, ImageOptionGenerating } from '@/types'
+import { extractPngName } from '@/util/url'
 import { v4 as uuid } from 'uuid'
 
 /*
@@ -54,8 +55,9 @@ class PageClass {
 	}
 
 	removeImageOption(imageId: string) {
+		const imageName = extractPngName(imageId)
 		this.image.imageOptions = this.image.imageOptions.filter(
-			(option) => option.url !== imageId
+			(option) => extractPngName(option.url) !== imageName
 		)
 	}
 

@@ -1,3 +1,5 @@
+import { SECTION_GUIDELINES } from '@/constants'
+
 interface SectionComponent {
 	Center: React.FC<CenterProps>
 	Right: React.FC<RightProps>
@@ -33,9 +35,29 @@ const Center: React.FC<CenterProps> = ({ children }) => {
 
 interface RightProps {
 	children?: React.ReactNode
+	sectionName?: string
 }
-const Right: React.FC<RightProps> = ({ children }) => {
-	return <div className="w-3/12 flex flex-col">{children}</div>
+const Right: React.FC<RightProps> = ({ children, sectionName }) => {
+	return (
+		<div className="w-3/12 flex flex-col">
+			{children}
+			{sectionName && (
+				<div className="stats shadow w-full mt-12">
+					<div className="stat">
+						<div className="stat-title">Section Checklist</div>
+						<ul className="list-disc list-inside text-wrap pr-4">
+							{/* @ts-ignore */}
+							{SECTION_GUIDELINES[sectionName].map(
+								(item: string, index: number) => (
+									<li className="stat-desc">{item}</li>
+								)
+							)}
+						</ul>
+					</div>
+				</div>
+			)}
+		</div>
+	)
 }
 
 Section.Center = Center

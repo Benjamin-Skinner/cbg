@@ -40,10 +40,11 @@ const ImagePicker: React.FC<Props> = ({
 		})
 	}
 
-	const deleteImage = async (url: string) => {
+	const deleteImage = async (url: string, type: string) => {
 		if (url === page.image.image) {
 			return
 		}
+		const originalImageOptions = [...currImageOptions]
 		// Immediately update the state
 		const newImageOptions = currImageOptions.filter(
 			(image) => image.url !== url
@@ -51,12 +52,19 @@ const ImagePicker: React.FC<Props> = ({
 		setCurrImageOptions(newImageOptions)
 
 		// Update the book on the server
-		await fetch(
-			`/api/image/upload?page=${page.key}&bookId=${bookId}&url=${url}`,
+		const res = await fetch(
+			`/api/image/upload?page=${page.key}&bookId=${bookId}&url=${url}&type=${type}`,
 			{
 				method: 'DELETE',
 			}
 		)
+
+		if (res.status !== 200) {
+			const { error, code } = await res.json()
+			setError(error)
+			setCurrImageOptions(originalImageOptions)
+			return
+		}
 
 		// Update the book on the client
 		updatePage(
@@ -102,8 +110,8 @@ const ImagePicker: React.FC<Props> = ({
 		setCurrImageOptions(
 			currImageOptions.concat({
 				url: newBlob.url,
-				progress: 100,
 				error: '',
+				type: 'manual',
 			})
 		)
 		// remove file
@@ -117,6 +125,8 @@ const ImagePicker: React.FC<Props> = ({
 					...page.image,
 					imageOptions: currImageOptions.concat({
 						url: newBlob.url,
+						error: '',
+						type: 'manual',
 					}),
 				},
 			},
@@ -177,21 +187,28 @@ const ImagePicker: React.FC<Props> = ({
 						{error}
 					</p>
 					<div className="grid grid-cols-3 pb-[700px] gap-y-14 pt-4 gap-x-8">
-						{currImageOptions.map((image, index) => (
-							<ImageCard
-								selected={page.image.image === image.url}
-								backcover={backcover}
-								image={image}
-								deleteImage={deleteImage}
-								selectImage={selectImage}
-							/>
-						))}
+						{currImageOptions
+							.filter((image) => image.url !== '')
+							.map((image, index) => (
+								<ImageCard
+									selected={
+										page.image.image === image.url &&
+										image.url !== ''
+									}
+									backcover={backcover}
+									image={image}
+									deleteImage={() =>
+										deleteImage(image.url, image.type)
+									}
+									selectImage={selectImage}
+								/>
+							))}
 						{loading ? (
 							<ImageCard
 								selected={false}
 								backcover={backcover}
 								placeholder
-								deleteImage={deleteImage}
+								deleteImage={() => {}}
 								selectImage={selectImage}
 							/>
 						) : null}

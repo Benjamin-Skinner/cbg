@@ -8,9 +8,10 @@ type Section = 'description'
 interface Props {
 	status: Status
 	section?: Section
+	showProgress?: boolean
 }
 
-const Status: React.FC<Props> = ({ status, section }) => {
+const Status: React.FC<Props> = ({ status, section, showProgress = false }) => {
 	if (status.generating.inProgress)
 		return (
 			<>
