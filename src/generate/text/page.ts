@@ -92,9 +92,6 @@ async function getIntroText(page: Page, book: Book): Promise<string> {
 Title: Journey Through the Jungle
 Deep in the heart of a lush, green jungle, a family set up their cozy campsite. All around, the air buzzed with the sounds of chirping birds and rustling leaves. "Do you hear the whispers of the jungle?" asked Dad, his eyes sparkling with excitement. "Let's explore and uncover the incredible wonders of this wonderful world." The children huddled closer, ready to embark on a journey through the fascinating jungle.
 
-Title: Our Spectacular Solar System
-On a peaceful hill, a family gathered under a vast, endless sky full of twinkling stars. Each star sparkled like a tiny diamond. It was a magical, wonderful night, just perfect for a special adventure of watching the beautiful stars and dreaming. "Have you ever wondered what's up there, beyond those shiny stars?" asked the mom with a smile. "Gather around, and let me tell you about the stunning wonders of our very own solar system."
-
 Title: Wonders of the World
 In the cozy living room of a small, warm house, a family gathered around a globe, spinning slowly on its stand. The walls were adorned with pictures of magnificent landmarks from all around the world. "Do you see these amazing places?" asked Grandma, her eyes twinkling with memories of her travels. "Each one has its own story, filled with history and mystery." The children leaned in, their eyes wide with curiosity, ready to embark on an imaginative journey to discover the wonders of the world.
 

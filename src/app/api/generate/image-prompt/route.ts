@@ -29,12 +29,16 @@ export async function POST(req: Request, res: Response) {
 
 	try {
 		// Set status as generating
-		const newStatus = new StatusClass(params.page.image.status)
+		const newStatus = new StatusClass(params.page.image.prompt.status)
 		newStatus.beginGenerating()
 
 		// Update the page with the new status; Book is now generating
 		const newPage = params.page
-		newPage.image.status = newStatus.toObject()
+		newPage.image.prompt = {
+			status: newStatus.toObject(),
+			content: '',
+		}
+		console.log(newPage)
 		await updatePage(params.book, newPage, params.intro, params.conclusion)
 
 		// Generate new prompt
@@ -44,6 +48,7 @@ export async function POST(req: Request, res: Response) {
 			params.intro,
 			params.conclusion
 		)
+		console.log(page)
 		await updatePage(params.book, page, params.intro, params.conclusion)
 		return NextResponse.json(
 			{

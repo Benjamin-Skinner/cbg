@@ -3,7 +3,7 @@
 import { Status } from '@/types'
 import { useEffect, useState } from 'react'
 
-type Section = 'description'
+type Section = 'description' | 'frontcover' | 'text' | 'backcover'
 
 interface Props {
 	status: Status
@@ -12,9 +12,18 @@ interface Props {
 }
 
 const Status: React.FC<Props> = ({ status, section, showProgress = false }) => {
+	const getImageNum = (progress: number) => {
+		if (progress < 40) {
+			return 1
+		} else if (progress < 60) {
+			return 2
+		} else if (progress < 80) {
+			return 3
+		} else return 4
+	}
 	if (status.generating.inProgress)
 		return (
-			<>
+			<div className="flex flex-col">
 				<div className="flex flex-col">
 					<div className="flex flex-row">
 						<div className="badge badge-info badge-xl">
@@ -28,8 +37,12 @@ const Status: React.FC<Props> = ({ status, section, showProgress = false }) => {
 						max="100"
 					></progress>
 				</div>
+
 				<Message status={status} section={'description'} />
-			</>
+				<p className="text-info text-sm mt-3">
+					Image {getImageNum(status.generating.progress)}/4
+				</p>
+			</div>
 		)
 	else {
 		return (

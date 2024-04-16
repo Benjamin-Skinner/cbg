@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { UploadIcon, XIcon } from './Icons'
 import ImageCard from './ImageCard'
 import ImageDisplay from './ImageDisplay'
@@ -13,6 +13,8 @@ interface Props {
 	bookId: string
 	backcover?: boolean
 	updatePage: (page: Page, options?: UpdateBookOptions) => void
+	newImages: boolean
+	setNewImages: (newImages: boolean) => void
 }
 
 const ImagePicker: React.FC<Props> = ({
@@ -20,6 +22,8 @@ const ImagePicker: React.FC<Props> = ({
 	bookId,
 	updatePage,
 	backcover = false,
+	newImages,
+	setNewImages,
 }) => {
 	const inputFileRef = useRef<HTMLInputElement>(null)
 	const [loading, setLoading] = useState(false)
@@ -28,6 +32,10 @@ const ImagePicker: React.FC<Props> = ({
 	const [currImageOptions, setCurrImageOptions] = useState(
 		page.image.imageOptions
 	)
+
+	useEffect(() => {
+		setCurrImageOptions(page.image.imageOptions)
+	}, [page.image.imageOptions])
 
 	const selectImage = async (url: string) => {
 		// Update the book on the client
@@ -139,11 +147,18 @@ const ImagePicker: React.FC<Props> = ({
 	return (
 		<>
 			<div
-				// @ts-ignore
-				onClick={() => document.getElementById(page.key).showModal()}
+				onClick={() => {
+					// @ts-ignore
+					document.getElementById(page.key).showModal()
+					setNewImages(false)
+				}}
 				className="hover:transform hover:scale-105 transition-all duration-250 cursor-pointer"
 			>
-				<ImageDisplay backcover={backcover} image={page.image.image} />
+				<ImageDisplay
+					newImages={newImages}
+					backcover={backcover}
+					image={page.image.image}
+				/>
 			</div>
 			<dialog id={page.key} className="modal w-5/6 m-auto">
 				<div className="modal-box w-full max-w-full h-full">
@@ -188,7 +203,10 @@ const ImagePicker: React.FC<Props> = ({
 					</p>
 					<div className="grid grid-cols-3 pb-[700px] gap-y-14 pt-4 gap-x-8">
 						{currImageOptions
-							.filter((image) => image.url !== '')
+							.filter(
+								(image) =>
+									image.url !== '' && image.url !== null
+							)
 							.map((image, index) => (
 								<ImageCard
 									selected={

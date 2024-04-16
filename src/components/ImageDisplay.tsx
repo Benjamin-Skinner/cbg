@@ -6,24 +6,32 @@ import Image from 'next/image'
 interface Props {
 	backcover?: boolean
 	image: string
+	newImages: boolean
 }
 
-const ImageDisplay: React.FC<Props> = ({ backcover, image }) => {
+const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
 	return (
-		<div className="">
-			<figure className="">
-				{backcover ? (
-					<PlaceholderBackcover size={400} />
-				) : image === '' ? (
-					<PlaceholderImage size={400} />
+		<div className="w-full h-full flex flex-col">
+			{newImages && (
+				<div className="w-full ">
+					<p className="text-center text-white rounded-full py-3  h-25 bg-blue-600  m-auto">
+						Click to view new images
+					</p>
+				</div>
+			)}
+			<figure className="w-full h-full m-auto flex items-center justify-center">
+				{image === '' ? (
+					<div className="h-full flex items-center justify-center">
+						<PlaceholderImage size={400} />
+					</div>
 				) : (
 					<div>
 						<Image
 							src={image}
 							alt="image"
 							className="rounded-lg aspect-square object-cover"
-							height={400}
-							width={400}
+							height={800}
+							width={800}
 						/>
 					</div>
 				)}

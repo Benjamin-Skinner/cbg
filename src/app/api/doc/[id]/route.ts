@@ -18,29 +18,11 @@ export async function POST(
 		}
 
 		const title = bookName(book.title, body.version)
-
 		const filepath = `/Users/Benskinner/Code/cbg/docs/${title}.docx`
-		const fileContent = fs.readFileSync(filepath, 'utf-8')
 
-		return new NextResponse(fileContent, {
-			headers: {
-				'Content-Type':
-					'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-				'Content-Disposition': `attachment; filename="${title}.docx"'`,
-			},
-		})
+		await generateDoc(book, body.version, filepath)
 
-		// await generateDoc(book, body.version)
-
-		// const fileContent = fs.readFileSync(
-		// 	`/Users/Benskinner/Code/cbg/docs/${title}.docx`,
-		// 	'utf-8'
-		// )
-
-		// const headers = {
-		// 	'Content-Disposition': `attachment; filename="${title}.docx"`,
-		// 	'Content-Type': 'text/plain',
-		// }
+		return NextResponse.json({ filepath })
 	} catch (error: any) {
 		return new CBGError(
 			error.message || 'Internal server error',

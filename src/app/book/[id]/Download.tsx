@@ -9,10 +9,6 @@ interface Props {
 	setWarningMessage: (message: string) => void
 }
 
-function bookName(title: string, version: string) {
-	return `${title}-${version}`
-}
-
 const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 	const downloadManuscript = async (version: 'hardcover' | 'softcover') => {
 		const res = await fetch(`/api/doc/${book.id}`, {
@@ -24,20 +20,8 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 		})
 
 		if (res.status === 200) {
-			console.log('Downloaded manuscript')
-			console.log(res)
-			const blob = await res.blob()
-
-			// Download the file
-			const url = window.URL.createObjectURL(blob)
-			console.log(url)
-			let link = document.createElement('a')
-			link.href = url
-			link.download = bookName(book.title, version) + '.docx'
-			link.click()
-
-			window.URL.revokeObjectURL(url)
-			link.remove() //afterwards we remove the element
+			const { filepath } = await res.json()
+			alert(`File downloaded to ${filepath}`)
 		} else {
 			const { error, code } = await res.json()
 			setWarningMessage(error)
@@ -59,7 +43,7 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 							>
 								Download Manuscript
 							</button>
-							<button className="btn btn-primary mt-4">
+							<button className="btn btn-primary mt-4" disabled>
 								Download Cover
 							</button>
 						</div>
@@ -76,7 +60,7 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 							>
 								Download Manuscript
 							</button>
-							<button className="btn btn-primary mt-4">
+							<button className="btn btn-primary mt-4" disabled>
 								Download Cover
 							</button>
 						</div>

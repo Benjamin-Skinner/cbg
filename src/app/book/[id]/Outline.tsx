@@ -70,7 +70,7 @@ const Outline: React.FC<Props> = ({ book, updateBook }) => {
 					<PageCardLocked page="Conclusion" />
 				</div>
 			</Section.Center>
-			<Section.Right>
+			<Section.Right sectionName="outline">
 				<Status status={book.outline.status} />
 
 				<button
@@ -78,7 +78,7 @@ const Outline: React.FC<Props> = ({ book, updateBook }) => {
 					onClick={generateOutline}
 					className="btn btn-info btn-wide mt-12"
 				>
-					Regenerate
+					Generate
 				</button>
 			</Section.Right>
 		</Section>

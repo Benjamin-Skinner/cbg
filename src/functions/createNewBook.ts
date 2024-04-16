@@ -4,12 +4,13 @@ import { Book, Page } from '@/types'
 import { NUM_CHAPTERS } from '@/constants'
 import PageClass from '@/classes/Page'
 
-export async function createNewBook(title: string, description?: string) {
+export async function createNewBook(title: string, oneLiner?: string) {
 	const newBook: Book = {
 		id: uuidv4(),
 		createdAt: Date.now(),
 		lastSaved: Date.now(),
 		title: title,
+		oneLiner: oneLiner || '',
 		description: {
 			hardcover: {
 				first: '',
@@ -76,7 +77,7 @@ export async function createNewBook(title: string, description?: string) {
 			activePages: [],
 		},
 		frontCover: {
-			ideas: {
+			imageIdeas: {
 				ideas: [],
 				status: {
 					generating: {
@@ -90,24 +91,39 @@ export async function createNewBook(title: string, description?: string) {
 					},
 				},
 			},
-			status: {
-				generating: {
-					inProgress: false,
-					progress: 0,
+			image: {
+				status: {
+					generating: {
+						inProgress: false,
+						progress: 0,
+					},
+					message: {
+						code: '',
+						content: '',
+						dismissed: false,
+					},
 				},
-				message: {
-					code: '',
+				image: '',
+				imageOptions: [],
+				generatingImages: [],
+				prompt: {
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
 					content: '',
-					dismissed: false,
 				},
 			},
-
-			image: '',
-			imageOptions: [],
-			prompt: '',
 		},
 		backCover: {
-			ideas: {
+			imageIdeas: {
 				ideas: [],
 				status: {
 					generating: {
@@ -121,20 +137,36 @@ export async function createNewBook(title: string, description?: string) {
 					},
 				},
 			},
-			status: {
-				generating: {
-					inProgress: false,
-					progress: 0,
+			image: {
+				status: {
+					generating: {
+						inProgress: false,
+						progress: 0,
+					},
+					message: {
+						code: '',
+						content: '',
+						dismissed: false,
+					},
 				},
-				message: {
-					code: '',
+				image: '',
+				imageOptions: [],
+				generatingImages: [],
+				prompt: {
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
 					content: '',
-					dismissed: false,
 				},
 			},
-			image: '',
-			imageOptions: [],
-			prompt: '',
 		},
 		pages: {
 			intro: {
@@ -171,7 +203,20 @@ export async function createNewBook(title: string, description?: string) {
 					image: '',
 					imageOptions: [],
 					generatingImages: [],
-					prompt: '',
+					prompt: {
+						status: {
+							generating: {
+								inProgress: false,
+								progress: 0,
+							},
+							message: {
+								code: '',
+								content: '',
+								dismissed: false,
+							},
+						},
+						content: '',
+					},
 				},
 			},
 			conclusion: {
@@ -208,7 +253,20 @@ export async function createNewBook(title: string, description?: string) {
 					image: '',
 					imageOptions: [],
 					generatingImages: [],
-					prompt: '',
+					prompt: {
+						status: {
+							generating: {
+								inProgress: false,
+								progress: 0,
+							},
+							message: {
+								code: '',
+								content: '',
+								dismissed: false,
+							},
+						},
+						content: '',
+					},
 				},
 			},
 			chapters: blankChapters(),

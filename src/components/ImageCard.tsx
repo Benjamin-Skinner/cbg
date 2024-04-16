@@ -44,9 +44,7 @@ const ImageCard: React.FC<Props> = ({
 				)}
 			</div>
 			<figure className="">
-				{backcover ? (
-					<PlaceholderBackcover size={400} />
-				) : placeholder ? (
+				{placeholder ? (
 					<PlaceholderImage size={400} />
 				) : (
 					<Image

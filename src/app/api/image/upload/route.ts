@@ -12,7 +12,6 @@ import sleep from '@/util/sleep'
 
 export async function POST(request: Request) {
 	try {
-		// throw new Error('Something went wrong')
 		const { searchParams } = new URL(request.url)
 		const pageKey = searchParams.get('page')
 		const bookId = searchParams.get('bookId')

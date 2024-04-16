@@ -61,6 +61,16 @@ export async function sendMidjourneyJob(
 export async function updateImages(images: PageImage): Promise<PageImage> {
 	const newImages = { ...images }
 	const generatingImages = images.generatingImages
+
+	if (generatingImages.length === 0) {
+		console.log('No generating images')
+		let newStatus = new StatusClass(newImages.status)
+		newStatus.clearGenerating()
+		newStatus.setAsSuccess()
+		newImages.status = newStatus.toObject()
+		return newImages
+	}
+
 	for (let i = 0; i < generatingImages.length; i++) {
 		const job = generatingImages[i]
 		if (!job.progress) job.progress = 0
@@ -79,13 +89,33 @@ export async function updateImages(images: PageImage): Promise<PageImage> {
 			console.log('UPDATING PROGRESS')
 			const imageResponse = await getMidJourneyImage(job.messageId)
 			imgResponseProgress = imageResponse.progress
+			// Make sure there's no error
+			// newImages.status.message = {
+			// 	code: '',
+			// 	content: '',
+			// 	dismissed: false,
+			// }
 			// Update the progress
 			newImages.generatingImages[i].progress = imageResponse.progress
-			newImages.status.generating.progress = 10
+			newImages.status.generating.progress =
+				10 + imageResponse.progress * 0.2
+
+			if (imageResponse.status === 'FAIL') {
+				console.log('MAIN IMAGE FAILED')
+				newImages.generatingImages[i].completed = true
+				newImages.status.generating.progress = 100
+				const newStatus = new StatusClass(newImages.status)
+				newStatus.clearGenerating()
+				newStatus.setError(
+					imageResponse.error ||
+						'An error occurred while generating the image. Please try again.'
+				)
+				newImages.status = newStatus.toObject()
+			}
 		}
 
 		// The image is complete but hasn't been upscaled yet
-		if (job.progress === 100 || imgResponseProgress === 100) {
+		else if (job.progress === 100 || imgResponseProgress === 100) {
 			console.log(
 				`job.progress = ${job.progress} and imgResponseProgress = ${imgResponseProgress}`
 			)
@@ -174,12 +204,15 @@ export async function updateImages(images: PageImage): Promise<PageImage> {
 					console.log(
 						`There are ${newImageOptions.length} new image options`
 					)
-					newImages.imageOptions = newImageOptions
+					const allImageOptions =
+						newImages.imageOptions.concat(newImageOptions)
+					newImages.imageOptions = allImageOptions
 
 					console.log('FINAL UPSCALE IS DONE')
 					newImages.generatingImages[i].completed = true
 					const newStatus = new StatusClass(newImages.status)
 					newStatus.clearGenerating()
+					newStatus.setAsSuccess()
 					newImages.status = newStatus.toObject()
 					console.log('STATUS UPDATED')
 				}
@@ -349,7 +382,7 @@ async function handleUpscaleJob(
  */
 function upscaleToImageOption(upscale: UpscaleJob): ImageOption {
 	return {
-		url: upscale.url,
+		url: upscale.url || '',
 		error: upscale.error || '',
 		type: 'midjourney',
 	}

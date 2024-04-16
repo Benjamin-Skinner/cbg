@@ -33,11 +33,6 @@ const IMAGE_POLLING_SECONDS = 5
 const Client: React.FC<Props> = ({ bookData }) => {
 	// The book state
 	const [book, setBook] = useState(bookData)
-
-	useEffect(() => {
-		console.log(book)
-	}, [book])
-
 	// Whether a save is in progress or not
 	const [saving, setSaving] = useState(false)
 	// The last time the book was saved
@@ -61,11 +56,12 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 	// Called when the book is updated
 	const updateBook = async (book: Book, funcOptions?: UpdateBookOptions) => {
-		console.log('UPDATING BOOK')
+		console.log('UPDATING BOOK IN CLIENT.TSX')
 		const options = funcOptions || { clientOnly: false, fields: [] }
 
 		!options.clientOnly && setSaving(true)
 		// Update in state
+		console.log(book)
 		setBook(book)
 
 		// // Update in Database after DEBOUNCE_SECONDS seconds

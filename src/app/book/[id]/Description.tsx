@@ -102,7 +102,7 @@ const Description: React.FC<Props> = ({ book, updateBook }) => {
 					</div>
 				</div>
 			</Section.Center>
-			<Section.Right>
+			<Section.Right sectionName="description">
 				<Status
 					status={book.description.status}
 					section="description"
@@ -132,7 +132,7 @@ const Description: React.FC<Props> = ({ book, updateBook }) => {
 					title="Word Count"
 					value={getWordCount(isHardcover, book)}
 					desc={`Goal ${
-						isHardcover ? '135 — 145' : '95 — 105'
+						isHardcover ? '140 — 160' : '95 — 105'
 					} words`}
 				/>
 				<button
@@ -140,7 +140,7 @@ const Description: React.FC<Props> = ({ book, updateBook }) => {
 					onClick={generateDescription}
 					disabled={book.description.status.generating.inProgress}
 				>
-					Regenerate
+					Generate
 				</button>
 			</Section.Right>
 		</Section>

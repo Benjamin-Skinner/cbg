@@ -35,8 +35,6 @@ async function generateOutline(book: Book): Promise<{
 		// Generate new pages from old pages and new chapter titles
 		const pages = new PagesClass(newTitles, book.pages)
 
-		// console.log(pages.toObject())
-
 		// Create new outline object from the old outline
 		const newOutline = new OutlineClass(book.outline)
 
@@ -78,6 +76,8 @@ async function getOutlineGPT(book: Book) {
     Title: Wonders of the World
     chapters: ["Pyramids", "Great Wall", "Taj Mahal", "Eiffel Tower", "Colosseum", "Machu Picchu", "Great Barrier Reef", "Northern Lights", "Mount Everest", "Amazon Rainforest", "Parthenon", "Grand Canyon", "Hagia Sophia"]
 
+    Title: Adventures in History
+    chapters: ["Egyptian Pharoahs", "Ancient Greece", "Roman Empire", "Incan Empire", "Medieval Castles", "Vikings", "Samurai", "Pirates", "Renaissance", "American Colonies", "Pioneers", "Jazz Age", "Space Race"]
     Title: ${book.title}`
 
 	const outlineJson = await generateText(prompt)

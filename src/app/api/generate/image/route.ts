@@ -27,6 +27,9 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	try {
+		if (params.page.image.prompt.content === '') {
+			throw new Error('Please enter a prompt')
+		}
 		// Set status as generating
 		const newStatus = new StatusClass(params.page.image.status)
 		newStatus.beginGenerating()
@@ -38,7 +41,7 @@ export async function POST(req: Request, res: Response) {
 
 		// Generate Images
 		const optionGenerating = await sendMidjourneyJob(
-			params.page.image.prompt
+			params.page.image.prompt.content
 		)
 
 		// Update the page with the new image option

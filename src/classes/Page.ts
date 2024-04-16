@@ -23,7 +23,10 @@ class PageClass {
 		image: string
 		imageOptions: ImageOption[]
 		generatingImages: ImageOptionGenerating[]
-		prompt: string
+		prompt: {
+			status: StatusClass
+			content: string
+		}
 	}
 
 	constructor(title: string, currPosition: number) {
@@ -46,7 +49,10 @@ class PageClass {
 			image: '',
 			imageOptions: [],
 			generatingImages: [],
-			prompt: '',
+			prompt: {
+				status: new StatusClass(),
+				content: '',
+			},
 		}
 	}
 
@@ -80,7 +86,10 @@ class PageClass {
 				image: this.image.image,
 				imageOptions: this.image.imageOptions,
 				generatingImages: this.image.generatingImages,
-				prompt: this.image.prompt,
+				prompt: {
+					status: this.image.prompt.status.toObject(),
+					content: this.image.prompt.content,
+				},
 			},
 		}
 	}
@@ -103,7 +112,10 @@ class PageClass {
 			image: page.image.image,
 			imageOptions: page.image.imageOptions,
 			generatingImages: page.image.generatingImages,
-			prompt: page.image.prompt,
+			prompt: {
+				status: new StatusClass(page.image.prompt.status),
+				content: page.image.prompt.content,
+			},
 		}
 		return newPage
 	}

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import Section from '@/components/Section'
 import Status from '@/components/Status'
 import Stat from '@/components/Stat'
@@ -9,8 +9,8 @@ import { Page, Book, PageImage } from '@/types'
 import { countWords } from '@/util/wordCount'
 import StatusClass from '@/classes/Status'
 import { UpdateBookOptions } from './Client'
-import { handleErrorOnClient } from '@/util/handleErrorOnClient'
-import { handleGenerationSuccess } from '@/util/handleGenerationSuccess'
+import { useInterval } from 'usehooks-ts'
+import { IMAGE_POLL_TIME } from '@/constants'
 
 interface Props {
 	style: 'hardcover' | 'softcover'
@@ -31,6 +31,7 @@ const Chapter: React.FC<Props> = ({
 	intro = false,
 	conclusion = false,
 }) => {
+	const [newImages, setNewImages] = useState(false)
 	const [isImage, setIsImage] = React.useState<boolean>(false)
 
 	return (
@@ -45,6 +46,8 @@ const Chapter: React.FC<Props> = ({
 										page={page}
 										bookId={book.id}
 										updatePage={updatePage}
+										newImages={newImages}
+										setNewImages={setNewImages}
 									/>
 								</div>
 								<article className="prose m-auto text-md px-6 w-full h-full">
@@ -92,9 +95,11 @@ const Chapter: React.FC<Props> = ({
 								<div className="card-body w-full">
 									<div className="m-auto w-full p-2 pb-8">
 										<ImagePicker
+											newImages={newImages}
 											page={page}
 											bookId={book.id}
 											updatePage={updatePage}
+											setNewImages={setNewImages}
 										/>
 									</div>
 								</div>
@@ -131,6 +136,8 @@ const Chapter: React.FC<Props> = ({
 						book={book}
 						intro={intro}
 						conclusion={conclusion}
+						newImages={newImages}
+						setNewImages={setNewImages}
 					/>
 				) : (
 					<Text
@@ -172,14 +179,14 @@ const Text: React.FC<TextProps> = ({
 	)
 	return (
 		<div>
-			<Status status={page.text.status} />
+			<Status section="text" status={page.text.status} />
 
 			<button
 				disabled={page.text.status.generating.inProgress}
 				onClick={generateText}
 				className="btn btn-info btn-wide mt-12"
 			>
-				Regenerate
+				Generate
 			</button>
 			<Stat
 				title="Word Count"
@@ -246,13 +253,20 @@ const useGeneratePageText = (
 
 		// SUCCESS --> update the state with the new generated text
 		if (res.status === 200) {
-			const { data } = await res.json()
+			const data = await res.json()
+			const page: Page = data.data
 			console.log('GENERATION SUCCESS')
-			console.log(data)
+			console.log(page)
 
-			await updatePage(data, {
-				clientOnly: true,
-			})
+			await updatePage(
+				{
+					...pageRef.current,
+					text: page.text,
+				},
+				{
+					clientOnly: true,
+				}
+			)
 		} else {
 			console.log('GENERATION ERROR')
 			const { error, code } = await res.json()
@@ -286,6 +300,8 @@ interface ImageProps {
 	book: Book
 	intro: boolean
 	conclusion: boolean
+	newImages: boolean
+	setNewImages: (newImages: boolean) => void
 }
 
 const Images: React.FC<ImageProps> = ({
@@ -294,6 +310,8 @@ const Images: React.FC<ImageProps> = ({
 	book,
 	intro,
 	conclusion,
+	newImages,
+	setNewImages,
 }) => {
 	const { generateImagePrompt } = useGenerateImagePrompt(
 		updatePage,
@@ -316,42 +334,90 @@ const Images: React.FC<ImageProps> = ({
 		book,
 		page,
 		intro,
-		conclusion
+		conclusion,
+		setNewImages
+	)
+
+	const cancelGeneration = async () => {
+		const newStatus = new StatusClass(page.image.status)
+		newStatus.clearGenerating()
+		updatePage({
+			...page,
+			image: {
+				...page.image,
+				status: newStatus.toObject(),
+			},
+		})
+	}
+
+	useInterval(
+		() => {
+			// Your custom logic here
+			if (page.image.status.generating.inProgress) {
+				console.log(`Polling for images for page ${page.title}`)
+				updateImages()
+			} else {
+				console.log('No generating images')
+			}
+		},
+		// Delay in milliseconds or null to stop it
+		IMAGE_POLL_TIME * 1000
 	)
 
 	return (
 		<div>
-			<Status status={page.image.status} />
+			<div className="flex flex-row items-center">
+				<Status status={page.image.status} />
+				{page.image.status.generating.inProgress && (
+					<button
+						className="btn btn-sm btn-outline ml-6"
+						onClick={cancelGeneration}
+					>
+						Cancel
+					</button>
+				)}
+			</div>
 
 			<button
 				onClick={generateImagePrompt}
 				className="btn btn-info btn-wide mt-12"
-				disabled={page.image.status.generating.inProgress}
+				disabled={
+					page.image.status.generating.inProgress ||
+					page.image.prompt.status.generating.inProgress
+				}
 			>
-				Regenerate Midjourney Prompt
+				{page.image.prompt.status.generating.inProgress ? (
+					<span className="loading loading-dots loading-md"></span>
+				) : (
+					'Generate Prompt'
+				)}
 			</button>
-			<button
-				onClick={updateImages}
-				className="btn btn-info btn-wide mt-12"
-			>
-				Update Images
-			</button>
+
 			<textarea
-				disabled={page.image.status.generating.inProgress}
-				value={page.image.prompt}
+				disabled={
+					page.image.status.generating.inProgress ||
+					page.image.prompt.status.generating.inProgress
+				}
+				value={page.image.prompt.content}
 				onChange={(e) =>
 					updatePage({
 						...page,
 						image: {
 							...page.image,
-							prompt: e.target.value,
+							prompt: {
+								...page.image.prompt,
+								content: e.target.value,
+							},
 						},
 					})
 				}
 				className="textarea h-48 w-full mt-12 leading-5"
 			/>
 			<button
-				disabled={page.image.status.generating.inProgress}
+				disabled={
+					page.image.status.generating.inProgress ||
+					page.image.status.generating.inProgress
+				}
 				onClick={generateImages}
 				className="btn btn-info btn-wide mt-12"
 			>
@@ -385,16 +451,19 @@ const useGenerateImagePrompt = (
 	const generateImagePrompt = async () => {
 		console.log('GENERATING IMAGE PROMPT for page ' + pageRef.current.title)
 		// ?
-		const newStatus = new StatusClass(pageRef.current.image.status)
+		const newStatus = new StatusClass(pageRef.current.image.prompt.status)
 		newStatus.beginGenerating()
 
 		// Update the book with the new status
-		await updatePage(
+		updatePage(
 			{
 				...pageRef.current,
 				image: {
 					...pageRef.current.image,
-					status: newStatus.toObject(),
+					prompt: {
+						content: pageRef.current.image.prompt.content,
+						status: newStatus.toObject(),
+					},
 				},
 			},
 			{
@@ -406,7 +475,7 @@ const useGenerateImagePrompt = (
 			method: 'POST',
 			body: JSON.stringify({
 				book: book,
-				page: page,
+				page: pageRef.current,
 				intro: intro,
 				conclusion: conclusion,
 			}),
@@ -428,7 +497,9 @@ const useGenerateImagePrompt = (
 			const { error, code } = await res.json()
 			console.error(`${code}: ${error}`)
 
-			const newStatus = new StatusClass(pageRef.current.image.status)
+			const newStatus = new StatusClass(
+				pageRef.current.image.prompt.status
+			)
 			newStatus.setError(error)
 			newStatus.clearGenerating()
 			await updatePage(
@@ -436,7 +507,10 @@ const useGenerateImagePrompt = (
 					...pageRef.current,
 					image: {
 						...pageRef.current.image,
-						status: newStatus.toObject(),
+						prompt: {
+							content: pageRef.current.image.prompt.content,
+							status: newStatus.toObject(),
+						},
 					},
 				},
 				{
@@ -547,7 +621,8 @@ const useUpdateImages = (
 	book: Book,
 	page: Page,
 	intro: boolean,
-	conclusion: boolean
+	conclusion: boolean,
+	setNewImages: (newImages: boolean) => void
 ) => {
 	// Use a ref to store the current book
 	const bookRef = useRef(book)
@@ -585,8 +660,16 @@ const useUpdateImages = (
 			console.log(images)
 
 			const newPage = {
-				...page,
+				...pageRef.current,
 				image: images,
+			}
+
+			if (
+				!images.status.generating.inProgress &&
+				images.status.message.code !== 'error'
+			) {
+				console.log('no longer generating; job done')
+				setNewImages(true)
 			}
 
 			console.log('new page received ')

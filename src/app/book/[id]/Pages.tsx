@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import Chapter from './Chapter'
 import { Book, Page } from '@/types'
 import { UpdateBookOptions } from './Client'
@@ -11,68 +11,15 @@ interface Props {
 }
 
 const Pages: React.FC<Props> = ({ book, updateBook }) => {
-	useEffect(() => {
-		console.log('Book updated in Pages Component')
-		console.log(book)
-	}, [book])
 	const [style, setStyle] = React.useState<'hardcover' | 'softcover'>(
 		'hardcover'
 	)
 
-	// The updatePage function prop is not updating when book updates
-	const updateIntro = useCallback(
-		(page: Page, options?: UpdateBookOptions) => {
-			updateBook(
-				{
-					...book,
-					pages: {
-						...book.pages,
-						intro: page,
-					},
-				},
-				options
-			)
-		},
-		[book, updateBook, book.pages]
+	const { updateChapter, updateConclusion, updateIntro } = useUpdatePage(
+		updateBook,
+		book
 	)
 
-	const updateConclusion = useCallback(
-		(page: Page, options?: UpdateBookOptions) => {
-			updateBook(
-				{
-					...book,
-					pages: {
-						...book.pages,
-						conclusion: page,
-					},
-				},
-				options
-			)
-		},
-		[book]
-	)
-
-	const updateChapter = useCallback(
-		(index: number, page: Page, options?: UpdateBookOptions): void => {
-			console.log('Updating chapter with book value of:')
-			console.log(book.pages.chapters)
-			updateBook(
-				{
-					...book,
-					pages: {
-						...book.pages,
-						chapters: [
-							...book.pages.chapters.slice(0, index),
-							page,
-							...book.pages.chapters.slice(index + 1),
-						],
-					},
-				},
-				options
-			)
-		},
-		[book, updateBook, book.pages]
-	)
 	return (
 		<>
 			<Chapter
@@ -108,3 +55,67 @@ const Pages: React.FC<Props> = ({ book, updateBook }) => {
 }
 
 export default Pages
+
+const useUpdatePage = (
+	updateBook: (book: Book, options?: UpdateBookOptions) => void,
+	book: Book
+) => {
+	const bookRef = useRef(book)
+
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	const updateChapter = (
+		index: number,
+		page: Page,
+		options?: UpdateBookOptions
+	) => {
+		updateBook(
+			{
+				...bookRef.current,
+				pages: {
+					...bookRef.current.pages,
+					chapters: [
+						...bookRef.current.pages.chapters.slice(0, index),
+						page,
+						...bookRef.current.pages.chapters.slice(index + 1),
+					],
+				},
+			},
+			options
+		)
+	}
+
+	const updateConclusion = (page: Page, options?: UpdateBookOptions) => {
+		updateBook(
+			{
+				...bookRef.current,
+				pages: {
+					...bookRef.current.pages,
+					conclusion: page,
+				},
+			},
+			options
+		)
+	}
+
+	const updateIntro = (page: Page, options?: UpdateBookOptions) => {
+		updateBook(
+			{
+				...bookRef.current,
+				pages: {
+					...bookRef.current.pages,
+					intro: page,
+				},
+			},
+			options
+		)
+	}
+
+	return {
+		updateChapter,
+		updateConclusion,
+		updateIntro,
+	}
+}

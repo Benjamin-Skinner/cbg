@@ -3,6 +3,7 @@ import CBGError from '@/classes/Error'
 export type Book = {
 	id: string
 	title: string
+	oneLiner: string
 	description: Description
 	outline: Outline
 	recall: {
@@ -15,23 +16,16 @@ export type Book = {
 		activePages: string[]
 		status: Status
 	}
-	frontCover: {
-		ideas: ImageIdeas
-		status: Status
-		image: string
-		imageOptions: ImageOption[]
-		prompt: string
-	}
-	backCover: {
-		ideas: ImageIdeas
-		status: Status
-		image: string
-		imageOptions: ImageOption[]
-		prompt: string
-	}
+	frontCover: Cover
+	backCover: Cover
 	pages: BookPages
 	lastSaved: number
 	createdAt: number
+}
+
+export type Cover = {
+	imageIdeas: ImageIdeas
+	image: PageImage
 }
 
 export type BookPages = {
@@ -67,8 +61,12 @@ export type RandR = {
 }
 
 export type ImageIdeas = {
-	ideas: string[]
+	ideas: ImageIdea[]
 	status: Status
+}
+
+export type ImageIdea = {
+	content: string
 }
 
 // For completed images
@@ -111,7 +109,10 @@ export type PageImage = {
 	status: Status
 	image: string
 	imageOptions: ImageOption[]
-	prompt: string
+	prompt: {
+		status: Status
+		content: string
+	}
 	generatingImages: ImageOptionGenerating[]
 }
 
@@ -165,4 +166,28 @@ export type MidjourneyResponse = {
 	ref: string
 	status?: string
 	error?: string
+}
+
+export type SubjectOptions = {
+	grade: 'All' | '1' | '2' | '3' | '4'
+	subject:
+		| 'All'
+		| 'Reading'
+		| 'Writing'
+		| 'Mathematics'
+		| 'Science'
+		| 'Social Studies'
+		| 'Physical Education'
+		| 'Art'
+		| 'Music'
+		| 'Health'
+		| 'Emotional Learning'
+}
+
+export type Subject = {
+	title: string
+	oneLiner: string
+	options: SubjectOptions
+	createdAt: number
+	batchNum: number
 }

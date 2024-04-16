@@ -1,4 +1,4 @@
-import { SECTION_GUIDELINES } from '@/constants'
+import { SECTION_GUIDELINES, PROMPT_TIPS } from '@/constants'
 
 interface SectionComponent {
 	Center: React.FC<CenterProps>
@@ -42,17 +42,36 @@ const Right: React.FC<RightProps> = ({ children, sectionName }) => {
 		<div className="w-3/12 flex flex-col">
 			{children}
 			{sectionName && (
-				<div className="stats shadow w-full mt-12">
-					<div className="stat">
-						<div className="stat-title">Section Checklist</div>
-						<ul className="list-disc list-inside text-wrap pr-4">
-							{/* @ts-ignore */}
-							{SECTION_GUIDELINES[sectionName].map(
-								(item: string, index: number) => (
-									<li className="stat-desc">{item}</li>
-								)
-							)}
-						</ul>
+				<div>
+					<div className="stats shadow w-full mt-12">
+						<div className="stat">
+							<div className="stat-title">Section Checklist</div>
+							<ul className="list-disc list-inside">
+								{/* @ts-ignore */}
+								{SECTION_GUIDELINES[sectionName].map(
+									(item: string, index: number) => (
+										<li className="stat-desc  w-full text-wrap">
+											{item}
+										</li>
+									)
+								)}
+							</ul>
+						</div>
+					</div>
+					<div className="stats shadow w-full mt-3">
+						<div className="stat">
+							<div className="stat-title">Prompt Tips</div>
+							<ul className="list-disc list-inside">
+								{/* @ts-ignore */}
+								{PROMPT_TIPS[sectionName].map(
+									(item: string, index: number) => (
+										<li className="stat-desc  w-full text-wrap">
+											{item}
+										</li>
+									)
+								)}
+							</ul>
+						</div>
 					</div>
 				</div>
 			)}

@@ -28,6 +28,6 @@ export async function PUT(
 			error.message || 'Internal server error',
 			500,
 			'INTERNAL_SERVER_ERROR'
-		)
+		).toResponse()
 	}
 }
