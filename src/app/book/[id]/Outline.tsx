@@ -70,7 +70,7 @@ const Outline: React.FC<Props> = ({ book, updateBook }) => {
 					<PageCardLocked page="Conclusion" />
 				</div>
 			</Section.Center>
-			<Section.Right>
+			<Section.Right sectionName="outline">
 				<Status status={book.outline.status} />
 
 				<button
@@ -78,7 +78,7 @@ const Outline: React.FC<Props> = ({ book, updateBook }) => {
 					onClick={generateOutline}
 					className="btn btn-info btn-wide mt-12"
 				>
-					Regenerate
+					Generate
 				</button>
 			</Section.Right>
 		</Section>
@@ -133,7 +133,7 @@ const PageCard: React.FC<PageCardProps> = ({
 							type="text"
 							value={page.title}
 							placeholder="(Page name)"
-							className="font-bold w-full cursor-row-resize"
+							className="font-bold w-full"
 							onChange={(e) => {
 								const newPages = [...pages]
 								newPages[index].title = e.target.value

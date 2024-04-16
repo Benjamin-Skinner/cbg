@@ -3,10 +3,10 @@ import sleep from '@/util/sleep'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
 import StatusClass from '@/classes/Status'
-import { Page, RandR } from '@/types'
-import clientPromise from '@/util/db'
+import { Page } from '@/types'
 import { Book } from '@/types'
 import generatePageText from '@/generate/text/page'
+import updatePage from '@/functions/updatePage'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -62,47 +62,4 @@ export async function POST(req: Request, res: Response) {
 			'INTERNAL_SERVER_ERROR'
 		).toResponse()
 	}
-}
-
-/**
- * @function updatePage
- *
- * @summary
- * Takes a book and page, and updates the page in the database.
- * Works for any page, including intro and conclusion.
- *
- * @param {Book} book - The book to update
- * @param {Page} page - The page to update
- * @param {boolean} intro - Whether the page is an intro
- * @param {boolean} conclusion - Whether the page is a conclusion
- *
- * @returns
- *
- * @remarks
- */
-async function updatePage(
-	book: Book,
-	page: Page,
-	intro: boolean,
-	conclusion: boolean
-) {
-	console.log('updating page in DB')
-	const client = await clientPromise
-	const db = client.db()
-	const books = db.collection('books')
-	const newChapters = book.pages.chapters.map((p: Page) => {
-		if (p.key === page.key) {
-			return page
-		}
-		return p
-	})
-
-	const newPages = { ...book.pages, chapters: newChapters }
-	if (intro) {
-		newPages.intro = page
-	}
-	if (conclusion) {
-		newPages.conclusion = page
-	}
-	await books.findOneAndUpdate({ id: book.id }, { $set: { pages: newPages } })
 }

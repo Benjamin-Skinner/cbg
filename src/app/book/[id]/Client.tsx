@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 
 import Navbar from '@/components/Navbar'
 import Description from './Description'
@@ -14,21 +14,25 @@ import { Book } from '@/types'
 import ShowWarning from './ShowWarning'
 import useUpdateinDB from './functions/useUpdateInDB'
 import debounce from 'lodash.debounce'
+import Download from './Download'
 
 interface Props {
 	bookData: Book
 }
 
 export type UpdateBookOptions = {
-	clientOnly: boolean
+	clientOnly?: boolean
+	fields?: Field[]
 }
 
+export type Field = 'title' | 'description'
+
 const DEBOUNCE_SECONDS = 3
+const IMAGE_POLLING_SECONDS = 5
 
 const Client: React.FC<Props> = ({ bookData }) => {
 	// The book state
 	const [book, setBook] = useState(bookData)
-
 	// Whether a save is in progress or not
 	const [saving, setSaving] = useState(false)
 	// The last time the book was saved
@@ -52,15 +56,16 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 	// Called when the book is updated
 	const updateBook = async (book: Book, funcOptions?: UpdateBookOptions) => {
-		console.log('UPDATING BOOK')
-		const options = funcOptions || { clientOnly: false }
+		console.log('UPDATING BOOK IN CLIENT.TSX')
+		const options = funcOptions || { clientOnly: false, fields: [] }
 
 		!options.clientOnly && setSaving(true)
 		// Update in state
+		console.log(book)
 		setBook(book)
 
 		// // Update in Database after DEBOUNCE_SECONDS seconds
-		!options.clientOnly && debouncedUpdateInDB(book)
+		!options.clientOnly && debouncedUpdateInDB(book, options.fields || [])
 	}
 
 	const manualSave = async () => {
@@ -69,8 +74,22 @@ const Client: React.FC<Props> = ({ bookData }) => {
 		setBook(book)
 
 		// Update in Database after DEBOUNCE_SECONDS seconds
-		updateInDB(book)
+		updateInDB(book, [])
 	}
+
+	// This function will be called to update the images periodically
+
+	// Periodically update the images
+	// useEffect(() => {
+	// 	const interval = setInterval(() => {
+	// 		// LOGIC HERE
+	// 		updateImages()
+	// 	}, 1000 * IMAGE_POLLING_SECONDS)
+
+	// 	return () => {
+	// 		clearInterval(interval)
+	// 	}
+	// }, [])
 
 	return (
 		<>
@@ -96,6 +115,12 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 				<Frontcover book={book} updateBook={updateBook} />
 				<Backcover book={book} updateBook={updateBook} />
+
+				<Download
+					book={book}
+					updateBook={updateBook}
+					setWarningMessage={setWarningMessage}
+				/>
 			</div>
 		</>
 	)

@@ -50,7 +50,7 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 	return (
 		<Section title="Reflect">
 			<Section.Center>
-				<div className="flex flex-col justify-center space-y-4 w-fit m-auto">
+				<div className="grid grid-cols-2 gap-2 w-fit m-auto">
 					{book.reflect.questions.map((question, index) => (
 						<div
 							className={`card w-96 bg-base-100 shadow-xl transition-all duration-300 border-2 ${
@@ -65,7 +65,7 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 												.inProgress
 										}
 										value={question.text}
-										className="w-full"
+										className="w-full h-20"
 										onChange={(e) =>
 											updateQuestion({
 												...question,
@@ -126,7 +126,7 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 					))}
 				</div>
 			</Section.Center>
-			<Section.Right>
+			<Section.Right sectionName="reflect">
 				<Status status={book.reflect.status} />
 
 				<Stat

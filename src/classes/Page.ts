@@ -1,5 +1,6 @@
 import StatusClass from './Status'
-import { ImageOption, Page } from '@/types'
+import { ImageOption, Page, ImageOptionGenerating } from '@/types'
+import { extractPngName } from '@/util/url'
 import { v4 as uuid } from 'uuid'
 
 /*
@@ -21,7 +22,11 @@ class PageClass {
 		status: StatusClass
 		image: string
 		imageOptions: ImageOption[]
-		prompt: string
+		generatingImages: ImageOptionGenerating[]
+		prompt: {
+			status: StatusClass
+			content: string
+		}
 	}
 
 	constructor(title: string, currPosition: number) {
@@ -43,8 +48,23 @@ class PageClass {
 			status: imageStatus,
 			image: '',
 			imageOptions: [],
-			prompt: '',
+			generatingImages: [],
+			prompt: {
+				status: new StatusClass(),
+				content: '',
+			},
 		}
+	}
+
+	addImageOption(option: ImageOption) {
+		this.image.imageOptions.push(option)
+	}
+
+	removeImageOption(imageId: string) {
+		const imageName = extractPngName(imageId)
+		this.image.imageOptions = this.image.imageOptions.filter(
+			(option) => extractPngName(option.url) !== imageName
+		)
 	}
 
 	setTitle(title: string) {
@@ -65,7 +85,11 @@ class PageClass {
 				status: this.image.status.toObject(),
 				image: this.image.image,
 				imageOptions: this.image.imageOptions,
-				prompt: this.image.prompt,
+				generatingImages: this.image.generatingImages,
+				prompt: {
+					status: this.image.prompt.status.toObject(),
+					content: this.image.prompt.content,
+				},
 			},
 		}
 	}
@@ -87,7 +111,11 @@ class PageClass {
 			status: new StatusClass(page.image.status),
 			image: page.image.image,
 			imageOptions: page.image.imageOptions,
-			prompt: page.image.prompt,
+			generatingImages: page.image.generatingImages,
+			prompt: {
+				status: new StatusClass(page.image.prompt.status),
+				content: page.image.prompt.content,
+			},
 		}
 		return newPage
 	}

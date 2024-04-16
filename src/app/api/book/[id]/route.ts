@@ -9,16 +9,17 @@ export async function PUT(
 	{ params }: { params: { bookId: string } }
 ) {
 	const body = await req.json()
-	const { isError, error } = ensureParams(body, ['book'])
+	const { isError, error } = ensureParams(body, ['book', 'fields'])
 	if (isError && error) {
 		return error.toResponse()
 	}
 
 	const book: Book = body.book
+	const fields: string[] = body.fields
 
 	try {
 		// For any fields that have generating.inProgress, do not update them
-		const lastSaved = await updateBook(book)
+		const lastSaved = await updateBook(book, fields)
 		return NextResponse.json({
 			lastUpdated: lastSaved,
 		})
@@ -27,6 +28,6 @@ export async function PUT(
 			error.message || 'Internal server error',
 			500,
 			'INTERNAL_SERVER_ERROR'
-		)
+		).toResponse()
 	}
 }

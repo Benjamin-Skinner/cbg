@@ -14,6 +14,7 @@ export async function getAlllBooks() {
 			title: bookDoc.title,
 			description: bookDoc.description,
 			outline: bookDoc.outline,
+			oneLiner: bookDoc.oneLiner,
 			recall: bookDoc.recall,
 			reflect: bookDoc.reflect,
 			frontCover: bookDoc.frontCover,

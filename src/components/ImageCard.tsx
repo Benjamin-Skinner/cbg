@@ -2,36 +2,96 @@ import React from 'react'
 import PlaceholderImage from './PlaceholderImage'
 import PlaceholderBackcover from './PlaceholderBackcover'
 import { OpenInNewWindowIcon } from './Icons'
+import { ImageOption } from '@/types'
+import Image from 'next/image'
+import mj_logo from '@/assets/midjourney.png'
+import { UploadIcon } from './Icons'
 
 interface Props {
+	selected: boolean
+	image?: ImageOption
 	backcover?: boolean
+	placeholder?: boolean
+	deleteImage: (url: string) => void
+	selectImage: (url: string) => void
 }
 
-const ImageCard: React.FC<Props> = ({ backcover }) => {
+const ImageCard: React.FC<Props> = ({
+	image,
+	selected,
+	backcover,
+	placeholder,
+	deleteImage,
+	selectImage,
+}) => {
 	return (
-		<div className="card bg-base-100 shadow-xl w-full p-2">
-			<figure className="">
-				{backcover ? (
-					<PlaceholderBackcover size={400} />
+		<div
+			className={`card bg-base-100 shadow-xl w-full p-2 border-4 ${
+				selected ? 'border-green-600' : 'border-transparent'
+			}`}
+		>
+			<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
+				{image?.type === 'midjourney' ? (
+					<Image
+						src={mj_logo}
+						className="rounded-full"
+						alt="Midjourney logo"
+						width={30}
+						height={30}
+					/>
 				) : (
+					<UploadIcon size={4} />
+				)}
+			</div>
+			<figure className="">
+				{placeholder ? (
 					<PlaceholderImage size={400} />
+				) : (
+					<Image
+						src={image?.url || '/placeholder.png'}
+						alt="image option"
+						width={400}
+						height={400}
+						className="rounded-lg aspect-square object-cover"
+					/>
 				)}
 			</figure>
 
 			<div className="card-body py-4 justify-center">
 				<div className="card-actions">
 					<div className="items-center justify-evenly flex flex-row space-x-4 flex-1">
-						<button className="btn btn-sm btn-outline btn-error">
+						<button
+							className="btn btn-sm btn-outline btn-error"
+							onClick={() => deleteImage(image?.url || '')}
+							disabled={selected}
+						>
 							Remove
 						</button>
-						<button className="btn btn-sm btn-outline btn-success">
+						<button
+							className="btn btn-sm btn-outline btn-success"
+							onClick={() => selectImage(image?.url || '')}
+						>
 							Select
 						</button>
 					</div>
-					<button className="btn btn-ghost btn-sm text-gray-500 ml-auto">
+					<button
+						className="btn btn-ghost btn-sm text-gray-500 ml-auto"
+						onClick={() => {
+							window.open(image?.url || '', '_blank')
+						}}
+					>
 						<OpenInNewWindowIcon size={4} />
 					</button>
 				</div>
+				{/* <progress
+					className={`${
+						image?.progress === 100 || image?.progress === 0
+							? 'hidden'
+							: ''
+					} progress progress-info w-56 m-auto mt-4`}
+					value={image?.progress || 0}
+					max="100"
+				></progress> */}
 			</div>
 		</div>
 	)

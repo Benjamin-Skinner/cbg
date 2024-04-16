@@ -1,8 +1,9 @@
 import { Book, BookPages, Outline } from '@/types'
 import StatusClass from '@/classes/Status'
 import OutlineClass from '@/classes/Outline'
-import AllPagesClass from '@/classes/AllPages'
 import PagesClass from '@/classes/Pages'
+import { getFullBookDescription } from '@/util/book'
+import generateText from './openai'
 
 /**
  * @function generateOutline
@@ -29,28 +30,10 @@ async function generateOutline(book: Book): Promise<{
 	const newStatus = new StatusClass(book.outline.status)
 
 	try {
-		const newTitles = [
-			'First Chapter',
-			'Pandas',
-			'JAGUARS',
-			'pigs',
-			'pigs',
-			'Parrots',
-			'Snakes',
-			'Gorillas',
-			'Monkeys',
-			'Cheetahs',
-			'Leopards',
-			'Elephants',
-			'Butterflies',
-			'Crocodiles',
-			'Ants',
-		]
+		const newTitles = await getOutlineGPT(book)
 
 		// Generate new pages from old pages and new chapter titles
 		const pages = new PagesClass(newTitles, book.pages)
-
-		console.log(pages.toObject())
 
 		// Create new outline object from the old outline
 		const newOutline = new OutlineClass(book.outline)
@@ -83,3 +66,27 @@ async function generateOutline(book: Book): Promise<{
 }
 
 export default generateOutline
+
+async function getOutlineGPT(book: Book) {
+	const description = getFullBookDescription(book)
+	const prompt = `Generate a list of chapters for a book with the title "${book.title}" and the following description: "${description}". Return the list as an array in JSON format. There should be 13 chapters. Each chapter should have a specific noun as the title, and should be one to three words. Topics must not repeat. Base the chapters on the following examples:
+    Title: Journey Through the Jungle
+    chapters: ["Tigers", "Monkeys", "Elephants", "Snakes", "Parrots", "Crocodiles", "Butterflies", "Ants", "Leopards", "Toucans", "Frogs", "Chameleons", "Gorillas"]
+
+    Title: Wonders of the World
+    chapters: ["Pyramids", "Great Wall", "Taj Mahal", "Eiffel Tower", "Colosseum", "Machu Picchu", "Great Barrier Reef", "Northern Lights", "Mount Everest", "Amazon Rainforest", "Parthenon", "Grand Canyon", "Hagia Sophia"]
+
+    Title: Adventures in History
+    chapters: ["Egyptian Pharoahs", "Ancient Greece", "Roman Empire", "Incan Empire", "Medieval Castles", "Vikings", "Samurai", "Pirates", "Renaissance", "American Colonies", "Pioneers", "Jazz Age", "Space Race"]
+    Title: ${book.title}`
+
+	const outlineJson = await generateText(prompt)
+
+	const outline = JSON.parse(outlineJson)
+	if (outline.chapters.length !== 13) {
+		throw new Error(
+			'Generated outline is not the correct length. Please try again'
+		)
+	}
+	return outline.chapters
+}

@@ -9,6 +9,7 @@ export async function getBookById(bookId: string) {
 	const book: Book = {
 		id: bookDoc.id.toString(),
 		title: bookDoc.title,
+		oneLiner: bookDoc.oneLiner,
 		description: bookDoc.description,
 		outline: bookDoc.outline,
 		recall: bookDoc.recall,

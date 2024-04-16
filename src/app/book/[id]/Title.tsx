@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react'
 import { Book } from '@/types'
+import { UpdateBookOptions } from './Client'
 
 interface Props {
 	book: Book
-	updateBook: (book: Book) => void
+	updateBook: (book: Book, options?: UpdateBookOptions) => void
 }
 
 const Title: React.FC<Props> = ({ book, updateBook }) => {
@@ -14,13 +15,15 @@ const Title: React.FC<Props> = ({ book, updateBook }) => {
 	}
 
 	return (
-		<input
-			type="text"
-			value={book.title}
-			placeholder="Title"
-			onChange={(e) => updateTitle(e.target.value)}
-			className="w-full h-12 m-auto text-4xl font-bold text-center"
-		/>
+		<>
+			<input
+				type="text"
+				value={book.title}
+				placeholder="Title"
+				onChange={(e) => updateTitle(e.target.value)}
+				className="w-full h-12 m-auto text-4xl font-bold text-center"
+			/>
+		</>
 	)
 }
 

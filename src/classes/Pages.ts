@@ -8,7 +8,7 @@ class PagesClass {
 
 	// Given a list of titles, create a new PagesClass -> used for the first generation
 	constructor(titles: string[], oldPages: BookPages) {
-		if (titles.length !== 15) throw new Error('There must be 15 chapters')
+		if (titles.length !== 13) throw new Error('There must be 13 chapters')
 		this.intro = oldPages.intro
 		this.conclusion = oldPages.conclusion
 
@@ -35,6 +35,16 @@ class PagesClass {
 			chapters: this.chapters.map((chapter) => chapter.toObject()),
 		}
 	}
+
+	// static fromObject(pages: BookPages) {
+	// 	const newPages = new PagesClass()
+	// 	newPages.intro = pages.intro
+	// 	newPages.conclusion = pages.conclusion
+	// 	newPages.chapters = pages.chapters.map((chapter) =>
+	// 		PageClass.fromObject(chapter)
+	// 	)
+	// 	return newPages
+	// }
 }
 
 export default PagesClass

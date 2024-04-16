@@ -12,7 +12,7 @@ const PlaceholderImage: React.FC<Props> = ({ size }) => {
 				className={`flex items-center justify-center bg-gray-300 aspect-square w-[${size}px] h-[${size}px]`}
 			>
 				<svg
-					className="w-10 h-10 text-gray-200 dark:text-gray-600"
+					className={`w-10 h-10 text-gray-200 dark:text-gray-600`}
 					aria-hidden="true"
 					xmlns="http://www.w3.org/2000/svg"
 					fill="currentColor"

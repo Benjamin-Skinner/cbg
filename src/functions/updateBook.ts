@@ -13,14 +13,30 @@ import clientPromise from '@/util/db'
  *
  * @remarks
  */
-export async function updateBook(book: Book) {
+export async function updateBook(book: Book, fields: string[] = []) {
 	const client = await clientPromise
 	const db = client.db()
 	const books = db.collection('books')
 	const query = { id: book.id }
 	const savingTime = Date.now()
-	const replacement = { ...book, lastSaved: savingTime }
-	await books.replaceOne(query, replacement)
-	console.log('book updated')
+
+	if (fields.length === 0) {
+		const replacement = { ...book, lastSaved: savingTime }
+		await books.replaceOne(query, replacement)
+	} else {
+		const updateDoc = {
+			$set: {
+				lastSaved: savingTime,
+				...fields.reduce((acc, field) => {
+					// @ts-ignore
+					acc[field] = book[field]
+					return acc
+				}, {}),
+			},
+		}
+		await books.updateOne(query, updateDoc)
+		console.log('book updated fields: ', fields.toString())
+	}
+
 	return savingTime
 }

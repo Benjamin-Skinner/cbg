@@ -3,6 +3,7 @@ import CBGError from '@/classes/Error'
 export type Book = {
 	id: string
 	title: string
+	oneLiner: string
 	description: Description
 	outline: Outline
 	recall: {
@@ -15,23 +16,16 @@ export type Book = {
 		activePages: string[]
 		status: Status
 	}
-	frontCover: {
-		ideas: ImageIdeas
-		status: Status
-		image: string
-		imageOptions: ImageOption[]
-		prompt: string
-	}
-	backCover: {
-		ideas: ImageIdeas
-		status: Status
-		image: string
-		imageOptions: ImageOption[]
-		prompt: string
-	}
+	frontCover: Cover
+	backCover: Cover
 	pages: BookPages
 	lastSaved: number
 	createdAt: number
+}
+
+export type Cover = {
+	imageIdeas: ImageIdeas
+	image: PageImage
 }
 
 export type BookPages = {
@@ -67,12 +61,36 @@ export type RandR = {
 }
 
 export type ImageIdeas = {
-	ideas: string[]
+	ideas: ImageIdea[]
 	status: Status
 }
 
+export type ImageIdea = {
+	content: string
+}
+
+// For completed images
 export type ImageOption = {
-	id: string
+	url: string
+	error: string
+	type: 'manual' | 'midjourney'
+}
+
+// For images that are being generated
+export type ImageOptionGenerating = {
+	messageId: string
+	progress: number
+	completed: boolean // whether the UpscaleJobs have been created or whether the image is ready
+	upscales: UpscaleJob[]
+}
+
+export type UpscaleJob = {
+	messageId: string
+	completed: boolean
+	progress: number
+	url: string
+	button: 'U1' | 'U2' | 'U3' | 'U4'
+	error: string
 }
 
 export type Page = {
@@ -84,12 +102,18 @@ export type Page = {
 		status: Status
 		content: string
 	}
-	image: {
+	image: PageImage
+}
+
+export type PageImage = {
+	status: Status
+	image: string
+	imageOptions: ImageOption[]
+	prompt: {
 		status: Status
-		image: string
-		imageOptions: ImageOption[]
-		prompt: string
+		content: string
 	}
+	generatingImages: ImageOptionGenerating[]
 }
 
 export type Description = {
@@ -119,12 +143,51 @@ export type OutlinePage = {
 	key: string
 }
 
-// export type CBGError = {
-// 	code: string
-// 	message: string
-// }
-
 export type ValidatorFunction = {
 	isError: boolean
 	error?: CBGError
+}
+
+export type GenerateImageResponse = {
+	success: boolean
+	messageId: string
+	createdAt: string
+}
+
+export type MidjourneyResponse = {
+	messageId: string
+	prompt: string
+	uri: string
+	progress: number
+	createdAt: string
+	updatedAt: string
+	buttons: string[]
+	originatingMessageId: string
+	ref: string
+	status?: string
+	error?: string
+}
+
+export type SubjectOptions = {
+	grade: 'All' | '1' | '2' | '3' | '4'
+	subject:
+		| 'All'
+		| 'Reading'
+		| 'Writing'
+		| 'Mathematics'
+		| 'Science'
+		| 'Social Studies'
+		| 'Physical Education'
+		| 'Art'
+		| 'Music'
+		| 'Health'
+		| 'Emotional Learning'
+}
+
+export type Subject = {
+	title: string
+	oneLiner: string
+	options: SubjectOptions
+	createdAt: number
+	batchNum: number
 }
