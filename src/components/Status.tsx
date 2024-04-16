@@ -9,9 +9,15 @@ interface Props {
 	status: Status
 	section?: Section
 	showProgress?: boolean
+	image?: boolean
 }
 
-const Status: React.FC<Props> = ({ status, section, showProgress = false }) => {
+const Status: React.FC<Props> = ({
+	status,
+	section,
+	showProgress = false,
+	image = false,
+}) => {
 	const getImageNum = (progress: number) => {
 		if (progress < 40) {
 			return 1
@@ -39,9 +45,11 @@ const Status: React.FC<Props> = ({ status, section, showProgress = false }) => {
 				</div>
 
 				<Message status={status} section={'description'} />
-				<p className="text-info text-sm mt-3">
-					Image {getImageNum(status.generating.progress)}/4
-				</p>
+				{image && (
+					<p className="text-info text-sm mt-3">
+						Image {getImageNum(status.generating.progress)}/4
+					</p>
+				)}
 			</div>
 		)
 	else {

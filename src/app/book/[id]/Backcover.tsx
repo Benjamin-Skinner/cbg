@@ -92,6 +92,7 @@ const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 					<Status
 						section="backcover"
 						status={book.backCover.image.status}
+						image
 					/>
 					{book.backCover.image.status.generating.inProgress && (
 						<button

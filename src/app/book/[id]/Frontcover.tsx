@@ -119,6 +119,7 @@ const Frontcover: React.FC<Props> = ({ book, updateBook }) => {
 			<Section.Right sectionName="frontcover">
 				<Status
 					section="frontcover"
+					image
 					status={book.frontCover.image.status}
 				/>
 				<div className="space-y-2 mt-4">

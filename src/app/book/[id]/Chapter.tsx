@@ -179,7 +179,7 @@ const Text: React.FC<TextProps> = ({
 	)
 	return (
 		<div>
-			<Status section="text" status={page.text.status} />
+			<Status section="text" status={page.text.status} image />
 
 			<button
 				disabled={page.text.status.generating.inProgress}
