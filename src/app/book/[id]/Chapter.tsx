@@ -179,7 +179,7 @@ const Text: React.FC<TextProps> = ({
 	)
 	return (
 		<div>
-			<Status section="text" status={page.text.status} image />
+			<Status section="text" status={page.text.status} />
 
 			<button
 				disabled={page.text.status.generating.inProgress}
@@ -367,7 +367,7 @@ const Images: React.FC<ImageProps> = ({
 	return (
 		<div>
 			<div className="flex flex-row items-center">
-				<Status status={page.image.status} />
+				<Status status={page.image.status} image />
 				{page.image.status.generating.inProgress && (
 					<button
 						className="btn btn-sm btn-outline ml-6"

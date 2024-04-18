@@ -21,7 +21,7 @@ const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
 			)}
 			<figure className="w-full h-full m-auto flex items-center justify-center">
 				{image === '' ? (
-					<div className="h-full flex items-center justify-center">
+					<div className="h-full flex items-center justify-center w-full">
 						<PlaceholderImage size={400} />
 					</div>
 				) : (
