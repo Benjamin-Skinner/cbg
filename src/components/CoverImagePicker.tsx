@@ -154,7 +154,7 @@ const CoverImagePicker: React.FC<Props> = ({
 					document.getElementById(id).showModal()
 					setNewImages(false)
 				}}
-				className="hover:transform hover:scale-105 transition-all duration-250 cursor-pointer"
+				className="hover:transform hover:scale-105 transition-all duration-250 cursor-pointer w-full h-full"
 			>
 				<ImageDisplay
 					newImages={newImages}

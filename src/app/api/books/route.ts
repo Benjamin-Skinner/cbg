@@ -3,11 +3,11 @@ import { updateBook } from '@/functions/updateBook'
 import { NextResponse } from 'next/server'
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
-import { getAlllBooks } from '@/functions/getAllBooks'
+import { getAllBooks } from '@/functions/getAllBooks'
 
-export async function GET(req: Request) {
+export async function POST(req: Request) {
 	try {
-		const books = await getAlllBooks()
+		const books = await getAllBooks()
 		return NextResponse.json({
 			books,
 		})

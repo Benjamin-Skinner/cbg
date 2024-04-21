@@ -49,3 +49,5 @@ export const PROMPT_TIPS = {
 }
 
 export const IMAGE_POLL_TIME = 5 // seconds
+
+export const EXCLUDE = ['0dc23ae0-b6ff-4cd3-866e-082e5d76247e']

@@ -1,7 +1,8 @@
 import { Book } from '@/types'
 import clientPromise from '@/util/db'
+import { EXCLUDE } from '@/constants'
 
-export async function getAlllBooks() {
+export async function getAllBooks() {
 	const client = await clientPromise
 	const db = client.db()
 	const bookDocs = await db.collection('books').find({})
@@ -26,5 +27,9 @@ export async function getAlllBooks() {
 		books.push(book)
 	}
 
-	return books
+	const filtered = books
+		.filter((book: Book) => !EXCLUDE.includes(book.id))
+		.sort((a, b) => a.lastSaved - b.lastSaved)
+
+	return filtered
 }
