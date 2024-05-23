@@ -6,9 +6,11 @@ export async function getBookById(bookId: string) {
 	const db = client.db()
 	const bookDoc = await db.collection('books').findOne({ id: bookId })
 	if (!bookDoc) throw new Error('No book found')
+	console.log(bookDoc)
 	const book: Book = {
 		id: bookDoc.id.toString(),
 		title: bookDoc.title,
+		status: bookDoc.status || 'inProgress',
 		oneLiner: bookDoc.oneLiner,
 		description: bookDoc.description,
 		outline: bookDoc.outline,

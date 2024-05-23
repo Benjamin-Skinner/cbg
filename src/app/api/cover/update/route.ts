@@ -22,6 +22,7 @@ export async function POST(req: Request) {
 			return error.toResponse()
 		}
 
+		const book = body.book as Book
 		const cover = body.cover as Cover
 		const images = body.cover.image as PageImage
 
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
 		}
 
 		// Get the updated page images
-		const newImages = await updateImages(images)
+		const newImages = await updateImages(images, book.id)
 
 		const newCover: Cover = {
 			...cover,

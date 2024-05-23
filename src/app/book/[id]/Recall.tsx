@@ -45,6 +45,18 @@ const Recall: React.FC<Props> = ({ book, updateBook }) => {
 		})
 	}
 
+	const cancelGeneration = () => {
+		const newStatus = new StatusClass(book.recall.status)
+		newStatus.clearGenerating()
+		updateBook({
+			...book,
+			recall: {
+				...book.reflect,
+				status: newStatus.toObject(),
+			},
+		})
+	}
+
 	const { generateRecall } = useRegenerateRecall(updateBook, book)
 
 	return (
@@ -127,7 +139,17 @@ const Recall: React.FC<Props> = ({ book, updateBook }) => {
 				</div>
 			</Section.Center>
 			<Section.Right sectionName="recall">
-				<Status status={book.recall.status} />
+				<div className="flex flex-row items-center">
+					<Status status={book.recall.status} />
+					{book.recall.status.generating.inProgress && (
+						<button
+							className="btn btn-sm btn-outline ml-6"
+							onClick={cancelGeneration}
+						>
+							Cancel
+						</button>
+					)}
+				</div>
 
 				<Stat
 					title="Questions Selected"

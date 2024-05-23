@@ -192,6 +192,10 @@ const Text: React.FC<TextProps> = ({
 				title="Word Count"
 				value={countWords(page.text.content).toString()}
 				desc="Goal: 65 to 75 words"
+				error={
+					countWords(page.text.content) < 65 ||
+					countWords(page.text.content) > 75
+				}
 			/>
 		</div>
 	)
@@ -666,9 +670,11 @@ const useUpdateImages = (
 
 			if (
 				!images.status.generating.inProgress &&
-				images.status.message.code !== 'error'
+				images.status.message.code !== 'error' &&
+				images.imageOptions.length > 0
 			) {
-				console.log('no longer generating; job done')
+				console.log('no longer generating; job done. STATUS:')
+				console.log(images.status)
 				setNewImages(true)
 			}
 

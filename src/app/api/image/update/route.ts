@@ -21,6 +21,7 @@ export async function POST(req: Request) {
 			return error.toResponse()
 		}
 
+		const book = body.book as Book
 		const page = body.page as Page
 		const images = body.page.image as PageImage
 
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
 		}
 
 		// Get the updated page images
-		const newImages = await updateImages(images)
+		const newImages = await updateImages(images, book.id)
 
 		// Update the page's images in the database
 		await updatePageImage(

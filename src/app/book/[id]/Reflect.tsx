@@ -45,6 +45,18 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 		})
 	}
 
+	const cancelGeneration = () => {
+		const newStatus = new StatusClass(book.reflect.status)
+		newStatus.clearGenerating()
+		updateBook({
+			...book,
+			reflect: {
+				...book.reflect,
+				status: newStatus.toObject(),
+			},
+		})
+	}
+
 	const { generateReflect } = useRegenerateReflect(updateBook, book)
 
 	return (
@@ -127,7 +139,17 @@ const Reflect: React.FC<Props> = ({ book, updateBook }) => {
 				</div>
 			</Section.Center>
 			<Section.Right sectionName="reflect">
-				<Status status={book.reflect.status} />
+				<div className="flex flex-row items-center">
+					<Status status={book.reflect.status} />
+					{book.reflect.status.generating.inProgress && (
+						<button
+							className="btn btn-sm btn-outline ml-6"
+							onClick={cancelGeneration}
+						>
+							Cancel
+						</button>
+					)}
+				</div>
 
 				<Stat
 					title="Questions Selected"

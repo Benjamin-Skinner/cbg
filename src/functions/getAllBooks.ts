@@ -13,6 +13,7 @@ export async function getAllBooks() {
 		const book: Book = {
 			id: bookDoc.id.toString(),
 			title: bookDoc.title,
+			status: bookDoc.status || 'inProgress',
 			description: bookDoc.description,
 			outline: bookDoc.outline,
 			oneLiner: bookDoc.oneLiner,

@@ -1,88 +1,40 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Options from './Options'
 import { SubjectOptions, Subject } from '@/types'
 import SubjectCard from './Subject'
 import Error from './Error'
 import Navbar from '../Navbar'
+import UserSubject from './UserSubject'
+import GenerateSubjects from './GenerateSubjects'
+import { BiSolidSave } from 'react-icons/bi'
 
-interface Props {}
+interface Props {
+	oldSubjects: Subject[]
+}
 
-const Client: React.FC<Props> = ({}) => {
+const Client: React.FC<Props> = ({ oldSubjects }) => {
 	const router = useRouter()
 	const [loading, setLoading] = useState(false)
-	const [generationLoading, setGenerationLoading] = useState(false)
 	const [error, setError] = useState('')
+	const [showCurrent, setShowCurrent] = useState(true)
 
-	const [options, setOptions] = useState<SubjectOptions>({
-		grade: 'All',
-		subject: 'All',
-	})
-
-	const [selectedSubject, setSelectedSubject] = useState<Subject>({
-		title: '',
-		oneLiner: '',
-		options: {
-			grade: 'All',
-			subject: 'All',
-		},
-		createdAt: Date.now(),
-		batchNum: 0,
-	})
-
-	const [subjects, setSubjects] = useState<Subject[]>([])
-
-	const regenerateSubjects = async () => {
-		setGenerationLoading(true)
-		const res = await fetch('/api/generate/subjects', {
-			method: 'POST',
-			body: JSON.stringify({
-				options,
-			}),
-		})
-
-		if (res.status !== 200) {
-			const { error, code } = await res.json()
-			console.error(error)
-			setError(error)
-			setGenerationLoading(false)
-			return
-		} else {
-			const data = await res.json()
-			console.log(data)
-			setSubjects(data.data)
-			setGenerationLoading(false)
-			setSelectedSubject({
-				title: '',
-				oneLiner: '',
-				options: {
-					grade: 'All',
-					subject: 'All',
-				},
-				createdAt: Date.now(),
-				batchNum: 0,
-			})
-		}
-	}
-
-	const createBook = async () => {
+	const createBook = async (subject: Subject) => {
 		setLoading(true)
 
 		try {
-			if (selectedSubject.title === '') {
+			if (subject.title === '') {
 				setLoading(false)
 				return
 			}
-
 			const res = await fetch('/api/new', {
 				method: 'POST',
 				body: JSON.stringify({
-					title: selectedSubject.title,
-					oneLiner: selectedSubject.oneLiner,
+					title: subject.title,
+					oneLiner: subject.oneLiner,
 				}),
 			})
-
 			if (res.status !== 200) {
 				const { error, code } = await res.json()
 				console.error(error)
@@ -90,14 +42,53 @@ const Client: React.FC<Props> = ({}) => {
 				setLoading(false)
 				return
 			}
-
 			const book = await res.json()
 			console.log(book)
-
 			router.push(`/book/${book.id}`)
 		} catch (e: any) {
 			setError(error)
 			setLoading(false)
+		}
+	}
+
+	const [subjects, setSubjects] = useState<Subject[]>(oldSubjects)
+	const [filteredSubjects, setFilteredSubjects] =
+		useState<Subject[]>(oldSubjects)
+
+	useEffect(() => {
+		console.log('subjects changed')
+		if (showCurrent) {
+			setFilteredSubjects(subjects.filter((subject) => subject.current))
+		} else {
+			setFilteredSubjects(subjects.filter((subject) => subject.saved))
+		}
+	}, [showCurrent, subjects])
+
+	const onSave = async (id: string) => {
+		console.log('save', id)
+		const oldSubjects = subjects
+
+		const newSubjects = subjects.map((subject) => {
+			if (subject.id === id) {
+				return { ...subject, saved: !subject.saved }
+			}
+			return subject
+		})
+		setSubjects(newSubjects)
+
+		const res = await fetch('/api/subject/save', {
+			method: 'POST',
+			body: JSON.stringify({
+				subjectId: id,
+			}),
+		})
+
+		if (res.status !== 200) {
+			const { error, code } = await res.json()
+			console.error(error)
+			setSubjects(oldSubjects)
+			setError(error)
+			return
 		}
 	}
 
@@ -106,77 +97,80 @@ const Client: React.FC<Props> = ({}) => {
 			<Navbar />
 			<Error error={error} close={() => setError('')} />
 
-			<div className="m-auto flex flex-row">
-				<div className="flex flex-row items-start gap-x-4 mt-8">
-					<Options options={options} setOptions={setOptions} />
-					<div className="space-y-2">
-						<button
-							className="btn btn-info"
-							disabled={generationLoading}
-							onClick={regenerateSubjects}
-						>
-							Generate Subjects
-						</button>
-						<div className="flex items-center justify-center w-full">
-							{generationLoading ? (
-								<div className="flex flex-row">
-									<div className="badge badge-info badge-xl">
-										Generating
-									</div>
-									<span className="loading loading-bars loading-md text-info ml-4"></span>
-								</div>
-							) : (
-								<div className="flex flex-col">
-									<div className="badge badge-neutral badge-xl">
-										Waiting
-									</div>
-								</div>
-							)}
-						</div>
-					</div>
+			<div className="m-auto flex flex-row gap-x-8 px-8">
+				<div className="w-1/2 card bg-base-200 shadow-xl">
+					{/* <div className="flex flex-row"> */}
+					<article className="prose p-4">
+						<h2>Option 1: Subjects By Topic</h2>
+					</article>
+					{/* <button className="border ml-auto mr-10 h-min py-2 px-3 border-black rounded-md">
+							<BiSolidSave />
+						</button> */}
+					{/* </div> */}
+					<GenerateSubjects
+						setSubjects={(allSubjects: Subject[]) => {
+							setSubjects(allSubjects)
+						}}
+						setError={setError}
+					/>
 				</div>
-				<div className="ml-24 flex flex-row">
-					<button
-						onClick={createBook}
-						disabled={selectedSubject?.title === ''}
-						className="btn btn-primary mt-6 btn-lg"
-					>
-						{loading ? (
-							<span className="loading loading-spinner loading-md"></span>
-						) : (
-							`Create ${
-								selectedSubject ? selectedSubject.title : ''
-							} ==>`
-						)}
-					</button>
-					{/* <div className="h-full  flex items-end">
-						<button className="btn btn-neutral btn-link text-gray-600">
-							Start from scratch
-						</button>
-					</div> */}
+				<div className="w-1/2 card bg-base-200 shadow-xl">
+					<article className="prose p-6">
+						<h2>Option 2: Manually Enter Subject</h2>
+					</article>
+
+					<UserSubject
+						setSubjects={(allSubjects: Subject[]) => {
+							setSubjects(allSubjects)
+						}}
+						setError={setError}
+					/>
 				</div>
 			</div>
-			<div className="mt-24">
+			{/* <div className="px-8"> */}
+			{/* <div className="w-full card bg-base-200 shadow-xl h-24 mx-auto mt-6"> */}
+			{/* <label className="label cursor-pointer">
+				<span className="label-text">Show Saved</span>
+				<input type="checkbox" className="toggle" checked />
+			</label> */}
+			{/* </div> */}
+			{/* </div> */}
+			<div className="flex flex-row space-x-3 my-12 mx-12">
+				<button
+					onClick={() => setShowCurrent(true)}
+					className={
+						showCurrent
+							? 'badge badge-lg badge-neutral'
+							: 'badge badge-lg badge-ghost badge-outline'
+					}
+				>
+					Show Current
+				</button>
+				<button
+					onClick={() => setShowCurrent(false)}
+					className={
+						!showCurrent
+							? 'badge badge-lg badge-neutral'
+							: 'badge badge-lg badge-ghost badge-outline'
+					}
+				>
+					Show Saved
+				</button>
+				{/* <button className="badge badge-lg badge-ghost badge-outline">
+					Show Category
+				</button> */}
+			</div>
+			<div className="">
 				<div className="grid grid-cols-4 gap-4 px-6">
-					{subjects.map((subject, index) => (
+					{filteredSubjects.map((subject, index) => (
 						<SubjectCard
 							subject={subject}
-							key={index}
-							selected={selectedSubject === subject}
-							onClick={() => setSelectedSubject(subject)}
-						>
-							{/* <button
-									className="btn btn-primary"
-									onClick={() =>
-										setContent(
-											subject.title,
-											subject.description
-										)
-									}
-								>
-									Select
-								</button> */}
-						</SubjectCard>
+							key={subject.id}
+							onClick={() => {
+								createBook(subject)
+							}}
+							onSave={onSave}
+						></SubjectCard>
 					))}
 				</div>
 			</div>

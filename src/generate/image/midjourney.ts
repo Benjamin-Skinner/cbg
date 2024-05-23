@@ -6,6 +6,7 @@ import {
 } from '@/types'
 import { ImageOptionGenerating, UpscaleJob } from '@/types'
 import StatusClass from '@/classes/Status'
+import { saveImageAsBlob } from '@/util/image'
 
 /**
  * *************** EXPORTED FUNCTIONS ***************
@@ -58,7 +59,10 @@ export async function sendMidjourneyJob(
  *
  * @remarks
  */
-export async function updateImages(images: PageImage): Promise<PageImage> {
+export async function updateImages(
+	images: PageImage,
+	bookId: string
+): Promise<PageImage> {
 	const newImages = { ...images }
 	const generatingImages = images.generatingImages
 
@@ -199,13 +203,17 @@ export async function updateImages(images: PageImage): Promise<PageImage> {
 					newImages.status.generating.progress = 100
 					// Make all the new image options
 					const newImageOptions = job.upscales.map((upscale) =>
-						upscaleToImageOption(upscale)
+						upscaleToImageOption(upscale, bookId)
 					)
 					console.log(
 						`There are ${newImageOptions.length} new image options`
 					)
-					const allImageOptions =
-						newImages.imageOptions.concat(newImageOptions)
+					const resolvedNewImageOptions = await Promise.all(
+						newImageOptions
+					)
+					const allImageOptions = newImages.imageOptions.concat(
+						resolvedNewImageOptions
+					)
 					newImages.imageOptions = allImageOptions
 
 					console.log('FINAL UPSCALE IS DONE')
@@ -380,10 +388,59 @@ async function handleUpscaleJob(
 /**
  * Converts an upscale job to an image option
  */
-function upscaleToImageOption(upscale: UpscaleJob): ImageOption {
-	return {
-		url: upscale.url || '',
-		error: upscale.error || '',
-		type: 'midjourney',
+async function upscaleToImageOption(
+	upscale: UpscaleJob,
+	bookId: string
+): Promise<ImageOption> {
+	try {
+		const response = await fetch(upscale.url)
+		if (!response.ok) {
+			throw new Error(`Failed to fetch image: ${response.statusText}`)
+		}
+		// Convert the response to a Blob
+		const blob = await response.blob()
+
+		// Convert the Blob to a ReadableStream<Uint8Array>
+		const stream = blob.stream()
+
+		// Save the image to Blob storage and get the result
+		const res = await saveImageAsBlob(bookId, stream)
+
+		return {
+			url: res.url || '',
+			error: upscale.error || '',
+			type: 'midjourney',
+		}
+	} catch (error: any) {
+		console.error('Error in upscaleToImageOption:', error)
+		return {
+			url: '',
+			error: upscale.error || error.message,
+			type: 'midjourney',
+		}
 	}
 }
+
+/**
+ * *************** TASKS ***************
+ */
+
+// will return the new url for the selected image
+// export async function getNewImageUrl(image: PageImage): Promise<string> {
+// 	// For each generatingImage, we need to fetch the image by the messageId
+// 	const messageId = image.generatingImages.find(
+// 		(option) => option. === image.image
+// 	)?.
+
+// 	if (!messageId) {
+// 		console.log('No image found')
+// 		throw new Error('No image found')
+// 	}
+
+// 	// Fetch the image
+// 	const response = await getMidJourneyImage(messageId)
+// 	console.log(response)
+// 	console.log('NEW IMAGE URL', response.uri)
+
+// 	return response.uri
+// }

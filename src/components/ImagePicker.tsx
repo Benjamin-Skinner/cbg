@@ -61,7 +61,7 @@ const ImagePicker: React.FC<Props> = ({
 
 		// Update the book on the server
 		const res = await fetch(
-			`/api/image/upload?page=${page.key}&bookId=${bookId}&url=${url}&type=${type}`,
+			`/api/image/delete?page=${page.key}&bookId=${bookId}&url=${url}&type=${type}`,
 			{
 				method: 'DELETE',
 			}

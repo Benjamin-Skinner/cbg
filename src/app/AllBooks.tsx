@@ -6,18 +6,21 @@ import Link from 'next/link'
 import FullCoverImage from '@/components/fullCoverImage'
 import TimeSince from '@/components/TimeAgo'
 import Navbar from './Navbar'
+import { SearchBar } from './Navbar'
 
 interface Props {
 	books: Book[]
 }
 
 const AllBooks: React.FC<Props> = ({ books }) => {
+	const [currBooks, setCurrBooks] = React.useState<Book[]>(books)
 	return (
-		<div>
+		<div className="w-full">
 			<Navbar />
-			<div className="grid grid-cols-4 gap-x-8 gay-y-8">
-				{books.map((book) => (
-					<Book key={book.id} book={book} />
+			<SearchBar setCurrBooks={setCurrBooks} allBooks={books} />
+			<div className="grid grid-cols-4 gap-x-8 gay-y-8 w-full pb-24">
+				{currBooks.map((book) => (
+					<BookComp key={book.id} book={book} />
 				))}
 			</div>
 		</div>
@@ -30,7 +33,35 @@ interface BookProps {
 	book: Book
 }
 
-const Book: React.FC<BookProps> = ({ book }) => {
+const BookComp: React.FC<BookProps> = ({ book }) => {
+	const badgeFromStatus = (status: string) => {
+		switch (status) {
+			case 'inProgress':
+				return (
+					<div className="badge badge-info badge-lg mt-2">
+						In Progress
+					</div>
+				)
+			case 'uploaded':
+				return (
+					<div className="badge badge-success badge-lg mt-2">
+						Uploaded
+					</div>
+				)
+			case 'abandoned':
+				return (
+					<div className="badge badge-error badge-lg mt-2">
+						Abandoned
+					</div>
+				)
+			default:
+				return (
+					<div className="badge badge-info badge-lg mt-2">
+						In Progress
+					</div>
+				)
+		}
+	}
 	return (
 		<div className="flex flex-col items-center justify-center mt-8">
 			<Link
@@ -47,6 +78,7 @@ const Book: React.FC<BookProps> = ({ book }) => {
 					<p className="italic">
 						Last updated <TimeSince time={book.lastSaved} />
 					</p>
+					{badgeFromStatus(book.status)}
 				</div>
 			</Link>
 		</div>

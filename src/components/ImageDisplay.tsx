@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PlaceholderImage from './PlaceholderImage'
 import PlaceholderBackcover from './PlaceholderBackcover'
 import Image from 'next/image'
@@ -10,6 +10,12 @@ interface Props {
 }
 
 const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
+	const [hasError, setHasError] = useState(false)
+
+	const handleImageError = () => {
+		setHasError(true)
+	}
+
 	return (
 		<div className="w-full h-full flex flex-col">
 			{newImages && (
@@ -20,7 +26,7 @@ const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
 				</div>
 			)}
 			<figure className="w-full h-full m-auto flex items-center justify-center">
-				{image === '' ? (
+				{image === '' || !image || hasError ? (
 					<div className="h-full flex items-center justify-center w-full">
 						<PlaceholderImage size={400} />
 					</div>
@@ -32,6 +38,7 @@ const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
 							className="rounded-lg aspect-square object-cover"
 							height={800}
 							width={800}
+							onError={handleImageError}
 						/>
 					</div>
 				)}

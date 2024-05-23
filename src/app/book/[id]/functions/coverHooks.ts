@@ -184,7 +184,8 @@ export const useUpdateImages = (
 
 			if (
 				!images.status.generating.inProgress &&
-				images.status.message.code !== 'error'
+				images.status.message.code !== 'error' &&
+				images.imageOptions.length > 0
 			) {
 				console.log('no longer generating; job done')
 				setNewImages(true)

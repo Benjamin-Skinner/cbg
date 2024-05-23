@@ -84,7 +84,7 @@ async function generateHardcoverDescription(
 	book: Book
 ): Promise<HardcoverDescription> {
 	// Generate the description
-	const prompt = `Generate a 140 word description for a children's book with the title '${book.title}'. The output should have three paragraphs, each separated by a newline character. Do not use character names. Basew the description on the following examples:
+	const prompt = `Generate a 140 word description for a children's book with the title '${book.title}' about ${book.oneLiner}. The output should have three paragraphs, each separated by a newline character. Do not use character names. Base the description on the following examples:
     
      Title: Journey Through the Jungle
     Description: Embark on an exhilarating journey into the heart of the jungle, a place brimming with life and color. This book is a gateway for young adventurers to explore a world filled with awe-inspiring sights. Each page is an invitation to uncover the secrets of this vibrant ecosystem.
@@ -118,7 +118,7 @@ async function generateSoftcoverDescription(
 	book: Book
 ): Promise<SoftcoverDescription> {
 	// Generate the description
-	const prompt = `Generate a 100 word description for a children's book with the title '${book.title}'. The output should have two paragraphs, each separated by a newline character. Do not use character names. Basew the description on the following examples:
+	const prompt = `Generate a 100 word description for a children's book with the title '${book.title}' about ${book.oneLiner}. The output should have two paragraphs, each separated by a newline character. Do not use character names. Base the description on the following examples:
     
     Title: Journey Through the Jungle
     Description: Set off on a thrilling expedition into the jungle's heart, a realm teeming with vibrant life and colors. This book serves as a portal for young explorers to delve into a world of breathtaking sights and mysteries. Every page invites readers to discover the secrets of this dynamic ecosystem. 

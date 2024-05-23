@@ -1,11 +1,14 @@
 import Client from './Client'
+import React from 'react'
+import { getAllSubjects, getSavedSubjects } from '@/functions/getAllSubjects'
 
 interface Props {}
 
-const New: React.FC<Props> = ({}) => {
+const New: React.FC<Props> = async ({}) => {
+	const subjects = await getAllSubjects()
 	return (
 		<main className="min-h-screen">
-			<Client />
+			<Client oldSubjects={subjects} />
 		</main>
 	)
 }

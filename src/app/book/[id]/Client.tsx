@@ -15,6 +15,8 @@ import ShowWarning from './ShowWarning'
 import useUpdateinDB from './functions/useUpdateInDB'
 import debounce from 'lodash.debounce'
 import Download from './Download'
+import Overview from './Overview'
+import BookStatus from './BookStatus'
 
 interface Props {
 	bookData: Book
@@ -105,16 +107,21 @@ const Client: React.FC<Props> = ({ bookData }) => {
 			<div className="px-8 flex flex-col items-center pt-12">
 				<Title book={book} updateBook={updateBook} />
 
+				{/* <BookStatus book={book} updateBook={updateBook} /> */}
+
+				{/* <Overview book={book} updateBook={updateBook} /> */}
+
 				<Description book={book} updateBook={updateBook} />
+
+				<Frontcover book={book} updateBook={updateBook} />
+				<Backcover book={book} updateBook={updateBook} />
+
 				<Outline book={book} updateBook={updateBook} />
 
 				<Pages book={book} updateBook={updateBook} />
 
 				<Recall book={book} updateBook={updateBook} />
 				<Reflect book={book} updateBook={updateBook} />
-
-				<Frontcover book={book} updateBook={updateBook} />
-				<Backcover book={book} updateBook={updateBook} />
 
 				<Download
 					book={book}

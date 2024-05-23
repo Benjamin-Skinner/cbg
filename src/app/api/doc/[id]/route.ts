@@ -1,8 +1,10 @@
 import { getBookById } from '@/functions/getBookById'
-import { bookName, generateDoc } from '@/util/doc'
+import { bookName } from '@/util/doc/util'
+import { generateDoc } from '@/util/doc'
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import fs from 'fs'
+import { getNewImageUrls } from '@/util/image'
 import { NextResponse } from 'next/server'
 
 export async function POST(
@@ -20,7 +22,14 @@ export async function POST(
 		const title = bookName(book.title, body.version)
 		const filepath = `/Users/Benskinner/Code/cbg/docs/${title}.docx`
 
+		// try {
 		await generateDoc(book, body.version, filepath)
+		// } catch (error) {
+		// 	console.log('REDOWNLOADING IMAGES')
+		// 	// throw error
+		// 	const updatedBook = await getNewImageUrls(book)
+		// 	await generateDoc(updatedBook, body.version, filepath)
+		// }
 
 		return NextResponse.json({ filepath })
 	} catch (error: any) {

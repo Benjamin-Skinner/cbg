@@ -56,6 +56,7 @@ export default generateRecall
 
 async function generateOneQuestion(book: Book) {
 	const pageNum = randomPageNumber()
+	console.log('pageNum', pageNum)
 	const page = book.pages.chapters[pageNum - 1]
 
 	// If the page has no content, throw error

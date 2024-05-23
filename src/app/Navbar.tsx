@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { Book } from '@/types'
 
-export default () => {
+type NavProps = {}
+export default function Nav({}: NavProps) {
 	const [state, setState] = useState(false)
 
 	// Replace javascript:void(0) path with your path
@@ -14,14 +16,14 @@ export default () => {
 	]
 
 	return (
-		<nav className="rounded-lg mb-12 w-full border-b md:border-0 md:static">
+		<nav className="rounded-lg mb-12 w-full border-b md:border-0">
 			<div className="items-center px-4 w-full mx-auto md:flex md:px-8">
 				<div className="flex items-center justify-between py-3 md:py-5 md:block">
 					<h2 className="text-xl font-bold">
 						Children's Book Generator
 					</h2>
 				</div>
-				<SearchBar />
+
 				<div
 					className={`flex-1 justify-self-center pb-3 mt-8 md:block md:pb-0 md:mt-0 ${
 						state ? 'block' : 'hidden'
@@ -53,14 +55,26 @@ export default () => {
 	)
 }
 
-interface Props {}
+interface Props {
+	setCurrBooks: (books: Book[]) => void
+	allBooks: Book[]
+}
 
-const SearchBar: React.FC<Props> = ({}) => {
+export const SearchBar: React.FC<Props> = ({ setCurrBooks, allBooks }) => {
+	const [search, setSearch] = useState('')
+
+	useEffect(() => {
+		if (search === '') {
+			setCurrBooks(allBooks)
+			return
+		}
+		const filteredBooks = allBooks.filter((book) => {
+			return book.title.toLowerCase().includes(search.toLowerCase())
+		})
+		setCurrBooks(filteredBooks)
+	})
 	return (
-		<form
-			onSubmit={(e) => e.preventDefault()}
-			className="max-w-md px-4 ml-8 mx-auto"
-		>
+		<form className="max-w-md px-4 ml-8 mx-auto">
 			<div className="relative">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -77,8 +91,12 @@ const SearchBar: React.FC<Props> = ({}) => {
 					/>
 				</svg>
 				<input
+					value={search}
+					onChange={(e) => {
+						setSearch(e.target.value)
+					}}
 					type="text"
-					placeholder="Search"
+					placeholder="Search Books"
 					className="w-full py-3 pl-12 pr-4 text-gray-500 border rounded-md outline-none bg-gray-50 focus:bg-white focus:border-indigo-600"
 				/>
 			</div>

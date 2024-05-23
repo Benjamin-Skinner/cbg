@@ -40,7 +40,6 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 							<button
 								onClick={() => downloadManuscript('hardcover')}
 								className="btn btn-primary mt-4"
-								disabled
 							>
 								Download Manuscript
 							</button>
@@ -58,7 +57,6 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 							<button
 								className="btn btn-primary mt-4"
 								onClick={() => downloadManuscript('softcover')}
-								disabled
 							>
 								Download Manuscript
 							</button>

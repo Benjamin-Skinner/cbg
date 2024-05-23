@@ -3,6 +3,7 @@ import CBGError from '@/classes/Error'
 export type Book = {
 	id: string
 	title: string
+	status: 'inProgress' | 'uploaded' | 'abandoned'
 	oneLiner: string
 	description: Description
 	outline: Outline
@@ -170,24 +171,24 @@ export type MidjourneyResponse = {
 
 export type SubjectOptions = {
 	grade: 'All' | '1' | '2' | '3' | '4'
-	subject:
-		| 'All'
-		| 'Reading'
-		| 'Writing'
-		| 'Mathematics'
-		| 'Science'
-		| 'Social Studies'
-		| 'Physical Education'
-		| 'Art'
-		| 'Music'
-		| 'Health'
-		| 'Emotional Learning'
+	subject: SubjectCategory
 }
 
+export type SubjectCategory =
+	| 'Other'
+	| 'History'
+	| 'Geography'
+	| 'Science'
+	| 'Art'
+	| 'User'
+	| 'Career'
+
 export type Subject = {
+	id?: string
 	title: string
 	oneLiner: string
 	options: SubjectOptions
 	createdAt: number
-	batchNum: number
+	saved: boolean
+	current: boolean
 }

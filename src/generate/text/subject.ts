@@ -11,9 +11,11 @@ const TOTAL_ITERATIONS = 3
  */
 export async function generateSubjects(
 	options: SubjectOptions,
-	batchNum: number
+	prompt: string
 ): Promise<Subject[]> {
-	const fullPrompt = await getFullPrompt(options)
+	console.log('generateSubjects with options:', options)
+	const fullPrompt = await getFullPrompt(options, prompt)
+	console.log(fullPrompt)
 
 	// Generate subjects
 	const promises: Promise<
@@ -23,7 +25,9 @@ export async function generateSubjects(
 		}[]
 	>[] = []
 
-	for (let i = 0; i < TOTAL_ITERATIONS; i++) {
+	const num = options.subject === 'User' ? TOTAL_ITERATIONS : TOTAL_ITERATIONS
+
+	for (let i = 0; i < num; i++) {
 		promises.push(generateSubjectsGPT(fullPrompt))
 	}
 
@@ -45,14 +49,13 @@ export async function generateSubjects(
 		const newSubject: Subject = {
 			options: options,
 			createdAt: time,
-			batchNum: batchNum,
 			title: subject.title,
 			oneLiner: subject.oneLiner,
+			saved: false,
+			current: true,
 		}
 		return newSubject
 	})
-
-	console.log(fullSubjects)
 
 	return fullSubjects
 }
@@ -77,430 +80,23 @@ async function generateSubjectsGPT(prompt: string): Promise<
 /**
  * Gets the full prompt for generating subjects, based on the options
  */
-async function getFullPrompt(options: SubjectOptions): Promise<string> {
-	const basicPrompt = `Give me a list of 5 creative subject ideas for fact-based children's books in JSON format. The title should be educational and interesting to children ages 3 to 7. Follow the format of the example: 
-
-{
-    "subjects": [
-        {
-            "title": "Dinosaurs Uncovered",
-            "oneLiner": "Discover different types of dinosaurs, from the Stegasaurus to the T-Rex, in 'Dinosaurs Uncovered'! This engaging children's book will take young readers on a journey through the prehistoric world."
-        },
-        {
-            "title": "Space Explorers",
-            "oneLiner": Learn about different cosmic phenomena, from black holes to supernovas, in 'Space Explorers'! This educational children's book will spark curiosity about the universe."
-        },
-        {
-            "title": "The Wonders of Weather",
-            "oneLiner": "Step into the world of meteorology and discover the fascinating science behind weather phenomena! 'The Wonders of Weather' will engage young readers as they learn about rainbows, thunderstorms, and other weather wonders."
-        },
-        {
-            "title": "Magnificent Marine Life",
-            "oneLiner": "Dive into the underwater world and meet the incredible creatures that inhabit our oceans! 'Magnificent Marine Life' will introduce children to colorful coral reefs, playful sea otters, and majestic whales."
-        },
-        {
-            "title": "Journey Through the Jungle",
-            "oneLiner": "This book introduces children to various animals that inhabit the jungle, from gorillas and tigers to snakes and parrots. 'Journey Through the Jungle' is an exciting adventure that will teach young readers about the diverse wildlife of the rainforest."
-        }
-    ]
-}
-`
-
-	const data: string[][] = await readSubjectsFile()
-	const addedTextFromOptions = await handleSettings(options, data)
-
-	return basicPrompt + addedTextFromOptions
-}
-
-/**
- * @function handleSettings
- *
- * @summary
- * Generates a string to append to the prompt based on the settings.
- *
- * @param settings - The settings to generate the string from
- *
- * @returns A string to append to the prompt
- *
- * @remarks
- * The key to this function is the format of the subjects.xlsx file. It contains an array of
- * array of strings, where each subarray contains a list of strings corresponding to the columns.
- *
- * Fortunately, the format of the file is consistent, so we can use the index of the subject and
- * grade to get the corresponding description and goal.
- *
- * Format of the file:
- * Grade Level | Subject | Description | Objective | Example Title
- * ------------|---------|-------------|-----------|---------------
- *
- */
-async function handleSettings(
-	settings: SubjectOptions,
-	data: string[][]
+async function getFullPrompt(
+	options: SubjectOptions,
+	prompt: string
 ): Promise<string> {
-	// Function to insert the subject and grade into the prompt
-	const textPrompt = (description: string, goal: string) => {
-		return ` It should help children to ${goal}. Generate topics about the following subject: ${description}.`
+	if (options.subject === 'Science') {
+		return getSciencePrompt()
+	} else if (options.subject === 'History') {
+		return getHistoryPrompt()
+	} else if (options.subject === 'Other') {
+		return getOtherPrompt()
+	} else if (options.subject === 'User') {
+		return getUserPrompt(prompt)
+	} else if (options.subject === 'Career') {
+		return getCareerPrompt()
+	} else {
+		throw new Error('Invalid subject')
 	}
-
-	// If the settings are the default, return an empty string
-	if (settings.subject === 'All' && settings.grade === 'All') {
-		return ''
-	}
-
-	/* If settings or subject are 'All', return a string with the other. This doesn't work that well
-    so the user should be encouraged to avoid this behavior
-    */
-
-	if (settings.subject === 'All') {
-		return ` The subject should be suitable for students in grade ${settings.grade}.`
-	}
-
-	if (settings.grade === 'All') {
-		return ` The subject should be related to ${settings.subject}.`
-	}
-
-	// The order of subjects so we can get the index; needed for computation
-	const subjects = [
-		'Reading',
-		'Writing',
-		'Mathematics',
-		'Science',
-		'Social Studies',
-		'Physical Education',
-		'Art',
-		'Music',
-		'Health',
-		'Emotional Learning',
-	]
-
-	/*
-        Calculate index
-            For grade 1, the index of the row is equal to the index of the subject in the subjects array + 1 (since the first row is the header)
-
-            For grade 2 - 4, the index of the row is equal to the index of the subject in the subjects array + 1 + (10 * grade)
-
-
-    */
-
-	const index =
-		subjects.indexOf(settings.subject) +
-		1 +
-		10 * (parseInt(settings.grade) - 1)
-
-	/*
-        index[2] = description
-        index[3] = goal
-    */
-
-	return textPrompt(
-		data[index][2].toLowerCase(),
-		data[index][3].toLowerCase()
-	)
-}
-
-/**
- * @function readSubjectsFile
- *
- * @summary
- * Reads the .xlsx file that contains data about appropriate subject
- * matter for children in differenet grades
- *
- * @returns An array of arrays of strings; each array of strings
- * is a row in the spreadsheet
- *
- * @remarks
- */
-async function readSubjectsFile(): Promise<string[][]> {
-	return JSON.parse(`[
-  [
-    "Grade Level",
-    "Subject",
-    "Description",
-    "Objective",
-    "Book Title"
-  ],
-  [
-    "1.0",
-    "Reading",
-    "Introduction to literacy, phonics, and basic vocabulary",
-    "Build fundamental reading skills",
-    "Let's Learn Letters!"
-  ],
-  [
-    "1.0",
-    "Writing",
-    "Learning to write full sentences and basic words",
-    "Develop foundational writing skills",
-    "My First Word Book"
-  ],
-  [
-    "1.0",
-    "Mathematics",
-    "Introduction to basic arithmetic",
-    "Understand basic mathematical operations",
-    "Counting Fun With Friends"
-  ],
-  [
-    "1.0",
-    "Science",
-    "Simple exploration of the world around them",
-    "Spark interest in scientific principles",
-    "Curious Kids Explore the World"
-  ],
-  [
-    "1.0",
-    "Social Studies",
-    "Introduction to community roles and responsibilities",
-    "Understand the role of community",
-    "Our Friendly Neighborhood Helpers"
-  ],
-  [
-    "1.0",
-    "Physical Education",
-    "Basics of movement and healthy habits",
-    "Develop motor skills and healthy lifestyle",
-    "Let's Get Moving!"
-  ],
-  [
-    "1.0",
-    "Art",
-    "Introduction to colors, shapes, and creative expression",
-    "Foster creativity",
-    "Colors and Shapes All Around Us"
-  ],
-  [
-    "1.0",
-    "Music",
-    "Basic understanding of rhythm and melody",
-    "Introduction to music concepts",
-    "Little Maestro's First Melodies"
-  ],
-  [
-    "1.0",
-    "Health",
-    "Introduction to personal hygiene and safety",
-    "Understand basics of personal health",
-    "Staying Clean and Safe with Tommy"
-  ],
-  [
-    "1.0",
-    "Emotional Learning",
-    "Recognizing and expressing feelings",
-    "Develop emotional intelligence",
-    "Feeling Big Emotions with Ellie"
-  ],
-  [
-    "2.0",
-    "Reading",
-    "Increasing vocabulary, reading fluency and comprehension",
-    "Develop advanced reading skills",
-    "Amazing Animal Adventures"
-  ],
-  [
-    "2.0",
-    "Writing",
-    "Writing more complex sentences and beginning paragraphs",
-    "Improve writing skills",
-    "Write Your Own Adventure Story"
-  ],
-  [
-    "2.0",
-    "Mathematics",
-    "Addition and subtraction within 100, introduction to multiplication",
-    "Deepen understanding of mathematical operations",
-    "Solving Mysteries with Numbers"
-  ],
-  [
-    "2.0",
-    "Science",
-    "Exploring living things, habitats, weather patterns",
-    "Foster scientific curiosity",
-    "Exploring Habitats: A Journey Around the World"
-  ],
-  [
-    "2.0",
-    "Social Studies",
-    "Learning about history, geography, and citizenship in a local context",
-    "Understand basic social studies concepts",
-    "Our Town's Story: Past and Present"
-  ],
-  [
-    "2.0",
-    "Physical Education",
-    "Building on movement skills, understanding games and teamwork",
-    "Develop physical skills and cooperation",
-    "Teamwork Makes the Dream Work: Sports Adventures"
-  ],
-  [
-    "2.0",
-    "Art",
-    "Experimenting with different materials, basic art techniques",
-    "Foster creativity and self-expression",
-    "Creating Art with Everyday Things"
-  ],
-  [
-    "2.0",
-    "Music",
-    "Learning about musical notation, rhythms, and instruments",
-    "Deepen understanding of music concepts",
-    "Musical Journeys: From Rhythms to Rhymes"
-  ],
-  [
-    "2.0",
-    "Health",
-    "Building on personal hygiene concepts, basic understanding of nutrition",
-    "Understand basics of personal health and nutrition",
-    "The Healthy Heroes: Adventures in Nutrition"
-  ],
-  [
-    "2.0",
-    "Emotional Learning",
-    "Identifying and managing a wider range of emotions",
-    "Develop emotional intelligence",
-    "Understanding My Feelings: A Guide for Kids"
-  ],
-  [
-    "3.0",
-    "Reading",
-    "Reading comprehension, understanding narrative elements",
-    "Improve reading skills and comprehension",
-    "Journey Through Time: Stories from History"
-  ],
-  [
-    "3.0",
-    "Writing",
-    "Writing structured paragraphs, introduction to essays",
-    "Enhance writing skills",
-    "Become an Author: Writing Your Own Short Stories"
-  ],
-  [
-    "3.0",
-    "Mathematics",
-    "Multiplication and division, introduction to fractions",
-    "Deepen understanding of mathematical operations",
-    "The Secret of the Multiplying Mice"
-  ],
-  [
-    "3.0",
-    "Science",
-    "Introduction to earth science, life cycles, simple physics",
-    "Foster scientific curiosity and knowledge",
-    "The Wondrous Life Cycle of Butterflies"
-  ],
-  [
-    "3.0",
-    "Social Studies",
-    "Expanding knowledge of local and national history, geography",
-    "Understand more complex social studies concepts",
-    "Exploring Our Nation: A Kid's Guide to U.S. History"
-  ],
-  [
-    "3.0",
-    "Physical Education",
-    "Broadening movement skills, introduction to specific sports",
-    "Enhance physical skills and sportsmanship",
-    "Fun with Fitness: Exploring New Sports"
-  ],
-  [
-    "3.0",
-    "Art",
-    "More complex art projects, introduction to art history",
-    "Foster creativity and self-expression",
-    "Art Around the World: A Creative Journey"
-  ],
-  [
-    "3.0",
-    "Music",
-    "Introduction to singing, more complex rhythm and melody work",
-    "Deepen understanding of music concepts",
-    "The Young Singer's Guide to Melodies and Songs"
-  ],
-  [
-    "3.0",
-    "Health",
-    "Expanding knowledge on nutrition, introduction to human body systems",
-    "Understand more complex health and nutrition concepts",
-    "My Amazing Body: A Guide to How We Work"
-  ],
-  [
-    "3.0",
-    "Emotional Learning",
-    "Managing complex emotions, introduction to empathy",
-    "Develop emotional intelligence and empathy",
-    "Walking in Someone Else's Shoes: Understanding Empathy"
-  ],
-  [
-    "4.0",
-    "Reading",
-    "Deepening comprehension, analyzing texts, reading across different genres",
-    "Enhance reading and critical analysis skills",
-    "Discovering Genres: A Literary Adventure"
-  ],
-  [
-    "4.0",
-    "Writing",
-    "Writing multi-paragraph essays, improving grammar and punctuation",
-    "Improve writing skills and mechanics",
-    "Super Grammar Heroes: Conquering the Written Word"
-  ],
-  [
-    "4.0",
-    "Mathematics",
-    "Fractions and decimals, basic geometry, multi-digit multiplication and division",
-    "Deepen understanding of mathematical concepts",
-    "Adventures in Fraction Land"
-  ],
-  [
-    "4.0",
-    "Science",
-    "Deeper exploration of earth science, introduction to physical science and biology",
-    "Broaden scientific knowledge and understanding",
-    "The Wonderful World of Weather: A Guide for Young Scientists"
-  ],
-  [
-    "4.0",
-    "Social Studies",
-    "Studying state history and geography, understanding government systems",
-    "Deepen understanding of social studies concepts",
-    "Our State's Story: A Journey Through Time and Place"
-  ],
-  [
-    "4.0",
-    "Physical Education",
-    "Refining movement skills, team games and activities",
-    "Develop physical skills and team collaboration",
-    "Mastering Movement: Games and Activities for Kids"
-  ],
-  [
-    "4.0",
-    "Art",
-    "Understanding visual art principles, exploring art history",
-    "Foster creativity and understanding of art principles",
-    "Artists Throughout History: Discovering Their Secrets"
-  ],
-  [
-    "4.0",
-    "Music",
-    "Introduction to music theory, exploring different music genres",
-    "Broaden understanding of music and its diversity",
-    "Music Explorer: A Journey Through Genres"
-  ],
-  [
-    "4.0",
-    "Health",
-    "Learning about body systems, healthy habits, and physical changes",
-    "Understand more about health and human body",
-    "The Fantastic Journey Inside Your Body"
-  ],
-  [
-    "4.0",
-    "Emotional Learning",
-    "Understanding conflict resolution, empathy, and social awareness",
-    "Develop emotional intelligence and social skills",
-    "Navigating Friendships: A Kid's Guide to Social Skills"
-  ]
-]`)
 }
 
 /**
@@ -519,4 +115,158 @@ function formatOutput(output: string): {
 	})
 
 	return subjects
+}
+
+function formattedOutputExample(
+	examples: { title: string; oneLiner: string }[]
+) {
+	return `{
+    "subjects": [
+        ${examples.map(
+			(example) =>
+				`{
+            "title": "${example.title}",
+            "oneLiner": "${example.oneLiner}"
+        }`
+		)},
+    ]
+}
+`
+}
+
+/**
+ * *************** SPECIFIC SUBJECT PROMPTS ***************
+ */
+
+function getSciencePrompt() {
+	const examples: { title: string; oneLiner: string }[] = [
+		{
+			title: 'Dinosaurs Uncovered',
+			oneLiner:
+				"Discover different types of dinosaurs, from the Stegasaurus to the T-Rex, in 'Dinosaurs Uncovered'! This engaging children's book will take young readers on a journey through the prehistoric world.",
+		},
+		{
+			title: 'Space Explorers',
+			oneLiner:
+				"Learn about different cosmic phenomena, from black holes to supernovas, in 'Space Explorers'! This educational children's book will spark curiosity about the universe.",
+		},
+		{
+			title: 'The Wonders of Weather',
+			oneLiner:
+				"Step into the world of meteorology and discover the fascinating science behind weather phenomena! 'The Wonders of Weather' will engage young readers as they learn about rainbows, thunderstorms, and other weather wonders.",
+		},
+		{
+			title: 'Magnificent Marine Life',
+			oneLiner:
+				"Dive into the underwater world and meet the incredible creatures that inhabit our oceans! 'Magnificent Marine Life' will introduce children to colorful coral reefs, playful sea otters, and majestic whales.",
+		},
+		{
+			title: 'Journey Through the Jungle',
+			oneLiner:
+				"This book introduces children to various animals that inhabit the jungle, from gorillas and tigers to snakes and parrots. 'Journey Through the Jungle' is an exciting adventure that will teach young readers about the diverse wildlife of the rainforest.",
+		},
+	]
+
+	const exampleText = formattedOutputExample(examples)
+
+	const prompt =
+		"Give me a list of 5 creative subject ideas for scientific fact-based children's books in JSON format. The title should be educational and interesting to children ages 3 to 7. They should teach children about a specific science concept. Follow examples below: "
+
+	return prompt + exampleText
+}
+
+function getHistoryPrompt() {
+	const examples: { title: string; oneLiner: string }[] = [
+		{
+			title: 'Adventures in American History',
+			oneLiner:
+				"Travel back in time and explore key moments in American history, from the founding of the nation to important events like the Civil Rights Movement. 'Adventures in American History' is an exciting educational journey for young readers.",
+		},
+		{
+			title: 'Inventions That Changed the World',
+			oneLiner:
+				"From the wheel to the internet, discover the groundbreaking inventions that shaped modern society. 'Inventions That Changed the World' introduces young readers to the brilliant minds behind these revolutionary creations.",
+		},
+	]
+
+	const exampleText = formattedOutputExample(examples)
+
+	const prompt =
+		"Give me a list of 5 creative subject ideas for historical fact-based children's books in JSON format. The title should be educational and interesting to children ages 3 to 7. They should each have a cohesive historical theme. Follow examples below: "
+
+	return prompt + exampleText
+}
+
+function getOtherPrompt() {
+	const examples: { title: string; oneLiner: string }[] = [
+		{
+			title: 'Exploring the Quraysh People',
+			oneLiner:
+				'Learn about the Quraysh people and their history in a unique and engaging book that offers insight into their culture and traditions.',
+		},
+		{
+			title: 'Understanding Cryptpgraphy for Kids',
+			oneLiner:
+				'Introduce children to the fascinating world of cryptography and codes in a fun and educational book that will spark their curiosity and creativity.',
+		},
+		{
+			title: 'Forms of Government',
+			oneLiner:
+				'Explore different forms of government, from democracy to monarchy, in an engaging and informative book that will help children understand the world around them.',
+		},
+	]
+
+	const exampleText = formattedOutputExample(examples)
+
+	const prompt =
+		"Give me a list of 5 creative subject ideas for fact-based children's books in JSON format. Be as creative as possible, and try to come up with ideas that are unique and innovative. The title should be educational and interesting to children ages 3 to 7. They should each have a unique cohesive theme. Follow examples below: "
+
+	return prompt + exampleText
+}
+
+function getUserPrompt(prompt: string) {
+	const examples: { title: string; oneLiner: string }[] = [
+		{
+			title: 'Critter Care',
+			oneLiner:
+				"Discover the skills and dedication required to become a veterinarian, from diagnosing illnesses to administering treatments. 'Critter Care' is an inspiring and insightful peek into the important work of caring for animals.",
+		},
+		{
+			title: 'Language Tree',
+			oneLiner:
+				"Step into the language tree and learn about the branches of languages that have grown and branched off from each other throughout history. 'Language Tree' is a colorful exploration of the roots of communication.",
+		},
+	]
+
+	const exampleText = formattedOutputExample(examples)
+
+	const fullPrompt = `Give me a list of 5 creative subject ideas for a fact-based children's book with the following description: ${prompt}. Respond in JSON format. The title should be educational and interesting to children ages 3 to 7. Never include specific characters or names. Follow examples below: `
+
+	return fullPrompt + exampleText
+}
+
+function getCareerPrompt() {
+	const examples: { title: string; oneLiner: string }[] = [
+		{
+			title: 'Critter Care',
+			oneLiner:
+				"Discover the skills and dedication required to become a veterinarian, from diagnosing illnesses to administering treatments. 'Critter Care' is an inspiring and insightful peek into the important work of caring for animals.",
+		},
+		{
+			title: 'Space Explorers',
+			oneLiner:
+				"Blast off to the stars and discover the fascinating world of astronauts and space exploration. 'Space Explorers' is full of fun facts about what it's like to work in outer space.",
+		},
+		{
+			title: 'Tech Titans',
+			oneLiner:
+				"Enter the fast-paced world of technology and learn about the innovative careers of programmers, engineers, and inventors who shape the future. 'Tech Titans' is an exciting glimpse into the digital age.",
+		},
+	]
+
+	const exampleText = formattedOutputExample(examples)
+
+	const fullPrompt = `Give me a list of 5 creative subject ideas for a fact-based children's book to help kids learn about different careers. Respond in JSON format. The title should be exciting and interesting to children ages 3 to 7. Never include specific characters or names. Follow examples below: `
+
+	return fullPrompt + exampleText
 }
