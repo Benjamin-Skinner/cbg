@@ -17,6 +17,7 @@ interface Props {
 
 const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 	const [newImages, setNewImages] = useState(false)
+	const [transparent, setTransparent] = useState(false)
 	const { generateImages } = useGenerateImages(
 		updateBook,
 		book,
@@ -73,6 +74,7 @@ const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 					<div className="card-body h-full flex items-center justify-center">
 						<CoverImagePicker
 							backcover
+							transparent={transparent}
 							cover={book.backCover}
 							book={book}
 							updateCover={(cover: Cover) => {
@@ -85,6 +87,17 @@ const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 							setNewImages={setNewImages}
 						/>
 					</div>
+				</div>
+				<div className="form-control">
+					<label className="cursor-pointer label font-semibold flex justify-center items-center">
+						<span>View with Transparency</span>
+						<input
+							type="checkbox"
+							className="checkbox ml-4 z-50 visible flex bg-white"
+							checked={transparent}
+							onChange={(e) => setTransparent(e.target.checked)}
+						/>
+					</label>
 				</div>
 			</Section.Center>
 			<Section.Right sectionName="backcover">

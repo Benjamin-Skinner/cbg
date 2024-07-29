@@ -12,8 +12,6 @@ const BookStatus: React.FC<Props> = ({ book, updateBook }) => {
 		return `rounded-md border-${color} border-2 text-${color}-500 bg-${color}-100 hover:bg-${color}-200`
 	}
 
-	console.log('BOOK STATUS', book.status)
-
 	return (
 		<div className="w-full">
 			<select

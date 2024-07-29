@@ -39,7 +39,7 @@ interface RightProps {
 }
 const Right: React.FC<RightProps> = ({ children, sectionName }) => {
 	return (
-		<div className="w-3/12 flex flex-col">
+		<div className="w-3/12 flex flex-col pl-12">
 			{children}
 			{sectionName && (
 				<div>
@@ -58,21 +58,24 @@ const Right: React.FC<RightProps> = ({ children, sectionName }) => {
 							</ul>
 						</div>
 					</div>
-					<div className="stats shadow w-full mt-3">
-						<div className="stat">
-							<div className="stat-title">Prompt Tips</div>
-							<ul className="list-disc list-inside">
-								{/* @ts-ignore */}
-								{PROMPT_TIPS[sectionName].map(
-									(item: string, index: number) => (
-										<li className="stat-desc  w-full text-wrap">
-											{item}
-										</li>
-									)
-								)}
-							</ul>
+					{/* @ts-ignore */}
+					{PROMPT_TIPS[sectionName].length > 0 && (
+						<div className="stats shadow w-full mt-3">
+							<div className="stat">
+								<div className="stat-title">Prompt Tips</div>
+								<ul className="list-disc list-inside">
+									{/* @ts-ignore */}
+									{PROMPT_TIPS[sectionName].map(
+										(item: string, index: number) => (
+											<li className="stat-desc  w-full text-wrap">
+												{item}
+											</li>
+										)
+									)}
+								</ul>
+							</div>
 						</div>
-					</div>
+					)}
 				</div>
 			)}
 		</div>

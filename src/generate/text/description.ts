@@ -149,7 +149,7 @@ async function generateHardcoverDescriptionFromSoftcover(
 	book: Book
 ): Promise<HardcoverDescription> {
 	// Generate the description
-	const prompt = `Generate a 140 word description for a children's book with the title '${book.title}' based on the shorter description provided. The output should have three paragraphs, each separated by a newline character. Do not use character names. The long description should be similar to the short one, but with more detail. Base the description on the following examples:
+	const prompt = `Generate a 90-100 word description for a children's book with the title '${book.title}' based on the shorter description provided. The output should have three paragraphs, each separated by a newline character. Do not use character names. The long description should be similar to the short one, but with more detail. Base the description on the following examples:
     
      Title: Wonders of the World
      Short: Embark on a globe-trotting adventure with Wonders of the World, a captivating children's book that showcases the most extraordinary natural and human-made marvels across the globe. This enchanting journey helps young readers appreciate the incredible diversity and beauty of our planet.

@@ -2,11 +2,12 @@ import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
 import StatusClass from '@/classes/Status'
-import { Cover, Page } from '@/types'
+import { Cover, ImageAR, Page } from '@/types'
 import { Book } from '@/types'
 import updatePage from '@/functions/updatePage'
 import { sendMidjourneyJob } from '@/generate/image/midjourney'
 import updateCover from '@/functions/updateCover'
+import { DEFAULT_AR, SQUARE_AR } from '@/constants'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -43,7 +44,9 @@ export async function POST(req: Request, res: Response) {
 
 		// Generate Images
 		const optionGenerating = await sendMidjourneyJob(
-			params.cover.image.prompt.content
+			params.cover.image.prompt.content,
+			SQUARE_AR,
+			'no tiling'
 		)
 
 		// // Update the page with the new image option

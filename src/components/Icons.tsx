@@ -1,3 +1,6 @@
+import { FaSquareFull } from 'react-icons/fa6'
+import { BiSolidRectangle } from 'react-icons/bi'
+
 interface Props {
 	size?: number
 	color?: string
@@ -158,4 +161,14 @@ export const SaveIcon: React.FC<Props> = ({ size = DEFAULT_ICON_SIZE }) => {
 			/>
 		</svg>
 	)
+}
+
+export const SquareIcon = ({ size = DEFAULT_ICON_SIZE }) => {
+	return <FaSquareFull className={`w-${size} h-${size}`} />
+}
+
+export const RectangleIcon: React.FC<Props> = ({
+	size = DEFAULT_ICON_SIZE,
+}) => {
+	return <BiSolidRectangle className={`w-${size} h-${size} scale-x-150`} />
 }

@@ -32,7 +32,7 @@ const UserSubject: React.FC<Props> = ({ setSubjects, setError }) => {
 			return
 		} else {
 			const data = await res.json()
-			console.log(data)
+			// console.log(data)
 			setSubjects(data.data)
 			setLoading(false)
 		}

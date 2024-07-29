@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+	font-family: 'LamAnh';
+	src: url('/fonts/VI Lam Anh Normal.ttf') format('truetype');
+}
+
+@font-face {
+	font-family: 'Comfortaa';
+	src: url('/fonts/Comfortaa-Bold.ttf') format('truetype');
+}
+
 :root {
 	--foreground-rgb: 0, 0, 0;
 	--background-start-rgb: 214, 219, 220;
@@ -16,8 +26,16 @@
 	}
 }
 
+.lam-anh {
+	font-family: 'LamAnh';
+}
+
+.comfortaa {
+	font-family: 'Comfortaa';
+}
+
 @layer base {
-	input {
+	input:not([type='checkbox']) {
 		@apply bg-transparent border-none resize-none focus:ring-0 focus:outline-none;
 	}
 

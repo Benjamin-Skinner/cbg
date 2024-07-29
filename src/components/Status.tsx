@@ -1,12 +1,12 @@
 'use client'
 
-import { Status } from '@/types'
+import { Status as StatusT } from '@/types'
 import { useEffect, useState } from 'react'
 
 type Section = 'description' | 'frontcover' | 'text' | 'backcover'
 
 interface Props {
-	status: Status
+	status: StatusT
 	section?: Section
 	showProgress?: boolean
 	image?: boolean
@@ -55,10 +55,12 @@ const Status: React.FC<Props> = ({
 	else {
 		return (
 			<>
-				<div className="flex flex-col">
+				<div className="flex flex-col w-full">
 					<div className="badge badge-neutral badge-xl">Waiting</div>
+					<div className="w-full">
+						<Message status={status} section={'description'} />
+					</div>
 				</div>
-				<Message status={status} section={'description'} />
 			</>
 		)
 	}
@@ -72,7 +74,7 @@ async function updateDismissedInDB(section: Section) {
 }
 
 interface MessageProps {
-	status: Status
+	status: StatusT
 	section: Section
 }
 

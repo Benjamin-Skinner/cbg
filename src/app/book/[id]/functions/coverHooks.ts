@@ -26,7 +26,8 @@ export const useGenerateImages = (
 
 	const generateImages = async () => {
 		console.log('GENERATING IMAGES for cover')
-		// ?
+
+		// Update the status
 		const newStatus = new StatusClass(coverRef.current.image.status)
 		newStatus.beginGenerating()
 		newStatus.clearMessage()
@@ -172,7 +173,7 @@ export const useUpdateImages = (
 		// SUCCESS --> update the state with the new images
 		if (res.status === 200) {
 			const images: PageImage = await res.json()
-			console.log(images)
+			// console.log(images)
 
 			const newCover = {
 				...coverRef.current,
@@ -180,7 +181,7 @@ export const useUpdateImages = (
 			}
 
 			console.log('new cover received ')
-			console.log(newCover)
+			// console.log(newCover)
 
 			if (
 				!images.status.generating.inProgress &&
@@ -311,7 +312,7 @@ export const useUpdateImageIdeas = (
 		// SUCCESS --> update the state with the new images
 		if (res.status === 200) {
 			const { data } = await res.json()
-			console.log(data)
+			// console.log(data)
 
 			const newCover: Cover = {
 				...coverRef.current,

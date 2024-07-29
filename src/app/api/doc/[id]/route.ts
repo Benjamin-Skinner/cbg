@@ -4,7 +4,6 @@ import { generateDoc } from '@/util/doc'
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import fs from 'fs'
-import { getNewImageUrls } from '@/util/image'
 import { NextResponse } from 'next/server'
 
 export async function POST(

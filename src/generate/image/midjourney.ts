@@ -1,5 +1,6 @@
 import {
 	GenerateImageResponse,
+	ImageAR,
 	ImageOption,
 	MidjourneyResponse,
 	PageImage,
@@ -30,10 +31,18 @@ import { saveImageAsBlob } from '@/util/image'
  */
 
 export async function sendMidjourneyJob(
-	prompt: string
+	prompt: string,
+	ar: ImageAR,
+	tiling: 'tiling' | 'no tiling'
 ): Promise<ImageOptionGenerating> {
 	// Send the job to the API, get the messageId
-	const response = await createMidjourneyJob(prompt)
+	const response = await createMidjourneyJob(
+		prompt,
+		ar,
+		tiling === 'no tiling' ? false : true
+	)
+
+	console.log('RESPONSE', response)
 
 	// Create a new midjourney job
 	const midjourneyJob: ImageOptionGenerating = {
@@ -41,6 +50,8 @@ export async function sendMidjourneyJob(
 		progress: 0,
 		completed: false,
 		upscales: [],
+		ar: ar,
+		tiling: tiling === 'no tiling' ? false : true,
 	}
 
 	return midjourneyJob
@@ -80,6 +91,7 @@ export async function updateImages(
 		if (!job.progress) job.progress = 0
 
 		console.log('JOB', job)
+		console.log('JOB AR', job.ar)
 		// The job is done and all the upscales have already been completed
 		if (job.completed) {
 			console.log('JOB ALREADY COMPLETED')
@@ -129,7 +141,12 @@ export async function updateImages(
 			// There has not been any upscale requested yet
 			if (currUpscale === 0) {
 				console.log('creating first upscale job')
-				const u1 = await sendUpscaleJob(job.messageId, 'U1')
+				const u1 = await sendUpscaleJob(
+					job.messageId,
+					'U1',
+					job.ar,
+					job.tiling
+				)
 				newImages.generatingImages[i].upscales.push(u1)
 			}
 
@@ -148,7 +165,12 @@ export async function updateImages(
 				// Create second upscale job if the first one is done
 				if (upscale.completed) {
 					console.log('Creating a new upscale job')
-					const u2 = await sendUpscaleJob(job.messageId, 'U2')
+					const u2 = await sendUpscaleJob(
+						job.messageId,
+						'U2',
+						job.ar,
+						job.tiling
+					)
 					newImages.generatingImages[i].upscales.push(u2)
 					newImages.status.generating.progress = 40
 				}
@@ -167,7 +189,12 @@ export async function updateImages(
 				if (upscale.completed) {
 					console.log('Creating a new upscale job')
 					newImages.status.generating.progress = 60
-					const u3 = await sendUpscaleJob(job.messageId, 'U3')
+					const u3 = await sendUpscaleJob(
+						job.messageId,
+						'U3',
+						job.ar,
+						job.tiling
+					)
 					newImages.generatingImages[i].upscales.push(u3)
 				}
 			} else if (currUpscale === 3) {
@@ -185,7 +212,12 @@ export async function updateImages(
 				if (upscale.completed) {
 					console.log('Creating a new upscale job')
 					newImages.status.generating.progress = 80
-					const u4 = await sendUpscaleJob(job.messageId, 'U4')
+					const u4 = await sendUpscaleJob(
+						job.messageId,
+						'U4',
+						job.ar,
+						job.tiling
+					)
 					newImages.generatingImages[i].upscales.push(u4)
 				}
 			} else if (currUpscale === 4) {
@@ -238,8 +270,13 @@ export async function updateImages(
  * Calls the MJ API and returns the raw unprocessed response
  */
 async function createMidjourneyJob(
-	prompt: string
+	prompt: string,
+	ar: ImageAR,
+	tiling: boolean
 ): Promise<GenerateImageResponse> {
+	const params = midjourneyParams(ar, tiling)
+	const fullPrompt = `${prompt} ${params}`
+	console.log('Creating image with params:', params)
 	const response = await fetch(
 		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/imagine`,
 		{
@@ -250,7 +287,7 @@ async function createMidjourneyJob(
 					`Bearer ${process.env.MIDJOURNEY_API_KEY}` as string,
 			},
 			body: JSON.stringify({
-				prompt: prompt,
+				prompt: fullPrompt,
 			}),
 		}
 	)
@@ -259,7 +296,7 @@ async function createMidjourneyJob(
 	if (data.error) {
 		throw new Error(data.message.toString())
 	}
-	console.log(data)
+	// console.log(data)
 	return data as GenerateImageResponse
 }
 
@@ -268,10 +305,14 @@ async function createMidjourneyJob(
  */
 async function sendUpscaleJob(
 	messageId: string,
-	button: 'U1' | 'U2' | 'U3' | 'U4'
+	button: 'U1' | 'U2' | 'U3' | 'U4',
+	ar: ImageAR,
+	tiling: boolean
 ): Promise<UpscaleJob> {
 	console.log(
-		`upscaling image with messageId ${messageId} and button ${button}`
+		`upscaling image with messageId ${messageId} and button ${button} ar ${JSON.stringify(
+			ar
+		)}`
 	)
 	const response = await fetch(
 		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/button`,
@@ -289,7 +330,7 @@ async function sendUpscaleJob(
 		}
 	)
 	const data = (await response.json()) as GenerateImageResponse
-	console.log(data)
+	// console.log(data)
 	return {
 		messageId: data.messageId,
 		completed: false,
@@ -297,6 +338,8 @@ async function sendUpscaleJob(
 		button: button,
 		url: '',
 		error: '',
+		ar: ar,
+		tiling: tiling,
 	}
 }
 
@@ -334,7 +377,7 @@ async function getMidJourneyImage(
 		console.log('failed')
 		data.progress = 100
 	}
-	console.log(data)
+	// console.log(data)
 	return data
 }
 
@@ -410,6 +453,8 @@ async function upscaleToImageOption(
 			url: res.url || '',
 			error: upscale.error || '',
 			type: 'midjourney',
+			ar: upscale.ar,
+			tiling: upscale.tiling,
 		}
 	} catch (error: any) {
 		console.error('Error in upscaleToImageOption:', error)
@@ -417,30 +462,23 @@ async function upscaleToImageOption(
 			url: '',
 			error: upscale.error || error.message,
 			type: 'midjourney',
+			ar: upscale.ar,
+			tiling: upscale.tiling,
 		}
 	}
 }
 
-/**
- * *************** TASKS ***************
- */
+function midjourneyParams(ar: ImageAR, tiling: boolean): string {
+	let params = ''
+	if (ar.fullPage) {
+		params += '--ar 5:2'
+	} else {
+		params + -`--ar ${ar.width}:${ar.height}`
+	}
 
-// will return the new url for the selected image
-// export async function getNewImageUrl(image: PageImage): Promise<string> {
-// 	// For each generatingImage, we need to fetch the image by the messageId
-// 	const messageId = image.generatingImages.find(
-// 		(option) => option. === image.image
-// 	)?.
+	if (tiling) {
+		params += '--tile'
+	}
 
-// 	if (!messageId) {
-// 		console.log('No image found')
-// 		throw new Error('No image found')
-// 	}
-
-// 	// Fetch the image
-// 	const response = await getMidJourneyImage(messageId)
-// 	console.log(response)
-// 	console.log('NEW IMAGE URL', response.uri)
-
-// 	return response.uri
-// }
+	return params
+}

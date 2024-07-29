@@ -1,3 +1,4 @@
+import removeBg from '@/functions/editImage/removeBg'
 import { generateDoc as generateHard } from './doc/hard'
 import { generateDoc as generateSoft } from './doc/soft'
 import { Book } from '@/types'

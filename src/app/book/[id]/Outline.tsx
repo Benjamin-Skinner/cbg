@@ -8,34 +8,35 @@ import { Lock, LockOpenIcon } from '@/components/Icons'
 import { Book, BookPages, OutlinePage, Page } from '@/types'
 import StatusClass from '@/classes/Status'
 import { UpdateBookOptions } from './Client'
-import { handleErrorOnClient } from '@/util/handleErrorOnClient'
 import { handleGenerationSuccess } from '@/util/handleGenerationSuccess'
+import { getNewPageLayouts } from '@/util/calculatePageLayout'
 
 interface Props {
 	book: Book
-	updateBook: (book: Book) => void
+	updateBook: (book: Book, options?: UpdateBookOptions) => void
 }
 
 const Outline: React.FC<Props> = ({ book, updateBook }) => {
-	const [labels, setLabels] = useState<Page[]>([
-		...book.pages.chapters.sort((a, b) => a.currPosition - b.currPosition),
-	])
+	const [labels, setLabels] = useState<Page[]>(book.pages.chapters)
 
 	useEffect(() => {
-		setLabels([
-			...book.pages.chapters.sort(
-				(a, b) => a.currPosition - b.currPosition
-			),
-		])
+		setLabels(book.pages.chapters)
 	}, [book.pages])
 
-	const updateOutline = (newPages: Page[]) => {
+	const updateOutline = async (newPages: Page[]) => {
 		if (book.outline.status.generating.inProgress) return
 
-		updateBook({
-			...book,
-			pages: { ...book.pages, chapters: newPages },
-		})
+		setLabels(newPages)
+
+		await updateBook(
+			{
+				...book,
+				pages: { ...book.pages, chapters: newPages },
+			},
+			{
+				updateLayouts: true,
+			}
+		)
 	}
 
 	/**
@@ -56,6 +57,10 @@ const Outline: React.FC<Props> = ({ book, updateBook }) => {
 						{labels.map((page, index) => (
 							<Reorder.Item key={page.key} value={page}>
 								<PageCard
+									generating={
+										book.outline.status.generating
+											.inProgress
+									}
 									page={page}
 									index={index}
 									pages={labels}
@@ -93,7 +98,8 @@ interface PageCardProps {
 	pages: Page[]
 	setPages: (pages: Page[]) => void
 	book: Book
-	updateBook: (book: Book) => void
+	updateBook: (book: Book, options?: UpdateBookOptions) => void
+	generating: boolean
 }
 
 const PageCard: React.FC<PageCardProps> = ({
@@ -103,6 +109,7 @@ const PageCard: React.FC<PageCardProps> = ({
 	setPages,
 	book,
 	updateBook,
+	generating,
 }) => {
 	const lock = () => {
 		const newPages = book.pages.chapters.map((p) => {
@@ -127,20 +134,24 @@ const PageCard: React.FC<PageCardProps> = ({
 		<div className=" flex flex-row items-center">
 			<div className="card w-96 bg-base-100 shadow-xl my-2 cursor-row-resize flex flex-row items-center">
 				<div className="card-body py-4">
-					<article className="prose">
-						<input
-							// disabled={true}
-							type="text"
-							value={page.title}
-							placeholder="(Page name)"
-							className="font-bold w-full"
-							onChange={(e) => {
-								const newPages = [...pages]
-								newPages[index].title = e.target.value
-								setPages(newPages)
-							}}
-						/>
-					</article>
+					{generating && !page.subjectLocked ? (
+						<span className="loading loading-bars loading-md text-info"></span>
+					) : (
+						<article className="prose">
+							<input
+								disabled={generating}
+								type="text"
+								value={page.title}
+								placeholder="(Page name)"
+								className="font-bold w-full"
+								onChange={(e) => {
+									const newPages = [...pages]
+									newPages[index].title = e.target.value
+									setPages(newPages)
+								}}
+							/>
+						</article>
+					)}
 				</div>
 				{page.subjectLocked ? (
 					<>

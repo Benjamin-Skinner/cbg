@@ -6,7 +6,7 @@ import { randomPageNumber } from '@/util/random'
 
 const NUM_QUESTIONS = 5
 async function generateReflect(book: Book): Promise<RandR> {
-	const newStatus = new StatusClass(book.reflect.status)
+	const newStatus = new StatusClass(book.recallAndReflect.recall.status)
 
 	try {
 		// throw new Error('Something got fucked up here')
@@ -29,7 +29,10 @@ async function generateReflect(book: Book): Promise<RandR> {
 		const newReflectQs: RandR = {
 			status: newStatus.toObject(),
 			activePages: [],
-			questions: [...book.reflect.questions, ...newQuestions],
+			questions: [
+				...book.recallAndReflect.reflect.questions,
+				...newQuestions,
+			],
 		}
 
 		// Return the new outline as an object
@@ -43,7 +46,7 @@ async function generateReflect(book: Book): Promise<RandR> {
 		newStatus.clearGenerating()
 
 		const newReflect = {
-			...book.reflect,
+			...book.recallAndReflect.reflect,
 			status: newStatus.toObject(),
 		}
 

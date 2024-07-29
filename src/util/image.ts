@@ -1,13 +1,16 @@
 import download from 'image-downloader'
-import { Book, BookPages, Page, PageImage } from '@/types'
+import { Book, BookPages, ImageAR, Page, PageImage } from '@/types'
 import { getImageUrlId } from './url'
 import fs from 'fs'
 import { put } from '@vercel/blob'
 import { v4 } from 'uuid'
-
+import { Readable } from 'stream'
+const sharp = require('sharp')
 // import { getNewImageUrl } from '@/generate/image/midjourney'
 import updatePageImage from '@/functions/updatePageImage'
 import { updateBook } from '@/functions/updateBook'
+import { DEFAULT_AR, FULL_PAGE_AR, SQUARE_AR } from '@/constants'
+import { isApproximatelyEqual } from './math'
 
 export function imageName(bookId: string, imageId: string) {
 	return `${bookId}/${imageId}`
@@ -106,4 +109,59 @@ export async function saveImageAsBlob(
 	})
 
 	return blob
+}
+
+export async function getImageDimensions(
+	image: ReadableStream<Uint8Array>
+): Promise<{ width: number; height: number }> {
+	// console.log('image', image)
+
+	const buffer = await readableStreamToBuffer(image)
+	// console.log('buffer', buffer.byteLength)
+	const metadata = await sharp(buffer).metadata()
+
+	if (!metadata || !metadata.width || !metadata.height) {
+		throw new Error('Failed to read image')
+	}
+
+	// Return the width and height from the metadata
+	return { width: metadata.width, height: metadata.height }
+}
+
+async function readableStreamToBuffer(
+	stream: ReadableStream<Uint8Array>
+): Promise<Buffer> {
+	const reader = stream.getReader()
+	const chunks: Uint8Array[] = []
+
+	while (true) {
+		const { done, value } = await reader.read()
+		if (done) break
+		if (value) chunks.push(value)
+	}
+
+	// Concatenate all Uint8Array chunks into a single Buffer
+	return Buffer.concat(chunks)
+}
+
+export function arFromImageDimesions(width: number, height: number): ImageAR {
+	console.log('width', width)
+	console.log('height', height)
+	// Image is square
+	if (height === width) {
+		console.log('SQUARE_AR')
+		return SQUARE_AR
+	}
+
+	const ar = width / height
+	console.log('ar', ar)
+
+	// ar is approximately 2.5, meaning it is a full-page image
+	if (isApproximatelyEqual(ar, 2.5, 0.4)) {
+		console.log('FULL_PAGE_AR')
+		return FULL_PAGE_AR
+	}
+
+	console.log('DEFAULT_AR')
+	return DEFAULT_AR
 }

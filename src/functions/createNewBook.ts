@@ -1,14 +1,29 @@
 import { v4 as uuidv4 } from 'uuid'
 import clientPromise from '@/util/db'
 import { Book, Page } from '@/types'
-import { NUM_CHAPTERS } from '@/constants'
+import { DEFAULT_AR, NUM_CHAPTERS } from '@/constants'
 import PageClass from '@/classes/Page'
 
 export async function createNewBook(title: string, oneLiner?: string) {
 	const newBook: Book = {
 		id: uuidv4(),
 		createdAt: Date.now(),
+		status: 'inProgress',
 		lastSaved: Date.now(),
+		blurb: {
+			text: '',
+			status: {
+				message: {
+					code: '',
+					content: '',
+					dismissed: false,
+				},
+				generating: {
+					inProgress: false,
+					progress: 0,
+				},
+			},
+		},
 		title: title,
 		oneLiner: oneLiner || '',
 		description: {
@@ -46,35 +61,68 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 		},
-		recall: {
-			questions: [],
-			status: {
-				generating: {
-					inProgress: false,
-					progress: 0,
+		recallAndReflect: {
+			reflect: {
+				questions: [],
+				status: {
+					generating: {
+						inProgress: false,
+						progress: 0,
+					},
+					message: {
+						code: '',
+						content: '',
+						dismissed: false,
+					},
 				},
-				message: {
-					code: '',
+				activePages: [],
+			},
+			recall: {
+				questions: [],
+				status: {
+					generating: {
+						inProgress: false,
+						progress: 0,
+					},
+					message: {
+						code: '',
+						content: '',
+						dismissed: false,
+					},
+				},
+				activePages: [],
+			},
+			image: {
+				ar: DEFAULT_AR,
+				status: {
+					generating: {
+						inProgress: false,
+						progress: 0,
+					},
+					message: {
+						code: '',
+						content: '',
+						dismissed: false,
+					},
+				},
+				image: '',
+				imageOptions: [],
+				generatingImages: [],
+				prompt: {
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
 					content: '',
-					dismissed: false,
 				},
 			},
-			activePages: [],
-		},
-		reflect: {
-			questions: [],
-			status: {
-				generating: {
-					inProgress: false,
-					progress: 0,
-				},
-				message: {
-					code: '',
-					content: '',
-					dismissed: false,
-				},
-			},
-			activePages: [],
 		},
 		frontCover: {
 			imageIdeas: {
@@ -92,6 +140,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 			image: {
+				ar: DEFAULT_AR,
 				status: {
 					generating: {
 						inProgress: false,
@@ -138,6 +187,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 			image: {
+				ar: DEFAULT_AR,
 				status: {
 					generating: {
 						inProgress: false,
@@ -170,6 +220,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 		},
 		pages: {
 			intro: {
+				layout: 'imageFirst',
 				title: 'Intro',
 				key: 'intro',
 				currPosition: 1,
@@ -189,6 +240,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 					content: '',
 				},
 				image: {
+					ar: DEFAULT_AR,
 					status: {
 						generating: {
 							inProgress: false,
@@ -220,6 +272,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 			conclusion: {
+				layout: 'imageFirst',
 				title: 'Conclusion',
 				key: 'conclusion',
 				currPosition: 15,
@@ -239,6 +292,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 					content: '',
 				},
 				image: {
+					ar: DEFAULT_AR,
 					status: {
 						generating: {
 							inProgress: false,

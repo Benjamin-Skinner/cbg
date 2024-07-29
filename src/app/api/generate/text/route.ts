@@ -3,7 +3,7 @@ import sleep from '@/util/sleep'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
 import StatusClass from '@/classes/Status'
-import { Page } from '@/types'
+import { Page, TextGenerationMode } from '@/types'
 import { Book } from '@/types'
 import generatePageText from '@/generate/text/page'
 import updatePage from '@/functions/updatePage'
@@ -14,6 +14,7 @@ export async function POST(req: Request, res: Response) {
 		page: Page
 		intro: boolean
 		conclusion: boolean
+		mode: TextGenerationMode
 	} = await req.json()
 
 	const { error, isError } = ensureParams(params, [
@@ -21,13 +22,12 @@ export async function POST(req: Request, res: Response) {
 		'page',
 		'intro',
 		'conclusion',
+		'mode',
 	])
 
 	if (isError && error) {
 		return error.toResponse()
 	}
-
-	await sleep(5000)
 
 	try {
 		// Set status as generating
@@ -44,9 +44,12 @@ export async function POST(req: Request, res: Response) {
 			params.book,
 			newPage,
 			params.intro,
-			params.conclusion
+			params.conclusion,
+			params.mode
 		)
+
 		await updatePage(params.book, page, params.intro, params.conclusion)
+
 		return NextResponse.json(
 			{
 				data: page,

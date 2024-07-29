@@ -43,7 +43,7 @@ const Client: React.FC<Props> = ({ oldSubjects }) => {
 				return
 			}
 			const book = await res.json()
-			console.log(book)
+			// console.log(book)
 			router.push(`/book/${book.id}`)
 		} catch (e: any) {
 			setError(error)

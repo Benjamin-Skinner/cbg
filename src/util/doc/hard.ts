@@ -6,14 +6,12 @@ import {
 	ImageRun,
 	PageBreak,
 	AlignmentType,
-	FrameAnchorType,
 	TextRun,
-	HorizontalPositionAlign,
-	VerticalPositionAlign,
 } from 'docx'
 import { Book, Page, Question, RandR } from '@/types'
 import { downloadMidjourneyImage } from '../image'
 import { saveDoc } from './util'
+import splitText from '../splitText'
 
 export async function generateDoc(
 	book: Book,
@@ -61,6 +59,21 @@ export async function generateDoc(
  * *************** BOOK BUILDING ***************
  */
 
+/**
+ * TYPES
+ */
+
+type ImageLayout = {
+	horizontalPosition: 'left' | 'right' | 'center'
+	verticalPosition: 'bottom' | 'center' | 'top' | 'inside' | 'outside'
+	width: number
+	height: number
+}
+
+type TextLayout = {
+	break: number
+}
+
 async function newPage(page: Page, book: Book) {
 	console.log(`Downloading Image for Page ${page.title}`)
 	const { imgPath } = await downloadMidjourneyImage(
@@ -75,52 +88,109 @@ async function newPage(page: Page, book: Book) {
 
 	console.log(`Creating new page`)
 
+	if (page.layout === 'fullPage') {
+		const fullPageTextLayout: TextLayout = {
+			break: 22,
+		}
+		const height = 800
+		const width = 800 * 2.5 // image AR is 5:2
+
+		const leftFullPageImageLayout: ImageLayout = {
+			horizontalPosition: 'left',
+			verticalPosition: 'top',
+			width: width,
+			height: height,
+		}
+
+		const rightFullPageImageLayout: ImageLayout = {
+			horizontalPosition: 'right',
+			verticalPosition: 'top',
+			width: width,
+			height: height,
+		}
+
+		const { firstHalf, secondHalf } = splitText(page.text.content)
+		return {
+			properties: {},
+			children: [
+				Image(imageBuffer, leftFullPageImageLayout),
+				Text(firstHalf, fullPageTextLayout),
+				EndPage(),
+				Image(imageBuffer, rightFullPageImageLayout),
+				Text(secondHalf, fullPageTextLayout),
+				EndPage(),
+			],
+		}
+	}
+
+	const imageLayout: ImageLayout = {
+		horizontalPosition: 'center',
+		verticalPosition: page.layout === 'imageFirst' ? 'top' : 'bottom',
+		width: 650,
+		height: 650,
+	}
+
+	const textLayout: TextLayout = {
+		break: page.layout === 'imageFirst' ? 18 : 0,
+	}
+
 	return {
 		properties: {},
 		children: [
-			new Paragraph({
-				children: [
-					new ImageRun({
-						data: imageBuffer,
-						transformation: {
-							width: 650,
-							height: 650,
-						},
-						floating: {
-							horizontalPosition: {
-								offset: 754400,
-							},
-							verticalPosition: {
-								offset: 254400,
-							},
-							margins: {
-								top: 0,
-								bottom: 0,
-							},
-						},
-					}),
-				],
-				// alignment: AlignmentType.CENTER,
-			}),
-			new Paragraph({
-				spacing: {
-					line: 276,
-				},
-				alignment: AlignmentType.CENTER,
-				children: [
-					new TextRun({
-						text: page.text.content,
-						size: 32,
-						font: 'VI Lam Anh',
-						break: 18,
-					}),
-				],
-			}),
-			new Paragraph({
-				children: [new PageBreak()],
-			}),
+			Image(imageBuffer, imageLayout),
+			Text(page.text.content, textLayout),
+			EndPage(),
 		],
 	}
+}
+
+function EndPage() {
+	return new Paragraph({
+		children: [new PageBreak()],
+	})
+}
+
+function Image(imageBuffer: Buffer, layout: ImageLayout) {
+	return new Paragraph({
+		children: [
+			new ImageRun({
+				data: imageBuffer,
+				transformation: {
+					width: layout.width,
+					height: layout.height,
+				},
+				floating: {
+					horizontalPosition: {
+						align: layout.horizontalPosition,
+					},
+					verticalPosition: {
+						align: layout.verticalPosition,
+					},
+					margins: {
+						top: 0,
+						bottom: 0,
+					},
+				},
+			}),
+		],
+	})
+}
+
+function Text(text: string, layout: TextLayout) {
+	return new Paragraph({
+		spacing: {
+			line: 276,
+		},
+		alignment: AlignmentType.CENTER,
+		children: [
+			new TextRun({
+				text: text,
+				size: 32,
+				font: 'VI Lam Anh',
+				break: layout.break,
+			}),
+		],
+	})
 }
 
 function newRandR(

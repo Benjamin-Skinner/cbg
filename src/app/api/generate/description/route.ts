@@ -18,8 +18,6 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
-	await sleep(5000)
-
 	try {
 		// Set Status as Generating
 		const newStatus = new StatusClass(params.book.description.status)

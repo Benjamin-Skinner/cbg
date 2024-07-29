@@ -6,6 +6,7 @@ import { Page } from '@/types'
 import { Book } from '@/types'
 import updatePage from '@/functions/updatePage'
 import { sendMidjourneyJob } from '@/generate/image/midjourney'
+import { DEFAULT_AR } from '@/constants'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -39,10 +40,20 @@ export async function POST(req: Request, res: Response) {
 		newPage.image.status = newStatus.toObject()
 		await updatePage(params.book, newPage, params.intro, params.conclusion)
 
+		const ar = params.page.image.ar || DEFAULT_AR
+
+		console.log('using AR')
+		console.log(ar)
+
 		// Generate Images
 		const optionGenerating = await sendMidjourneyJob(
-			params.page.image.prompt.content
+			params.page.image.prompt.content,
+			ar,
+			'no tiling'
 		)
+
+		console.log('optionGenerating')
+		console.log(optionGenerating)
 
 		// Update the page with the new image option
 		const page = params.page

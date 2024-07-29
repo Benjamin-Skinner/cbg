@@ -1,11 +1,16 @@
-export const NUM_CHAPTERS = 15 // not including intro and conclusion
+import { ImageAR } from './types'
+
+export const NUM_CHAPTERS = 12 // not including intro and conclusion
 
 export const SECTION_GUIDELINES = {
 	page: [
-		'Wording of the text is appropriate for children.',
-		'The image matches the text.',
-		'The image is positive and happy.',
-		'All hands, feet and faces look realistic.',
+		'TEXT: Wording of the text is appropriate for children.',
+		'TEXT: The flow of the text is effective and engaging',
+		'TEXT: Each sentence is either a transition or information',
+		'TEXT: ',
+		'IMAGE: The image matches the text.',
+		'IMAGE: The image is positive and happy.',
+		'IMAGE: All hands, feet and faces look realistic.',
 	],
 	backcover: [
 		'The image should be a background image that can be easily cropped',
@@ -32,6 +37,7 @@ export const SECTION_GUIDELINES = {
 		'Each chapter is unique',
 		'Each chapter has a single simple subject',
 		'There is diverse representation',
+		'The chapters are in a logical order',
 	],
 }
 
@@ -51,3 +57,31 @@ export const PROMPT_TIPS = {
 export const IMAGE_POLL_TIME = 5 // seconds
 
 export const EXCLUDE = ['0dc23ae0-b6ff-4cd3-866e-082e5d76247e']
+
+export const DEFAULT_AR: ImageAR = {
+	fullPage: false,
+	square: true,
+	height: 1,
+	width: 1,
+}
+
+export const SQUARE_AR: ImageAR = {
+	fullPage: false,
+	square: true,
+	height: 1,
+	width: 1,
+}
+
+export const FULL_PAGE_AR: ImageAR = {
+	fullPage: true,
+	square: false,
+	height: 5,
+	width: 2,
+}
+
+export const RANDR_IMAGE_AR: ImageAR = {
+	fullPage: false,
+	square: false,
+	height: 1,
+	width: 4,
+}

@@ -2,21 +2,19 @@
 import React, { useState, useCallback, useEffect } from 'react'
 
 import Navbar from '@/components/Navbar'
-import Description from './Description'
 import Title from './Title'
-import Recall from './Recall'
-import Reflect from './Reflect'
 import Frontcover from './Frontcover'
 import Backcover from './Backcover'
 import Outline from './Outline'
 import Pages from './Pages'
-import { Book } from '@/types'
+import { Book, Page } from '@/types'
 import ShowWarning from './ShowWarning'
 import useUpdateinDB from './functions/useUpdateInDB'
 import debounce from 'lodash.debounce'
 import Download from './Download'
-import Overview from './Overview'
-import BookStatus from './BookStatus'
+import Blurb from './Blurb'
+import RecallAndReflect from './RecallAndReflect/index'
+import { getNewPageLayouts } from '@/util/calculatePageLayout'
 
 interface Props {
 	bookData: Book
@@ -25,12 +23,12 @@ interface Props {
 export type UpdateBookOptions = {
 	clientOnly?: boolean
 	fields?: Field[]
+	updateLayouts?: boolean
 }
 
 export type Field = 'title' | 'description'
 
 const DEBOUNCE_SECONDS = 3
-const IMAGE_POLLING_SECONDS = 5
 
 const Client: React.FC<Props> = ({ bookData }) => {
 	// The book state
@@ -50,6 +48,8 @@ const Client: React.FC<Props> = ({ bookData }) => {
 		setWarningMessage
 	)
 
+	// Call function to update the page layouts whenever one page layout gets set to full, or the order changes
+
 	// Debounce the updateInDB function (so it only runs every DEBOUNCE_SECONDS seconds)
 	const debouncedUpdateInDB = useCallback(
 		debounce(updateInDB, 1000 * DEBOUNCE_SECONDS),
@@ -58,16 +58,28 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 	// Called when the book is updated
 	const updateBook = async (book: Book, funcOptions?: UpdateBookOptions) => {
-		console.log('UPDATING BOOK IN CLIENT.TSX')
-		const options = funcOptions || { clientOnly: false, fields: [] }
+		let updatedBook = { ...book }
+		const options = funcOptions || {
+			clientOnly: false,
+			fields: [],
+			updateLayouts: false,
+		}
+
+		if (options.updateLayouts) {
+			const newPageLayouts = getNewPageLayouts(book)
+			updatedBook = {
+				...book,
+				pages: { ...book.pages, chapters: newPageLayouts },
+			}
+		}
 
 		!options.clientOnly && setSaving(true)
 		// Update in state
-		console.log(book)
-		setBook(book)
+		setBook(updatedBook)
 
 		// // Update in Database after DEBOUNCE_SECONDS seconds
-		!options.clientOnly && debouncedUpdateInDB(book, options.fields || [])
+		!options.clientOnly &&
+			debouncedUpdateInDB(updatedBook, options.fields || [])
 	}
 
 	const manualSave = async () => {
@@ -78,20 +90,6 @@ const Client: React.FC<Props> = ({ bookData }) => {
 		// Update in Database after DEBOUNCE_SECONDS seconds
 		updateInDB(book, [])
 	}
-
-	// This function will be called to update the images periodically
-
-	// Periodically update the images
-	// useEffect(() => {
-	// 	const interval = setInterval(() => {
-	// 		// LOGIC HERE
-	// 		updateImages()
-	// 	}, 1000 * IMAGE_POLLING_SECONDS)
-
-	// 	return () => {
-	// 		clearInterval(interval)
-	// 	}
-	// }, [])
 
 	return (
 		<>
@@ -111,17 +109,19 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 				{/* <Overview book={book} updateBook={updateBook} /> */}
 
-				<Description book={book} updateBook={updateBook} />
+				{/* <Description book={book} updateBook={updateBook} /> */}
 
 				<Frontcover book={book} updateBook={updateBook} />
 				<Backcover book={book} updateBook={updateBook} />
 
 				<Outline book={book} updateBook={updateBook} />
+				<Blurb book={book} updateBook={updateBook} />
 
 				<Pages book={book} updateBook={updateBook} />
 
-				<Recall book={book} updateBook={updateBook} />
-				<Reflect book={book} updateBook={updateBook} />
+				<RecallAndReflect book={book} updateBook={updateBook} />
+				{/* <Recall book={book} updateBook={updateBook} />
+				<Reflect book={book} updateBook={updateBook} /> */}
 
 				<Download
 					book={book}

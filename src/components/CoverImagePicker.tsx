@@ -5,7 +5,7 @@ import { UploadIcon, XIcon } from './Icons'
 import ImageCard from './ImageCard'
 import ImageDisplay from './ImageDisplay'
 import type { PutBlobResult } from '@vercel/blob'
-import { Cover, Book } from '@/types'
+import { Cover, Book, ImageOption } from '@/types'
 import { UpdateBookOptions } from '@/app/book/[id]/Client'
 
 interface Props {
@@ -15,6 +15,7 @@ interface Props {
 	updateCover: (cover: Cover, options?: UpdateBookOptions) => void
 	newImages: boolean
 	setNewImages: (newImages: boolean) => void
+	transparent?: boolean
 }
 
 const CoverImagePicker: React.FC<Props> = ({
@@ -24,6 +25,7 @@ const CoverImagePicker: React.FC<Props> = ({
 	backcover = false,
 	newImages,
 	setNewImages,
+	transparent = false,
 }) => {
 	const inputFileRef = useRef<HTMLInputElement>(null)
 	const [loading, setLoading] = useState(false)
@@ -37,112 +39,18 @@ const CoverImagePicker: React.FC<Props> = ({
 		setCurrImageOptions(cover.image.imageOptions)
 	}, [cover.image.imageOptions])
 
-	const selectImage = async (url: string) => {
+	const selectImage = async (option: ImageOption) => {
+		// console.log('option', option)
 		// Update the book on the client
 		updateCover({
 			...cover,
 			image: {
 				...cover.image,
-				image: url,
+				ar: option.ar,
+				image: option.url,
 			},
 		})
 	}
-
-	// const deleteImage = async (url: string, type: string) => {
-	// 	if (url === cover.image.image) {
-	// 		return
-	// 	}
-	// 	const originalImageOptions = [...currImageOptions]
-	// 	// Immediately update the state
-	// 	const newImageOptions = currImageOptions.filter(
-	// 		(image) => image.url !== url
-	// 	)
-	// 	setCurrImageOptions(newImageOptions)
-
-	// 	// Update the book on the server
-	// 	const res = await fetch(
-	// 		`/api/image/upload?page=${page.key}&bookId=${bookId}&url=${url}&type=${type}`,
-	// 		{
-	// 			method: 'DELETE',
-	// 		}
-	// 	)
-
-	// 	if (res.status !== 200) {
-	// 		const { error, code } = await res.json()
-	// 		setError(error)
-	// 		setCurrImageOptions(originalImageOptions)
-	// 		return
-	// 	}
-
-	// 	// Update the book on the client
-	// 	updatePage(
-	// 		{
-	// 			...page,
-	// 			image: {
-	// 				...page.image,
-	// 				imageOptions: newImageOptions,
-	// 			},
-	// 		},
-	// 		{ clientOnly: true }
-	// 	)
-	// }
-
-	// const uploadImage = async (event: React.FormEvent<HTMLFormElement>) => {
-	// 	event.preventDefault()
-	// 	setLoading(true)
-
-	// 	if (!inputFileRef.current?.files) {
-	// 		setLoading(false)
-	// 		throw new Error('No file selected')
-	// 	}
-
-	// 	const file = inputFileRef.current.files[0]
-
-	// 	const response = await fetch(
-	// 		`/api/image/upload?page=${page.key}&bookId=${bookId}`,
-	// 		{
-	// 			method: 'POST',
-	// 			body: file,
-	// 		}
-	// 	)
-
-	// 	if (response.status !== 200) {
-	// 		const { error, code } = await response.json()
-	// 		setError(error)
-	// 		setLoading(false)
-	// 		return
-	// 	}
-
-	// 	const newBlob = (await response.json()) as PutBlobResult
-
-	// 	setCurrImageOptions(
-	// 		currImageOptions.concat({
-	// 			url: newBlob.url,
-	// 			error: '',
-	// 			type: 'manual',
-	// 		})
-	// 	)
-	// 	// remove file
-	// 	inputFileRef.current.value = ''
-
-	// 	// Update book on client
-	// 	updatePage(
-	// 		{
-	// 			...page,
-	// 			image: {
-	// 				...page.image,
-	// 				imageOptions: currImageOptions.concat({
-	// 					url: newBlob.url,
-	// 					error: '',
-	// 					type: 'manual',
-	// 				}),
-	// 			},
-	// 		},
-	// 		{ clientOnly: true }
-	// 	)
-
-	// 	setLoading(false)
-	// }
 
 	const id = backcover ? 'backcover' : 'frontcover'
 	return (
@@ -159,6 +67,7 @@ const CoverImagePicker: React.FC<Props> = ({
 				<ImageDisplay
 					newImages={newImages}
 					backcover={backcover}
+					transparent={transparent}
 					image={cover.image.image}
 				/>
 			</div>
@@ -168,27 +77,6 @@ const CoverImagePicker: React.FC<Props> = ({
 						<article className="prose">
 							<h3>Select Image for {id}</h3>
 						</article>
-						{/* <span className="loading loading-spinner loading-lg"></span> */}
-						{/* <form onSubmit={uploadImage}>
-							<div className="flex flex-row mr-auto ml-8">
-								<input
-									id="file"
-									name="file"
-									ref={inputFileRef}
-									type="file"
-									required
-									className="max-w-56"
-									accept="image/png, image/jpeg, image/webp"
-								/>
-								<button
-									type="submit"
-									className="btn btn-ghost btn-sm mt-0"
-								>
-									Upload
-									<UploadIcon size={6} />
-								</button>
-							</div>
-						</form> */}
 
 						<div className="modal-action mt-0 ml-auto">
 							<form method="dialog">
@@ -215,7 +103,6 @@ const CoverImagePicker: React.FC<Props> = ({
 										cover.image.image === image.url &&
 										image.url !== ''
 									}
-									backcover={backcover}
 									image={image}
 									deleteImage={() => null}
 									selectImage={selectImage}
@@ -224,7 +111,6 @@ const CoverImagePicker: React.FC<Props> = ({
 						{loading ? (
 							<ImageCard
 								selected={false}
-								backcover={backcover}
 								placeholder
 								deleteImage={() => {}}
 								selectImage={selectImage}

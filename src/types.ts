@@ -4,24 +4,25 @@ export type Book = {
 	id: string
 	title: string
 	status: 'inProgress' | 'uploaded' | 'abandoned'
+	blurb: Blurb
 	oneLiner: string
 	description: Description
 	outline: Outline
-	recall: {
-		questions: Question[]
-		status: Status
-		activePages: string[]
-	}
-	reflect: {
-		questions: Question[]
-		activePages: string[]
-		status: Status
+	recallAndReflect: {
+		image: PageImage
+		recall: RandR
+		reflect: RandR
 	}
 	frontCover: Cover
 	backCover: Cover
 	pages: BookPages
 	lastSaved: number
 	createdAt: number
+}
+
+export type Blurb = {
+	text: string
+	status: Status
 }
 
 export type Cover = {
@@ -74,15 +75,19 @@ export type ImageIdea = {
 export type ImageOption = {
 	url: string
 	error: string
+	tiling: boolean
 	type: 'manual' | 'midjourney'
+	ar: ImageAR
 }
 
 // For images that are being generated
 export type ImageOptionGenerating = {
 	messageId: string
 	progress: number
+	tiling: boolean
 	completed: boolean // whether the UpscaleJobs have been created or whether the image is ready
 	upscales: UpscaleJob[]
+	ar: ImageAR
 }
 
 export type UpscaleJob = {
@@ -92,10 +97,15 @@ export type UpscaleJob = {
 	url: string
 	button: 'U1' | 'U2' | 'U3' | 'U4'
 	error: string
+	ar: ImageAR
+	tiling: boolean
 }
+
+export type PageLayoutOption = 'textFirst' | 'imageFirst' | 'fullPage'
 
 export type Page = {
 	title: string
+	layout: PageLayoutOption
 	key: string
 	currPosition: number
 	subjectLocked: boolean
@@ -106,14 +116,24 @@ export type Page = {
 	image: PageImage
 }
 
+export type ImageAR = {
+	fullPage: boolean
+	square: boolean
+	height: number
+	width: number
+}
+
+export type ImagePrompt = {
+	status: Status
+	content: string
+}
+
 export type PageImage = {
 	status: Status
 	image: string
+	ar: ImageAR
 	imageOptions: ImageOption[]
-	prompt: {
-		status: Status
-		content: string
-	}
+	prompt: ImagePrompt
 	generatingImages: ImageOptionGenerating[]
 }
 
@@ -192,3 +212,5 @@ export type Subject = {
 	saved: boolean
 	current: boolean
 }
+
+export type TextGenerationMode = 'generate' | 'add' | 'reduce' | 'edit'

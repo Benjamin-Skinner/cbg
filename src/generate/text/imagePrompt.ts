@@ -61,7 +61,7 @@ async function getMidjourneyPrompt(page: Page, book: Book) {
 
 	const response = await generateText(prompt)
 
-	console.log(response)
+	// console.log(response)
 
 	return response
 }

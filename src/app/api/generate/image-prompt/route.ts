@@ -6,7 +6,6 @@ import { Page, RandR } from '@/types'
 import { Book } from '@/types'
 import updatePage from '@/functions/updatePage'
 import generateImagePrompt from '@/generate/text/imagePrompt'
-import { sleep } from 'openai/core.mjs'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -28,6 +27,9 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	try {
+		if (params.page.text.content === '') {
+			throw new Error('Generate some text for this page first')
+		}
 		// Set status as generating
 		const newStatus = new StatusClass(params.page.image.prompt.status)
 		newStatus.beginGenerating()
@@ -38,7 +40,7 @@ export async function POST(req: Request, res: Response) {
 			status: newStatus.toObject(),
 			content: '',
 		}
-		console.log(newPage)
+		// console.log(newPage)
 		await updatePage(params.book, newPage, params.intro, params.conclusion)
 
 		// Generate new prompt
@@ -48,7 +50,7 @@ export async function POST(req: Request, res: Response) {
 			params.intro,
 			params.conclusion
 		)
-		console.log(page)
+		// console.log(page)
 		await updatePage(params.book, page, params.intro, params.conclusion)
 		return NextResponse.json(
 			{

@@ -5,8 +5,9 @@ import { UploadIcon, XIcon } from './Icons'
 import ImageCard from './ImageCard'
 import ImageDisplay from './ImageDisplay'
 import type { PutBlobResult } from '@vercel/blob'
-import { Page } from '@/types'
+import { ImageAR, ImageOption, Page } from '@/types'
 import { UpdateBookOptions } from '@/app/book/[id]/Client'
+import { DEFAULT_AR } from '@/constants'
 
 interface Props {
 	page: Page
@@ -15,6 +16,8 @@ interface Props {
 	updatePage: (page: Page, options?: UpdateBookOptions) => void
 	newImages: boolean
 	setNewImages: (newImages: boolean) => void
+	imgHeight?: number
+	imgWidth?: number
 }
 
 const ImagePicker: React.FC<Props> = ({
@@ -24,6 +27,8 @@ const ImagePicker: React.FC<Props> = ({
 	backcover = false,
 	newImages,
 	setNewImages,
+	imgHeight,
+	imgWidth,
 }) => {
 	const inputFileRef = useRef<HTMLInputElement>(null)
 	const [loading, setLoading] = useState(false)
@@ -37,13 +42,15 @@ const ImagePicker: React.FC<Props> = ({
 		setCurrImageOptions(page.image.imageOptions)
 	}, [page.image.imageOptions])
 
-	const selectImage = async (url: string) => {
+	const selectImage = async (option: ImageOption) => {
+		// console.log('option', option)
 		// Update the book on the client
 		updatePage({
 			...page,
 			image: {
 				...page.image,
-				image: url,
+				ar: option.ar,
+				image: option.url,
 			},
 		})
 	}
@@ -113,13 +120,17 @@ const ImagePicker: React.FC<Props> = ({
 			return
 		}
 
-		const newBlob = (await response.json()) as PutBlobResult
+		const { url, ar } = (await response.json()) as {
+			url: string
+			ar: ImageAR
+		}
 
 		setCurrImageOptions(
 			currImageOptions.concat({
-				url: newBlob.url,
+				url: url,
 				error: '',
 				type: 'manual',
+				ar: ar,
 			})
 		)
 		// remove file
@@ -132,9 +143,10 @@ const ImagePicker: React.FC<Props> = ({
 				image: {
 					...page.image,
 					imageOptions: currImageOptions.concat({
-						url: newBlob.url,
+						url: url,
 						error: '',
 						type: 'manual',
+						ar: ar,
 					}),
 				},
 			},
@@ -158,6 +170,10 @@ const ImagePicker: React.FC<Props> = ({
 					newImages={newImages}
 					backcover={backcover}
 					image={page.image.image}
+					ar={page.image.ar}
+					transparent={false}
+					imgHeight={imgHeight}
+					imgWidth={imgWidth}
 				/>
 			</div>
 			<dialog id={page.key} className="modal w-5/6 m-auto">
@@ -201,7 +217,7 @@ const ImagePicker: React.FC<Props> = ({
 					>
 						{error}
 					</p>
-					<div className="grid grid-cols-3 pb-[700px] gap-y-14 pt-4 gap-x-8">
+					<div className="grid grid-cols-4 pb-[700px] gap-y-14 pt-4 gap-x-8">
 						{currImageOptions
 							.filter(
 								(image) =>
@@ -209,11 +225,17 @@ const ImagePicker: React.FC<Props> = ({
 							)
 							.map((image, index) => (
 								<ImageCard
+									key={image.url}
+									// disabled={
+									// 	image.ar.height !==
+									// 		page.image.ar.height ||
+									// 	image.ar.width !== page.image.ar.width
+									// }
+									pageAr={page.image.ar}
 									selected={
 										page.image.image === image.url &&
 										image.url !== ''
 									}
-									backcover={backcover}
 									image={image}
 									deleteImage={() =>
 										deleteImage(image.url, image.type)
@@ -223,8 +245,8 @@ const ImagePicker: React.FC<Props> = ({
 							))}
 						{loading ? (
 							<ImageCard
+								pageAr={page.image.ar}
 								selected={false}
-								backcover={backcover}
 								placeholder
 								deleteImage={() => {}}
 								selectImage={selectImage}
@@ -268,4 +290,20 @@ const ErrorBanner: React.FC<ErrorBannerProps> = ({ message, setError }) => {
 			</div>
 		</div>
 	)
+}
+
+function isDisabled(imageOption: ImageOption, page: Page): boolean {
+	const optionAr = imageOption.ar || DEFAULT_AR
+	const pageAr = page.image.ar || DEFAULT_AR
+
+	// console.log('optionAr', optionAr)
+	console.log('pageAr', pageAr)
+
+	if (optionAr.fullPage && pageAr.fullPage) {
+		return true
+	} else if (!optionAr.fullPage && !pageAr.fullPage) {
+		return true
+	} else {
+		return false
+	}
 }

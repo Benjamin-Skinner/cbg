@@ -14,6 +14,7 @@ class PageClass {
 	currPosition: number
 	subjectLocked: boolean
 	key: string
+	layout: Page['layout']
 	text: {
 		status: StatusClass
 		content: string
@@ -32,6 +33,8 @@ class PageClass {
 	constructor(title: string, currPosition: number) {
 		this.title = title
 		this.currPosition = currPosition
+
+		this.layout = 'imageFirst'
 
 		const textStatus = new StatusClass()
 		const imageStatus = new StatusClass()
@@ -74,6 +77,7 @@ class PageClass {
 	toObject(): Page {
 		return {
 			title: this.title,
+			layout: this.layout,
 			currPosition: this.currPosition,
 			subjectLocked: this.subjectLocked,
 			key: this.key,

@@ -16,8 +16,6 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
-	await sleep(5000)
-
 	try {
 		// Set status as generating
 		const newStatus = new StatusClass(params.book.outline.status)

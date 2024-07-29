@@ -6,10 +6,9 @@ import generateText from './openai'
 
 const NUM_QUESTIONS = 5
 async function generateRecall(book: Book): Promise<RandR> {
-	const newStatus = new StatusClass(book.recall.status)
+	const newStatus = new StatusClass(book.recallAndReflect.recall.status)
 
 	try {
-		// throw new Error('Something got fucked up here')
 		newStatus.clearGenerating()
 		newStatus.setAsSuccess()
 
@@ -29,7 +28,10 @@ async function generateRecall(book: Book): Promise<RandR> {
 		const newRecallQs: RandR = {
 			status: newStatus.toObject(),
 			activePages: [],
-			questions: [...book.recall.questions, ...newQuestions],
+			questions: [
+				...book.recallAndReflect.recall.questions,
+				...newQuestions,
+			],
 		}
 
 		// Return the new questions as an object
@@ -43,7 +45,7 @@ async function generateRecall(book: Book): Promise<RandR> {
 		newStatus.clearGenerating()
 
 		const newRecall = {
-			...book.recall,
+			...book.recallAndReflect.recall,
 			status: newStatus.toObject(),
 		}
 

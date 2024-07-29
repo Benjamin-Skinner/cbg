@@ -16,13 +16,13 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
-	await sleep(5000)
-
 	try {
 		// Set status as generating
 		const newStatus = new StatusClass(params.book.outline.status)
 		newStatus.beginGenerating()
-		await updateRecall(params.book, params.book.recall)
+		const generatingRecall = params.book.recallAndReflect.recall
+		generatingRecall.status = newStatus.toObject()
+		await updateRecall(params.book, generatingRecall)
 
 		// Generate questions
 		const recall = await generateRecall(params.book)

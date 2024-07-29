@@ -5,12 +5,15 @@ import Section from '@/components/Section'
 import Status from '@/components/Status'
 import Stat from '@/components/Stat'
 import ImagePicker from '@/components/ImagePicker'
-import { Page, Book, PageImage } from '@/types'
+import { Page, Book, PageImage, TextGenerationMode } from '@/types'
 import { countWords } from '@/util/wordCount'
 import StatusClass from '@/classes/Status'
 import { UpdateBookOptions } from './Client'
 import { useInterval } from 'usehooks-ts'
 import { IMAGE_POLL_TIME } from '@/constants'
+import SelectPageLayout from '@/components/SelectPageLayout'
+import PageContent from '@/components/PageContent'
+import { IoMdArrowDropdown } from 'react-icons/io'
 
 interface Props {
 	style: 'hardcover' | 'softcover'
@@ -34,82 +37,25 @@ const Chapter: React.FC<Props> = ({
 	const [newImages, setNewImages] = useState(false)
 	const [isImage, setIsImage] = React.useState<boolean>(false)
 
+	// set undefined fields
+	page.layout = page.layout || 'imageFirst'
+
 	return (
 		<Section title={title}>
 			<Section.Center>
-				<div className="">
-					{style === 'hardcover' ? (
-						<div className="card w-7/12 m-auto aspect-hardcover bg-base-100 shadow-xl">
-							<div className="card-body w-full">
-								<div className="m-auto w-5/6 p-2 pb-8">
-									<ImagePicker
-										page={page}
-										bookId={book.id}
-										updatePage={updatePage}
-										newImages={newImages}
-										setNewImages={setNewImages}
-									/>
-								</div>
-								<article className="prose m-auto text-md px-6 w-full h-full">
-									<textarea
-										value={page.text.content}
-										onChange={(e) =>
-											updatePage({
-												...page,
-												text: {
-													...page.text,
-													content: e.target.value,
-												},
-											})
-										}
-										className="w-full h-full"
-									/>
-								</article>
-							</div>
-						</div>
-					) : (
-						<div
-							className="
-                    flex flex-row pr-16"
-						>
-							<div className="card w-2/3 aspect-softcover bg-base-100 shadow-xl">
-								<div className="card-body w-full h-full flex justify-center">
-									<article className="prose m-auto w-full px-6">
-										<textarea
-											value={page.text.content}
-											onChange={(e) =>
-												updatePage({
-													...page,
-													text: {
-														...page.text,
-														content: e.target.value,
-													},
-												})
-											}
-											className="w-full h-48 overflow-hidden"
-										/>
-									</article>
-								</div>
-							</div>
-							<div className="card w-2/3 aspect-softcover bg-base-100 shadow-xl">
-								<div className="card-body w-full">
-									<div className="m-auto w-full p-2 pb-8">
-										<ImagePicker
-											newImages={newImages}
-											page={page}
-											bookId={book.id}
-											updatePage={updatePage}
-											setNewImages={setNewImages}
-										/>
-									</div>
-								</div>
-							</div>
-						</div>
-					)}
-				</div>
+				<PageContent
+					page={page}
+					updatePage={updatePage}
+					book={book}
+					newImages={newImages}
+					setNewImages={setNewImages}
+				/>
 			</Section.Center>
 			<Section.Right sectionName="page">
-				<div role="tablist" className="tabs tabs-boxed mb-8">
+				{!intro && !conclusion && (
+					<SelectPageLayout page={page} updatePage={updatePage} />
+				)}
+				<div role="tablist" className="tabs tabs-boxed my-8">
 					<button
 						onClick={() => setIsImage(false)}
 						role="tab"
@@ -170,31 +116,73 @@ const Text: React.FC<TextProps> = ({
 	intro,
 	conclusion,
 }) => {
+	const [mode, setMode] = useState<TextGenerationMode>('generate')
 	const { generateText } = useGeneratePageText(
 		updatePage,
 		book,
 		page,
 		intro,
-		conclusion
+		conclusion,
+		mode
 	)
 	return (
 		<div>
 			<Status section="text" status={page.text.status} />
 
-			<button
-				disabled={page.text.status.generating.inProgress}
-				onClick={generateText}
-				className="btn btn-info btn-wide mt-12"
-			>
-				Generate
-			</button>
+			<div className="flex flex-row items-center mt-6">
+				<button
+					disabled={page.text.status.generating.inProgress}
+					onClick={generateText}
+					className="btn btn-info btn-wide"
+				>
+					{mode === 'generate'
+						? 'Generate'
+						: mode === 'add'
+						? 'Add Sentence'
+						: mode === 'reduce'
+						? 'Reduce Words'
+						: 'Edit'}
+				</button>
+				<div className="dropdown dropdown-bottom dropdown-end btn-info">
+					<div tabIndex={0} role="button" className="btn m-1">
+						<IoMdArrowDropdown />
+					</div>
+					<ul
+						tabIndex={0}
+						className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow"
+					>
+						<li onClick={() => setMode('generate')}>
+							<a>Generate Text</a>
+						</li>
+						<li onClick={() => setMode('add')}>
+							<a>Add Sentence</a>
+						</li>
+						<li onClick={() => setMode('reduce')}>
+							<a>Reduce Words</a>
+						</li>
+						<li onClick={() => setMode('edit')}>
+							<a>Edit</a>
+						</li>
+					</ul>
+				</div>
+			</div>
 			<Stat
 				title="Word Count"
 				value={countWords(page.text.content).toString()}
-				desc="Goal: 65 to 75 words"
+				desc={
+					page.layout === 'fullPage'
+						? 'Goal: 80 to 90 words'
+						: 'Goal: 65 to 75 words'
+				}
 				error={
-					countWords(page.text.content) < 65 ||
-					countWords(page.text.content) > 75
+					(countWords(page.text.content) < 65 &&
+						page.layout !== 'fullPage') ||
+					(countWords(page.text.content) < 80 &&
+						page.layout === 'fullPage') ||
+					(countWords(page.text.content) > 90 &&
+						page.layout === 'fullPage') ||
+					(countWords(page.text.content) > 75 &&
+						page.layout !== 'fullPage')
 				}
 			/>
 		</div>
@@ -206,7 +194,8 @@ const useGeneratePageText = (
 	book: Book,
 	page: Page,
 	intro: boolean,
-	conclusion: boolean
+	conclusion: boolean,
+	mode: TextGenerationMode
 ) => {
 	// Use a ref to store the current book
 	const bookRef = useRef(book)
@@ -249,6 +238,7 @@ const useGeneratePageText = (
 				page: page,
 				intro: intro,
 				conclusion: conclusion,
+				mode: mode,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -260,7 +250,7 @@ const useGeneratePageText = (
 			const data = await res.json()
 			const page: Page = data.data
 			console.log('GENERATION SUCCESS')
-			console.log(page)
+			// console.log(page)
 
 			await updatePage(
 				{
@@ -587,7 +577,7 @@ const useGenerateImages = (
 		if (res.status === 200) {
 			const { data } = await res.json()
 			console.log('GENERATION SUCCESS')
-			console.log(data)
+			// console.log(data)
 
 			await updatePage(data, {
 				clientOnly: true,
@@ -661,7 +651,7 @@ const useUpdateImages = (
 		// SUCCESS --> update the state with the new images
 		if (res.status === 200) {
 			const images: PageImage = await res.json()
-			console.log(images)
+			// console.log(images)
 
 			const newPage = {
 				...pageRef.current,
@@ -674,12 +664,12 @@ const useUpdateImages = (
 				images.imageOptions.length > 0
 			) {
 				console.log('no longer generating; job done. STATUS:')
-				console.log(images.status)
+				// console.log(images.status)
 				setNewImages(true)
 			}
 
 			console.log('new page received ')
-			console.log(newPage)
+			// console.log(newPage)
 
 			await updatePage(newPage, {
 				clientOnly: true,

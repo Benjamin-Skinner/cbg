@@ -1,49 +1,68 @@
 import React from 'react'
 import PlaceholderImage from './PlaceholderImage'
 import PlaceholderBackcover from './PlaceholderBackcover'
-import { OpenInNewWindowIcon } from './Icons'
-import { ImageOption } from '@/types'
+import { OpenInNewWindowIcon, RectangleIcon, SquareIcon } from './Icons'
+import { ImageAR, ImageOption } from '@/types'
 import Image from 'next/image'
 import mj_logo from '@/assets/midjourney.png'
 import { UploadIcon } from './Icons'
+import Link from 'next/link'
+import { DEFAULT_AR } from '@/constants'
 
 interface Props {
 	selected: boolean
 	image?: ImageOption
-	backcover?: boolean
 	placeholder?: boolean
 	deleteImage: (url: string) => void
-	selectImage: (url: string) => void
+	selectImage: (imageOption: ImageOption) => void
+	disabled?: boolean
+	pageAr: ImageAR
 }
 
 const ImageCard: React.FC<Props> = ({
 	image,
 	selected,
-	backcover,
 	placeholder,
 	deleteImage,
 	selectImage,
+	disabled = false,
+	pageAr,
 }) => {
+	const isFullPage = image && image.ar && image.ar.fullPage
 	return (
 		<div
 			className={`card bg-base-100 shadow-xl w-full p-2 border-4 ${
-				selected ? 'border-green-600' : 'border-transparent'
-			}`}
+				isFullPage && 'col-span-2'
+			} ${selected ? 'border-green-600' : 'border-transparent'}`}
 		>
-			<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
-				{image?.type === 'midjourney' ? (
-					<Image
-						src={mj_logo}
-						className="rounded-full"
-						alt="Midjourney logo"
-						width={30}
-						height={30}
-					/>
-				) : (
-					<UploadIcon size={4} />
-				)}
+			<div className="flex flex-row space-x-4 pb-2">
+				<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
+					{image?.type === 'midjourney' ? (
+						<Image
+							src={mj_logo}
+							className="rounded-full"
+							alt="Midjourney logo"
+							width={30}
+							height={30}
+						/>
+					) : (
+						<UploadIcon size={4} />
+					)}
+				</div>
+				<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
+					{isFullPage ? (
+						<span title="Image is full page">
+							<RectangleIcon size={4} />
+						</span>
+					) : (
+						<span title="Image is square">
+							<SquareIcon size={4} />
+						</span>
+					)}
+				</div>
 			</div>
-			<figure className="">
+
+			<figure className="h-full">
 				{placeholder ? (
 					<PlaceholderImage size={400} />
 				) : (
@@ -51,14 +70,15 @@ const ImageCard: React.FC<Props> = ({
 						src={image?.url || '/placeholder.png'}
 						alt="image option"
 						width={400}
-						height={400}
-						className="rounded-lg aspect-square object-cover"
+						height={isFullPage ? 800 : 400}
+						className={`rounded-lg w-full`}
 					/>
 				)}
 			</figure>
 
 			<div className="card-body py-4 justify-center">
 				<div className="card-actions">
+					<p className="text-black">{JSON.stringify(image?.ar)}</p>
 					<div className="items-center justify-evenly flex flex-row space-x-4 flex-1">
 						<button
 							className="btn btn-sm btn-outline btn-error"
@@ -69,19 +89,28 @@ const ImageCard: React.FC<Props> = ({
 						</button>
 						<button
 							className="btn btn-sm btn-outline btn-success"
-							onClick={() => selectImage(image?.url || '')}
+							disabled={false}
+							onClick={() =>
+								selectImage(
+									image || {
+										url: '',
+										type: 'manual',
+										error: 'No image selected',
+										ar: DEFAULT_AR,
+									}
+								)
+							}
 						>
 							Select
 						</button>
 					</div>
-					<button
+					<Link
+						target="_blank"
+						href={`/image?url=${image?.url}`}
 						className="btn btn-ghost btn-sm text-gray-500 ml-auto"
-						onClick={() => {
-							window.open(image?.url || '', '_blank')
-						}}
 					>
 						<OpenInNewWindowIcon size={4} />
-					</button>
+					</Link>
 				</div>
 				{/* <progress
 					className={`${

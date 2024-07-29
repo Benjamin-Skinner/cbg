@@ -2,14 +2,29 @@ import React, { useState } from 'react'
 import PlaceholderImage from './PlaceholderImage'
 import PlaceholderBackcover from './PlaceholderBackcover'
 import Image from 'next/image'
+import { ImageAR } from '@/types'
+import NewImagesBanner from './NewImagesBanner'
 
 interface Props {
 	backcover?: boolean
 	image: string
 	newImages: boolean
+	transparent?: boolean
+	imgHeight?: number
+	imgWidth?: number
+	ar?: ImageAR
 }
 
-const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
+const ImageDisplay: React.FC<Props> = ({
+	backcover,
+	image,
+	newImages,
+	transparent,
+	imgHeight,
+	imgWidth,
+	ar,
+}) => {
+	const isFullPage = ar && ar.fullPage
 	const [hasError, setHasError] = useState(false)
 
 	const handleImageError = () => {
@@ -20,40 +35,29 @@ const ImageDisplay: React.FC<Props> = ({ backcover, image, newImages }) => {
 		<div className="w-full h-full flex flex-col">
 			{newImages && (
 				<div className="w-full ">
-					<p className="text-center text-white rounded-full py-3  h-25 bg-blue-600  m-auto">
-						Click to view new images
-					</p>
+					<NewImagesBanner />
 				</div>
 			)}
 			<figure className="w-full h-full m-auto flex items-center justify-center">
 				{image === '' || !image || hasError ? (
 					<div className="h-full flex items-center justify-center w-full">
-						<PlaceholderImage size={400} />
+						<PlaceholderImage size={400} fullPage={ar?.fullPage} />
 					</div>
 				) : (
 					<div>
 						<Image
 							src={image}
 							alt="image"
-							className="rounded-lg aspect-square object-cover"
-							height={800}
-							width={800}
+							className={`rounded-lg object-cover ${
+								transparent && 'opacity-20'
+							} ${isFullPage && ''}`}
+							height={imgHeight || 800}
+							width={imgWidth || 800}
 							onError={handleImageError}
 						/>
 					</div>
 				)}
 			</figure>
-
-			{/* <div className="card-body py-4 justify-center">
-				<div className="card-actions items-center justify-evenly flex flex-row space-x-4">
-					<button className="btn btn-sm btn-outline btn-error">
-						Remove
-					</button>
-					<button className="btn btn-sm btn-outline btn-success">
-						Select
-					</button>
-				</div>
-			</div> */}
 		</div>
 	)
 }

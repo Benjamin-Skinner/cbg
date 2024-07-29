@@ -33,7 +33,7 @@ const Pages: React.FC<Props> = ({ book, updateBook }) => {
 			{book.pages.chapters.map((page, index) => (
 				<Chapter
 					book={book}
-					title={`${page.currPosition}. ${page.title}`}
+					title={`${index + 1}. ${page.title}`}
 					style={style}
 					page={page}
 					updatePage={(page, options) =>

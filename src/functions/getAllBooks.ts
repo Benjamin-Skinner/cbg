@@ -1,11 +1,17 @@
-import { Book } from '@/types'
+import { Blurb, Book } from '@/types'
 import clientPromise from '@/util/db'
 import { EXCLUDE } from '@/constants'
 
 export async function getAllBooks() {
+	console.log('Getting all books function')
+	// setFieldOnAllBookDocs()
 	const client = await clientPromise
+	console.log('client')
 	const db = client.db()
+	console.log('connected to db')
 	const bookDocs = await db.collection('books').find({})
+
+	console.log('BOOK DOCS', bookDocs)
 
 	const books = []
 
@@ -13,6 +19,7 @@ export async function getAllBooks() {
 		const book: Book = {
 			id: bookDoc.id.toString(),
 			title: bookDoc.title,
+			blurb: bookDoc.blurb,
 			status: bookDoc.status || 'inProgress',
 			description: bookDoc.description,
 			outline: bookDoc.outline,
@@ -33,4 +40,37 @@ export async function getAllBooks() {
 		.sort((a, b) => a.lastSaved - b.lastSaved)
 
 	return filtered
+}
+
+async function setFieldOnAllBookDocs() {
+	// set blurb object
+	const defaultBlurb: Blurb = {
+		text: '',
+		status: {
+			message: {
+				code: '',
+				content: '',
+				dismissed: false,
+			},
+			generating: {
+				inProgress: false,
+				progress: 0,
+			},
+		},
+	}
+
+	const client = await clientPromise
+	const db = client.db()
+	const bookDocs = await db.collection('books').find({})
+
+	// for await (const bookDoc of bookDocs) {
+	// 	await db.collection('books').updateOne(
+	// 		{ _id: bookDoc._id },
+	// 		{
+	// 			$set: {
+	// 				blurb: defaultBlurb,
+	// 			},
+	// 		}
+	// 	)
+	// }
 }

@@ -2,13 +2,15 @@ import { put, del } from '@vercel/blob'
 import { NextResponse } from 'next/server'
 import CBGError from '@/classes/Error'
 import { v4 } from 'uuid'
-import { imageName } from '@/util/image'
-import { ensureParams } from '@/util/ensureParams'
-import { Book } from '@/types'
+import {
+	arFromImageDimesions,
+	getImageDimensions,
+	imageName,
+} from '@/util/image'
+import { ImageAR } from '@/types'
 import BookPagesClass from '@/classes/BookPages'
 import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
-import sleep from '@/util/sleep'
 import { saveImageAsBlob } from '@/util/image'
 
 export async function POST(request: Request) {
@@ -31,7 +33,15 @@ export async function POST(request: Request) {
 
 		const book = await getBookById(bookId)
 
-		const blob = await saveImageAsBlob(book.id, request.body)
+		const [stream1, stream2] = request.body.tee()
+
+		const blob = await saveImageAsBlob(book.id, stream1)
+
+		const { height, width } = await getImageDimensions(stream2)
+		const ar: ImageAR = arFromImageDimesions(width, height)
+
+		console.log('height', height)
+		console.log('width', width)
 
 		// save the image in the database
 		const newPages = new BookPagesClass(book.pages)
@@ -40,6 +50,7 @@ export async function POST(request: Request) {
 				url: blob.url,
 				error: '',
 				type: 'manual',
+				ar,
 			},
 			pageKey
 		)
@@ -51,7 +62,10 @@ export async function POST(request: Request) {
 
 		await updateBook(newBook, [])
 
-		return NextResponse.json(blob)
+		return NextResponse.json({
+			url: blob.url,
+			ar,
+		})
 	} catch (e: any) {
 		return new CBGError(
 			e.message || 'An error occurred',
