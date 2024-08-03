@@ -79,6 +79,13 @@ export const FULL_PAGE_AR: ImageAR = {
 	width: 2,
 }
 
+export const HARDCOVER_AR: ImageAR = {
+	fullPage: false,
+	square: false,
+	height: 22,
+	width: 17,
+}
+
 export const RANDR_IMAGE_AR: ImageAR = {
 	fullPage: false,
 	square: false,

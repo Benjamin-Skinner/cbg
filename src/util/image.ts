@@ -9,7 +9,13 @@ const sharp = require('sharp')
 // import { getNewImageUrl } from '@/generate/image/midjourney'
 import updatePageImage from '@/functions/updatePageImage'
 import { updateBook } from '@/functions/updateBook'
-import { DEFAULT_AR, FULL_PAGE_AR, SQUARE_AR } from '@/constants'
+import {
+	DEFAULT_AR,
+	FULL_PAGE_AR,
+	SQUARE_AR,
+	HARDCOVER_AR,
+	RANDR_IMAGE_AR,
+} from '@/constants'
 import { isApproximatelyEqual } from './math'
 
 export function imageName(bookId: string, imageId: string) {
@@ -144,24 +150,63 @@ async function readableStreamToBuffer(
 	return Buffer.concat(chunks)
 }
 
-export function arFromImageDimesions(width: number, height: number): ImageAR {
+/**
+ * Takes a width and height of an image and needs to find the closest AR
+ * one of:
+ * - SQUARE_AR
+ * - FULL_PAGE_AR
+ * - HARDCOVER_AR
+ * - RANDR_IMAGE_AR
+ *
+ */
+export function arFromImageDimesions(
+	width: number,
+	height: number
+): { ar: ImageAR; error: boolean } {
 	console.log('width', width)
 	console.log('height', height)
 	// Image is square
 	if (height === width) {
 		console.log('SQUARE_AR')
-		return SQUARE_AR
+		return {
+			ar: SQUARE_AR,
+			error: false,
+		}
 	}
 
 	const ar = width / height
 	console.log('ar', ar)
 
-	// ar is approximately 2.5, meaning it is a full-page image
+	// AR is approximately 2.5, meaning it is a full-page image
 	if (isApproximatelyEqual(ar, 2.5, 0.4)) {
 		console.log('FULL_PAGE_AR')
-		return FULL_PAGE_AR
+		return {
+			ar: FULL_PAGE_AR,
+			error: false,
+		}
 	}
 
-	console.log('DEFAULT_AR')
-	return DEFAULT_AR
+	// AR is about 0.77, meaning it is a hardcover image
+	if (isApproximatelyEqual(ar, 0.77, 0.4)) {
+		console.log('HARDCOVER_AR')
+		return {
+			ar: HARDCOVER_AR,
+			error: false,
+		}
+	}
+
+	// AR is about 4, meaning it is a randr image
+	if (isApproximatelyEqual(ar, 4, 0.4)) {
+		console.log('RANDR_IMAGE_AR')
+		return {
+			ar: RANDR_IMAGE_AR,
+			error: false,
+		}
+	}
+
+	console.log('Could not find AR, returning default')
+	return {
+		ar: DEFAULT_AR,
+		error: true,
+	}
 }

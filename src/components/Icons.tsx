@@ -172,3 +172,13 @@ export const RectangleIcon: React.FC<Props> = ({
 }) => {
 	return <BiSolidRectangle className={`w-${size} h-${size} scale-x-150`} />
 }
+
+export const HardcoverIcon: React.FC<Props> = ({
+	size = DEFAULT_ICON_SIZE,
+}) => {
+	return <BiSolidRectangle className={`w-${size} h-${size} scale-y-150`} />
+}
+
+export const RandRIcon: React.FC<Props> = ({ size = DEFAULT_ICON_SIZE }) => {
+	return <BiSolidRectangle className={`w-${size} h-${size * 4}`} />
+}

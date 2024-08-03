@@ -7,6 +7,7 @@ import ImageDisplay from './ImageDisplay'
 import type { PutBlobResult } from '@vercel/blob'
 import { Cover, Book, ImageOption } from '@/types'
 import { UpdateBookOptions } from '@/app/book/[id]/Client'
+import { DEFAULT_AR } from '@/constants'
 
 interface Props {
 	cover: Cover
@@ -99,6 +100,7 @@ const CoverImagePicker: React.FC<Props> = ({
 							)
 							.map((image, index) => (
 								<ImageCard
+									pageAr={image.ar}
 									selected={
 										cover.image.image === image.url &&
 										image.url !== ''
@@ -110,6 +112,7 @@ const CoverImagePicker: React.FC<Props> = ({
 							))}
 						{loading ? (
 							<ImageCard
+								pageAr={DEFAULT_AR}
 								selected={false}
 								placeholder
 								deleteImage={() => {}}

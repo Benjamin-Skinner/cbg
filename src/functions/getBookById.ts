@@ -34,12 +34,11 @@ export async function getBookById(bookId: string) {
 		outline: bookDoc.outline,
 		frontCover: bookDoc.frontCover,
 		backCover: bookDoc.backCover,
+		insideCover: bookDoc.insideCover,
 		createdAt: bookDoc.createdAt,
 		lastSaved: bookDoc.lastSaved,
 		pages: bookDoc.pages,
 	}
-
-	console.log('ITERATING THROUGH PAGES')
 
 	for (const page of book.pages.chapters) {
 		if (!page.image.ar) {
@@ -52,7 +51,6 @@ export async function getBookById(bookId: string) {
 			if (!option.ar) {
 				option.ar = DEFAULT_AR
 			}
-			console.log('image', option)
 		}
 	}
 

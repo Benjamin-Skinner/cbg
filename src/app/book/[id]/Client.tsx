@@ -15,6 +15,7 @@ import Download from './Download'
 import Blurb from './Blurb'
 import RecallAndReflect from './RecallAndReflect/index'
 import { getNewPageLayouts } from '@/util/calculatePageLayout'
+import InsideCover from './InsideCover'
 
 interface Props {
 	bookData: Book
@@ -113,6 +114,7 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 				<Frontcover book={book} updateBook={updateBook} />
 				<Backcover book={book} updateBook={updateBook} />
+				<InsideCover book={book} updateBook={updateBook} />
 
 				<Outline book={book} updateBook={updateBook} />
 				<Blurb book={book} updateBook={updateBook} />

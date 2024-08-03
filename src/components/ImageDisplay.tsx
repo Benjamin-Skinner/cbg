@@ -41,7 +41,16 @@ const ImageDisplay: React.FC<Props> = ({
 			<figure className="w-full h-full m-auto flex items-center justify-center">
 				{image === '' || !image || hasError ? (
 					<div className="h-full flex items-center justify-center w-full">
-						<PlaceholderImage size={400} fullPage={ar?.fullPage} />
+						<PlaceholderImage
+							size={400}
+							ar={
+								ar?.fullPage
+									? 'fullPage'
+									: ar?.height === ar?.width
+									? 'square'
+									: 'hardcover'
+							}
+						/>
 					</div>
 				) : (
 					<div>

@@ -13,8 +13,12 @@ export type Book = {
 		recall: RandR
 		reflect: RandR
 	}
-	frontCover: Cover
+	frontCover: {
+		hard: Cover
+		paper: Cover
+	}
 	backCover: Cover
+	insideCover: Cover
 	pages: BookPages
 	lastSaved: number
 	createdAt: number

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import clientPromise from '@/util/db'
 import { Book, Page } from '@/types'
-import { DEFAULT_AR, NUM_CHAPTERS } from '@/constants'
+import { DEFAULT_AR, HARDCOVER_AR, NUM_CHAPTERS, SQUARE_AR } from '@/constants'
 import PageClass from '@/classes/Page'
 
 export async function createNewBook(title: string, oneLiner?: string) {
@@ -125,6 +125,102 @@ export async function createNewBook(title: string, oneLiner?: string) {
 			},
 		},
 		frontCover: {
+			paper: {
+				imageIdeas: {
+					ideas: [],
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
+				},
+				image: {
+					ar: SQUARE_AR,
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
+					image: '',
+					imageOptions: [],
+					generatingImages: [],
+					prompt: {
+						status: {
+							generating: {
+								inProgress: false,
+								progress: 0,
+							},
+							message: {
+								code: '',
+								content: '',
+								dismissed: false,
+							},
+						},
+						content: '',
+					},
+				},
+			},
+			hard: {
+				imageIdeas: {
+					ideas: [],
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
+				},
+				image: {
+					ar: HARDCOVER_AR,
+					status: {
+						generating: {
+							inProgress: false,
+							progress: 0,
+						},
+						message: {
+							code: '',
+							content: '',
+							dismissed: false,
+						},
+					},
+					image: '',
+					imageOptions: [],
+					generatingImages: [],
+					prompt: {
+						status: {
+							generating: {
+								inProgress: false,
+								progress: 0,
+							},
+							message: {
+								code: '',
+								content: '',
+								dismissed: false,
+							},
+						},
+						content: '',
+					},
+				},
+			},
+		},
+		backCover: {
 			imageIdeas: {
 				ideas: [],
 				status: {
@@ -140,7 +236,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 			image: {
-				ar: DEFAULT_AR,
+				ar: HARDCOVER_AR,
 				status: {
 					generating: {
 						inProgress: false,
@@ -171,7 +267,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 		},
-		backCover: {
+		insideCover: {
 			imageIdeas: {
 				ideas: [],
 				status: {
@@ -187,7 +283,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 			image: {
-				ar: DEFAULT_AR,
+				ar: SQUARE_AR,
 				status: {
 					generating: {
 						inProgress: false,

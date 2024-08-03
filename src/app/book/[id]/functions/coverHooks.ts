@@ -8,7 +8,8 @@ export const useGenerateImages = (
 	book: Book,
 	cover: Cover,
 	front: boolean,
-	back: boolean
+	back: boolean,
+	setNewImages: (newImages: boolean) => void
 ) => {
 	// Use a ref to store the current book
 	const bookRef = useRef(book)
@@ -78,6 +79,7 @@ export const useGenerateImages = (
 			const newCover: Cover = data
 			console.log('GENERATION SUCCESS')
 			console.log(newCover)
+			setNewImages(true)
 
 			const newBook = front
 				? {

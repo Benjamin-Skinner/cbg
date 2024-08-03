@@ -294,7 +294,7 @@ async function createMidjourneyJob(
 
 	const data = await response.json()
 	if (data.error) {
-		throw new Error(data.message.toString())
+		throw new Error(data.error)
 	}
 	// console.log(data)
 	return data as GenerateImageResponse
@@ -470,14 +470,11 @@ async function upscaleToImageOption(
 
 function midjourneyParams(ar: ImageAR, tiling: boolean): string {
 	let params = ''
-	if (ar.fullPage) {
-		params += '--ar 5:2'
-	} else {
-		params + -`--ar ${ar.width}:${ar.height}`
-	}
+
+	params += ` --ar ${ar.width}:${ar.height}`
 
 	if (tiling) {
-		params += '--tile'
+		params += ' --tile'
 	}
 
 	return params

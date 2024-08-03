@@ -35,7 +35,7 @@
 }
 
 @layer base {
-	input:not([type='checkbox']) {
+	input:not([type='checkbox']):not([type='radio']) {
 		@apply bg-transparent border-none resize-none focus:ring-0 focus:outline-none;
 	}
 

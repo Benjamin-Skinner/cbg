@@ -16,6 +16,7 @@ const config: Config = {
 			aspectRatio: {
 				hardcover: '16/22',
 				softcover: '1/1',
+				rAndR: '4/1',
 				fullPage: '32/22',
 				fullPageImage: '5/2',
 			},

@@ -7,7 +7,7 @@ import { Book } from '@/types'
 import updatePage from '@/functions/updatePage'
 import { sendMidjourneyJob } from '@/generate/image/midjourney'
 import updateCover from '@/functions/updateCover'
-import { DEFAULT_AR, SQUARE_AR } from '@/constants'
+import { DEFAULT_AR, FULL_PAGE_AR, HARDCOVER_AR, SQUARE_AR } from '@/constants'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -45,7 +45,7 @@ export async function POST(req: Request, res: Response) {
 		// Generate Images
 		const optionGenerating = await sendMidjourneyJob(
 			params.cover.image.prompt.content,
-			SQUARE_AR,
+			params.back ? HARDCOVER_AR : SQUARE_AR,
 			'no tiling'
 		)
 
