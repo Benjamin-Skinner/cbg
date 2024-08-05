@@ -1,26 +1,29 @@
 import React, { useState } from 'react'
-import { Book, PageImage, ImagePrompt as ImagePromptT } from '@/types'
+import { Book, ImagePrompt as ImagePromptT, PageImage } from '@/types'
 import Section from '@/components/Section'
 import SelectImage from '@/components/selectImage/SelectImage'
 import { UpdateBookOptions } from './Client'
 import ImagePrompt from '@/components/imagePrompt/ImagePrompt'
-import GenerateImages from '@/components/generateImage/GenerateImage'
 import ImageGenerationStatus from '@/components/generateImage/ImageGenerationStatus'
+import GenerateImages from '@/components/generateImage/GenerateImage'
 
 interface Props {
 	book: Book
 	updateBook: (book: Book, options?: UpdateBookOptions) => void
 }
 
-const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
+const FrontcoverHard: React.FC<Props> = ({ book, updateBook }) => {
 	const [newImages, setNewImages] = useState(false)
 	const updateImage = (image: PageImage, options?: UpdateBookOptions) => {
 		updateBook(
 			{
 				...book,
-				insideCover: {
-					...book.insideCover,
-					image,
+				frontCover: {
+					...book.frontCover,
+					hard: {
+						...book.frontCover.hard,
+						image,
+					},
 				},
 			},
 			options
@@ -34,11 +37,14 @@ const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
 		updateBook(
 			{
 				...book,
-				insideCover: {
-					...book.insideCover,
-					image: {
-						...book.insideCover.image,
-						prompt,
+				frontCover: {
+					...book.frontCover,
+					hard: {
+						...book.frontCover.hard,
+						image: {
+							...book.frontCover.hard.image,
+							prompt,
+						},
 					},
 				},
 			},
@@ -47,33 +53,30 @@ const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
 	}
 
 	return (
-		<Section title="Inside Cover">
+		<Section title="Hardback Front Cover">
 			<Section.Center>
 				<SelectImage
-					image={book.insideCover.image}
+					image={book.frontCover.hard.image}
 					updateImage={updateImage}
-					modalId="insideCover"
+					modalId="frontCover-hard"
 					bookId={book.id}
 					newImages={newImages}
 					setNewImages={setNewImages}
 				/>
 			</Section.Center>
 			<Section.Right>
-				<ImageGenerationStatus
-					image={book.insideCover.image}
-					updateImage={updateImage}
-				/>
+				<ImageGenerationStatus image={book.frontCover.hard.image} />
 				<ImagePrompt
 					updatePrompt={updateImagePrompt}
-					prompt={book.insideCover.image.prompt}
+					prompt={book.frontCover.hard.image.prompt}
 					bookId={book.id}
-					id="insideCover"
+					id="frontCover-hard"
 				/>
 				<GenerateImages
 					setNewImages={setNewImages}
-					image={book.insideCover.image}
+					image={book.frontCover.hard.image}
 					updateImage={updateImage}
-					id="insideCover"
+					id="frontCover-hard"
 					bookId={book.id}
 				/>
 			</Section.Right>
@@ -81,4 +84,4 @@ const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
 	)
 }
 
-export default InsideCover
+export default FrontcoverHard

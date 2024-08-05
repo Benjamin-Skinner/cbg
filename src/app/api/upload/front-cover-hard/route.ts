@@ -2,15 +2,15 @@ import CBGError from '@/classes/Error'
 import uploadImage from '@/functions/uploadImage'
 import { NextResponse } from 'next/server'
 import { HARDCOVER_AR, SQUARE_AR } from '@/constants'
-import { addImageOptionBackCover } from '@/functions/addImageOption'
+import { addImageOptionFrontCoverHard } from '@/functions/addImageOption'
 
 export async function POST(request: Request) {
-	console.log('Back Cover Upload')
+	console.log('Front Cover Hard Upload')
 	try {
 		const newImageOption = await uploadImage(
 			request,
 			HARDCOVER_AR,
-			addImageOptionBackCover
+			addImageOptionFrontCoverHard
 		)
 		return NextResponse.json(newImageOption)
 	} catch (e: any) {

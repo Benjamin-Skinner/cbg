@@ -69,7 +69,11 @@ const BookComp: React.FC<BookProps> = ({ book }) => {
 				href={`/book/${book.id}`}
 			>
 				<figure>
-					{<FullCoverImage image={book.frontCover.image.image} />}
+					{
+						<FullCoverImage
+							image={book.frontCover.hard.image.image}
+						/>
+					}
 				</figure>
 				<div className="card-body bg-white rounded-md">
 					<article className="prose">

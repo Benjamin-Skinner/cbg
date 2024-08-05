@@ -55,7 +55,7 @@ const ImageCard: React.FC<Props> = ({
 						<button
 							className="btn btn-sm btn-outline btn-error"
 							onClick={() => deleteImage(image)}
-							disabled={selected}
+							// disabled={selected}
 						>
 							Remove
 						</button>

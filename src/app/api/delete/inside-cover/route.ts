@@ -6,12 +6,11 @@ import { removeImageOptionInsideCover } from '@/functions/removeImageOption'
 export async function DELETE(request: Request) {
 	console.log('Inside Cover Delete')
 	try {
-		const newImageOptions = await deleteImage(
+		const newImage = await deleteImage(
 			request,
-			'insideCover',
 			removeImageOptionInsideCover
 		)
-		return NextResponse.json(newImageOptions)
+		return NextResponse.json(newImage)
 	} catch (e: any) {
 		return new CBGError(
 			e.message || 'An error occurred',

@@ -84,18 +84,13 @@ const ImageModal: React.FC<Props> = ({
 		}
 
 		console.log('SUCCESS')
-		const newImageOptions = await res.json()
-		console.log('newImageOptions', newImageOptions)
+		const newImage = (await res.json()) as PageImage
+		console.log('newImage', newImage)
+		setError('')
 
 		// On success, update the book
 		// Add to local Book (client only)
-		updateImage(
-			{
-				...image,
-				imageOptions: newImageOptions,
-			},
-			{ clientOnly: true }
-		)
+		updateImage(newImage, { clientOnly: true })
 	}
 
 	return (

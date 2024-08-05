@@ -11,6 +11,7 @@ import SelectImage from '@/components/selectImage/SelectImage'
 import { UpdateBookOptions } from './Client'
 import StatusClass from '@/classes/Status'
 import { RefreshIcon } from '@/components/Icons'
+import ImagePrompt from '@/components/imagePrompt/ImagePrompt'
 
 interface Props {
 	book: Book
@@ -73,19 +74,6 @@ const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 		IMAGE_POLL_TIME * 1000
 	)
 
-	const styles = {
-		outer: {
-			image: 'card w-2/3 aspect-square bg-base-100 shadow-xl m-auto',
-			hard: 'card w-2/3 aspect-hardcover bg-base-100 shadow-xl m-auto',
-			paper: 'card w-2/3 aspect-square bg-base-100 shadow-xl m-auto',
-		},
-		inner: {
-			image: 'card-body h-full flex items-center justify-center',
-			hard: 'h-full  items-center justify-center',
-			paper: 'card-body h-full flex items-center justify-center',
-		},
-	}
-
 	const updateImage = (image: PageImage, options?: UpdateBookOptions) => {
 		updateBook({
 			...book,
@@ -104,6 +92,8 @@ const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 					updateImage={updateImage}
 					modalId="backCover"
 					bookId={book.id}
+					newImages={newImages}
+					setNewImages={setNewImages}
 				/>
 				{/* <div className="flex items-center flex-row space-x-5 justify-center mb-4">
 					<div className="form-control">
@@ -197,46 +187,12 @@ const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 					))}
 				</div> */}
 
-				<div className="space-y-2 mt-4">
-					<div className="flex flex-row items-center space-x-3">
-						<article className="prose">
-							<h4>Image Prompt:=</h4>
-						</article>
-						<button
-							className="btn btn-ghost btn-sm"
-							onClick={generateImagePrompt}
-						>
-							{book.backCover.image.prompt.status.generating
-								.inProgress ? (
-								<span className="loading loading-dots loading-md"></span>
-							) : (
-								<RefreshIcon />
-							)}
-						</button>
-					</div>
-				</div>
-
-				<textarea
-					value={book.backCover.image.prompt.content}
-					disabled={book.backCover.image.status.generating.inProgress}
-					onChange={(e) =>
-						updateBook({
-							...book,
-							backCover: {
-								...book.backCover,
-								image: {
-									...book.backCover.image,
-									prompt: {
-										...book.backCover.image.prompt,
-										content: e.target.value,
-									},
-								},
-							},
-						})
-					}
-					className="textarea h-48 w-full mt-12 leading-5"
+				<ImagePrompt
+					prompt={book.backCover.image.prompt}
+					updatePrompt={generateImagePrompt}
+					bookId={book.id}
+					id="backCover"
 				/>
-
 				<button
 					disabled={book.backCover.image.status.generating.inProgress}
 					onClick={generateImages}

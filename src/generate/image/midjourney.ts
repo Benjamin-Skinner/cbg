@@ -13,6 +13,31 @@ import { saveImageAsBlob } from '@/util/image'
  * *************** EXPORTED FUNCTIONS ***************
  */
 
+export async function generateImages(image: PageImage) {
+	// Make sure there is a prompt
+	if (image.prompt.content === '') {
+		throw new Error('Please enter a prompt')
+	}
+
+	const optionGenerating = await sendMidjourneyJob(
+		image.prompt.content,
+		image.ar,
+		'no tiling'
+	)
+
+	console.log(optionGenerating)
+
+	const newImage = image
+	newImage.generatingImages.push(optionGenerating)
+
+	// Set the status
+	const newStatus = new StatusClass(newImage.status)
+	newStatus.beginGenerating()
+	newImage.status = newStatus.toObject()
+
+	return newImage
+}
+
 /**
  * @function sendMidjourneyJob
  *

@@ -1,18 +1,11 @@
 import { NextResponse } from 'next/server'
 import { del } from '@vercel/blob'
 import { getBookById } from '@/functions/getBookById'
-import { Book, ImageOption } from '@/types'
-
-type ImageKey =
-	| 'insideCover'
-	| 'backCover'
-	| 'frontCover-hard'
-	| 'frontCover-paper'
+import { Book, PageImage } from '@/types'
 
 async function deleteImage(
 	request: Request,
-	imageKey: ImageKey,
-	removeImageOption: (book: Book, url: string) => Promise<ImageOption[]>
+	removeImageOption: (book: Book, url: string) => Promise<PageImage>
 ) {
 	console.log('Deleting an image')
 	// Extract bookId from search Params
@@ -34,13 +27,6 @@ async function deleteImage(
 
 	// Get book from DB
 	const book = await getBookById(bookId)
-
-	const selectedUrl = getSelectedImage(book, imageKey)
-	console.log('selectedUrl', selectedUrl)
-	// Make sure the image is not selected
-	if (selectedUrl === url) {
-		throw new Error('Cannot delete the selected image')
-	}
 
 	// Delete from the Image Storage
 	await del(url)
@@ -64,28 +50,10 @@ async function deleteImage(
 
 	// await updateBook(newBook)
 
-	const newImageOptions = await removeImageOption(book, url)
+	const newImage = await removeImageOption(book, url)
 	console.log('Deleted from database')
 
-	return newImageOptions
+	return newImage
 }
 
 export default deleteImage
-
-function getSelectedImage(book: Book, key: ImageKey) {
-	if (key === 'insideCover') {
-		return book.insideCover.image.image
-	}
-
-	if (key === 'backCover') {
-		return book.backCover.image.image
-	}
-
-	if (key === 'frontCover-hard') {
-		return book.frontCover.paper.image.image
-	}
-
-	if (key === 'frontCover-paper') {
-		return book.frontCover.hard.image.image
-	}
-}

@@ -1,6 +1,6 @@
-import { Blurb, Book } from '@/types'
+import { Blurb, Book, Cover, PageImage, Status } from '@/types'
 import clientPromise from '@/util/db'
-import { EXCLUDE } from '@/constants'
+import { DEFAULT_AR, EXCLUDE } from '@/constants'
 
 export async function getAllBooks() {
 	console.log('Getting all books function')
@@ -24,8 +24,8 @@ export async function getAllBooks() {
 			description: bookDoc.description,
 			outline: bookDoc.outline,
 			oneLiner: bookDoc.oneLiner,
-			recall: bookDoc.recall,
-			reflect: bookDoc.reflect,
+			insideCover: bookDoc.insideCover,
+			recallAndReflect: bookDoc.recallAndReflect,
 			frontCover: bookDoc.frontCover,
 			backCover: bookDoc.backCover,
 			createdAt: bookDoc.createdAt,
@@ -44,19 +44,18 @@ export async function getAllBooks() {
 
 async function setFieldOnAllBookDocs() {
 	// set blurb object
-	const defaultBlurb: Blurb = {
-		text: '',
-		status: {
-			message: {
-				code: '',
-				content: '',
-				dismissed: false,
-			},
-			generating: {
-				inProgress: false,
-				progress: 0,
+	const frontCover = {
+		hard: {
+			image: {
+				prompt: {
+					content: '',
+					status: {},
+				},
 			},
 		},
+	} as {
+		hard: Cover
+		soft: Cover
 	}
 
 	const client = await clientPromise
@@ -74,3 +73,49 @@ async function setFieldOnAllBookDocs() {
 	// 	)
 	// }
 }
+
+const EMPTY_STATUS: Status = {
+	message: {
+		code: '',
+		content: '',
+		dismissed: false,
+	},
+	generating: {
+		inProgress: false,
+		progress: 0,
+	},
+}
+
+const EMPTY_COVER: Cover = {
+	imageIdeas: {
+		ideas: [],
+		status: EMPTY_STATUS,
+	},
+	image: {
+		prompt: {
+			content: '',
+			status: EMPTY_STATUS,
+		},
+	},
+}
+
+const EMPTY_PAGE_IMAGE: PageImage = {
+	status: EMPTY_STATUS,
+	image: '',
+	ar: DEFAULT_AR,
+	imageOptions: [],
+	prompt: {
+		content: '',
+		status: EMPTY_STATUS,
+	},
+	generatingImages: [],
+}
+
+// type PageImage = {
+// 	status: Status
+// 	image: string
+// 	ar: ImageAR
+// 	imageOptions: ImageOption[]
+// 	prompt: ImagePrompt
+// 	generatingImages: ImageOptionGenerating[]
+// }
