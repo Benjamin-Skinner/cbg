@@ -40,7 +40,7 @@ const Card: React.FC<CardProps> = ({ subject, onClick, onSave }) => {
 						onClick={() => {
 							setLoading(true)
 							onClick()
-							setLoading(false)
+							// setLoading(false)
 						}}
 					>
 						{loading ? (

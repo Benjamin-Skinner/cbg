@@ -56,6 +56,7 @@ const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
 					bookId={book.id}
 					newImages={newImages}
 					setNewImages={setNewImages}
+					card
 				/>
 			</Section.Center>
 			<Section.Right>

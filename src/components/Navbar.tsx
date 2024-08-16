@@ -1,7 +1,8 @@
 import React from 'react'
 import Link from 'next/link'
 import TimeSince from './TimeAgo'
-import { SaveIcon, SavedIcon } from './Icons'
+import { SavedIcon } from './Icons'
+import { IoSaveOutline as SaveIcon } from 'react-icons/io5'
 
 interface Props {
 	lastSaved: number

@@ -8,15 +8,24 @@ type IdOption =
 	| 'frontCover-hard'
 	| 'backCover'
 	| 'insideCover'
+	| 'page'
+	| 'recallAndReflect'
 
 interface Props {
 	updatePrompt: (prompt: ImagePromptT) => void
 	prompt: ImagePromptT
 	bookId: string
 	id: IdOption
+	pageKey?: string
 }
 
-const ImagePrompt: React.FC<Props> = ({ prompt, updatePrompt, bookId, id }) => {
+const ImagePrompt: React.FC<Props> = ({
+	prompt,
+	updatePrompt,
+	bookId,
+	id,
+	pageKey,
+}) => {
 	return (
 		<div>
 			<GeneratePrompt
@@ -24,6 +33,7 @@ const ImagePrompt: React.FC<Props> = ({ prompt, updatePrompt, bookId, id }) => {
 				updatePrompt={updatePrompt}
 				bookId={bookId}
 				apiUrl={getApiUrlFromId(id)}
+				pageKey={pageKey || 'none'}
 			/>
 			<TextBox
 				prompt={prompt}
@@ -46,5 +56,9 @@ const getApiUrlFromId = (id: IdOption) => {
 			return '/api/generate/image-prompt/back-cover'
 		case 'insideCover':
 			return '/api/generate/image-prompt/inside-cover'
+		case 'page':
+			return '/api/generate/image-prompt/page'
+		case 'recallAndReflect':
+			return '/api/generate/image-prompt/recall-and-reflect'
 	}
 }

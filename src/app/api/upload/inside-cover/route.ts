@@ -5,7 +5,6 @@ import { SQUARE_AR } from '@/constants'
 import { addImageOptionInsideCover } from '@/functions/addImageOption'
 
 export async function POST(request: Request) {
-	console.log('Inside Cover Upload')
 	try {
 		const newImageOption = await uploadImage(
 			request,

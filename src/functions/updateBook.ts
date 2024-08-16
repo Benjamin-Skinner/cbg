@@ -1,3 +1,4 @@
+import logger from '@/logging'
 import { Book } from '@/types'
 import clientPromise from '@/util/db'
 
@@ -34,8 +35,10 @@ export async function updateBook(book: Book, fields: string[] = []) {
 				}, {}),
 			},
 		}
+		if (fields.includes('status')) {
+			logger.info(`STATUS of book ${book.id} set to ${book.status}`)
+		}
 		await books.updateOne(query, updateDoc)
-		console.log('book updated fields: ', fields.toString())
 	}
 
 	return savingTime

@@ -1,6 +1,4 @@
 import { PageImage } from '@/types'
-import Status from '@/components/Status'
-import CancelGeneration from './CancelGeneration'
 import { useGenerateImages } from './useGenerateImages'
 import { useUpdateImages } from './useUpdateImages'
 import { IMAGE_POLL_TIME } from '@/constants'
@@ -11,6 +9,8 @@ type IdOption =
 	| 'backCover'
 	| 'insideCover'
 	| 'frontCover-paper'
+	| 'page'
+	| 'recallAndReflect'
 
 interface Props {
 	setNewImages: (newImages: boolean) => void
@@ -18,6 +18,7 @@ interface Props {
 	updateImage: (image: PageImage) => void
 	bookId: string
 	id: IdOption
+	pageKey?: string
 }
 
 const GenerateImages: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const GenerateImages: React.FC<Props> = ({
 	bookId,
 	setNewImages,
 	id,
+	pageKey,
 }) => {
 	const apiUrl = apiUrlFromId(id)
 
@@ -33,7 +35,8 @@ const GenerateImages: React.FC<Props> = ({
 		image,
 		updateImage,
 		apiUrl,
-		bookId
+		bookId,
+		pageKey || 'none'
 	)
 
 	const { updateImages } = useUpdateImages(
@@ -41,14 +44,14 @@ const GenerateImages: React.FC<Props> = ({
 		updateImage,
 		`${apiUrl}/update`,
 		bookId,
-		setNewImages
+		setNewImages,
+		pageKey || 'none'
 	)
 
 	useInterval(
 		() => {
 			// Your custom logic here
 			if (image.status.generating.inProgress) {
-				console.log(`Polling for images for page ${id}`)
 				updateImages()
 			}
 		},
@@ -79,5 +82,9 @@ const apiUrlFromId = (id: IdOption) => {
 			return '/api/generate/image/inside-cover'
 		case 'frontCover-paper':
 			return '/api/generate/image/front-cover-paper'
+		case 'page':
+			return '/api/generate/image/page'
+		case 'recallAndReflect':
+			return '/api/generate/image/recall-and-reflect'
 	}
 }

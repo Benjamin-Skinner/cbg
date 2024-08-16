@@ -4,8 +4,8 @@ import generateOutline from '@/generate/text/outline'
 import { Book, BookPages, Outline } from '@/types'
 import clientPromise from '@/util/db'
 import { NextResponse } from 'next/server'
-import StatusClass from '@/classes/Status'
-import sleep from '@/util/sleep'
+import logger from '@/logging'
+import logStatus from '@/util/statusLog'
 
 export async function POST(req: Request, res: Response) {
 	const params = await req.json()
@@ -16,11 +16,13 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
+	logStatus('OUTLINE', 'requested', params.book.id)
+
 	try {
 		// Set Status as Generating
-		const newStatus = new StatusClass(params.book.outline.status)
-		newStatus.beginGenerating()
-		await updateOutline(params.book, params.book.outline)
+		// const newStatus = new StatusClass(params.book.outline.status)
+		// newStatus.beginGenerating()
+		// await updateOutline(params.book, params.book.outline)
 
 		// Generate Outline
 		const { outline, pages } = await generateOutline(params.book)
@@ -28,6 +30,8 @@ export async function POST(req: Request, res: Response) {
 		await updateOutline(params.book, outline)
 
 		await updatePages(params.book, pages)
+
+		logStatus('OUTLINE', 'completed', params.book.id)
 		return NextResponse.json(
 			{
 				outline: outline,
@@ -38,6 +42,9 @@ export async function POST(req: Request, res: Response) {
 			}
 		)
 	} catch (error: any) {
+		logger.error(
+			`OUTLINE generation for book ${params.book.id}: ${error.message}`
+		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

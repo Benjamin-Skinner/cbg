@@ -5,9 +5,10 @@ import { Cover } from '@/types'
 import generateImagePrompt from '@/generate/text/coverImagePrompt'
 import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
+import logger from '@/logging'
+import logStatus from '@/util/statusLog'
 
 export async function POST(req: Request, res: Response) {
-	console.log('front-cover-paper')
 	const params: {
 		bookId: string
 	} = await req.json()
@@ -20,9 +21,10 @@ export async function POST(req: Request, res: Response) {
 
 	const bookId = params.bookId
 
-	try {
-		const book = await getBookById(bookId)
+	logStatus('IMAGE_PROMPT_PAPER_COVER', 'requested', bookId)
+	const book = await getBookById(bookId)
 
+	try {
 		const openAiPrompt = `Generate a description of a front cover image for a children's book called ${book.title}.
     The description should be one short sentence. There should be only one subject.
     Base it closely on the following examples:
@@ -57,6 +59,8 @@ export async function POST(req: Request, res: Response) {
 			},
 		})
 
+		logStatus('IMAGE_PROMPT_PAPER_COVER', 'completed', bookId)
+
 		return NextResponse.json(
 			{
 				data: newPrompt,
@@ -66,6 +70,11 @@ export async function POST(req: Request, res: Response) {
 			}
 		)
 	} catch (error: any) {
+		logger.error(
+			`IMAGE PROMPT PAPER COVER generating for ${JSON.stringify(
+				book.frontCover.paper
+			)}`
+		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

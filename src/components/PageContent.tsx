@@ -1,7 +1,7 @@
 import React from 'react'
 import { Book, Page } from '@/types'
-import ImagePicker from './ImagePicker'
-import { motion } from 'framer-motion'
+// import ImagePicker from './ImagePicker'
+import SelectImage from './selectImage/SelectImage'
 
 interface Props {
 	page: Page
@@ -44,10 +44,14 @@ const SinglePageContent: React.FC<Props> = ({
 			<div className="card w-7/12 m-auto aspect-hardcover bg-base-100 shadow-xl">
 				<div className="card-body w-full">
 					<div className="m-auto w-5/6 p-2 pb-8">
-						<ImagePicker
-							page={page}
+						<SelectImage
+							image={page.image}
+							updateImage={(image) =>
+								updatePage({ ...page, image })
+							}
+							modalId={page.key}
+							modalTitle={`${page.title}`}
 							bookId={book.id}
-							updatePage={updatePage}
 							newImages={newImages}
 							setNewImages={setNewImages}
 						/>
@@ -79,10 +83,14 @@ const SinglePageContent: React.FC<Props> = ({
 				<div className="flex flex-row items-center justify-center">
 					<div className="card w-10/12 aspect-fullPage bg-base-100 shadow-xl">
 						<div className="card-body w-full h-full">
-							<ImagePicker
-								page={page}
+							<SelectImage
+								image={page.image}
+								updateImage={(image) =>
+									updatePage({ ...page, image })
+								}
+								modalId={page.key}
+								modalTitle={`${page.title}`}
 								bookId={book.id}
-								updatePage={updatePage}
 								newImages={newImages}
 								setNewImages={setNewImages}
 							/>
@@ -127,10 +135,14 @@ const SinglePageContent: React.FC<Props> = ({
 					</article>
 
 					<div className="m-auto w-5/6 p-2 pb-2">
-						<ImagePicker
-							page={page}
+						<SelectImage
+							image={page.image}
+							updateImage={(image) =>
+								updatePage({ ...page, image })
+							}
+							modalId={page.key}
+							modalTitle={`${page.title}`}
 							bookId={book.id}
-							updatePage={updatePage}
 							newImages={newImages}
 							setNewImages={setNewImages}
 						/>

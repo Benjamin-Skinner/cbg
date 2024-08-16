@@ -43,35 +43,27 @@ export async function getAllBooks() {
 }
 
 async function setFieldOnAllBookDocs() {
-	// set blurb object
+	// set frontCover object
+
 	const frontCover = {
-		hard: {
-			image: {
-				prompt: {
-					content: '',
-					status: {},
-				},
-			},
-		},
-	} as {
-		hard: Cover
-		soft: Cover
+		hard: EMPTY_COVER,
+		soft: EMPTY_COVER,
 	}
 
 	const client = await clientPromise
 	const db = client.db()
 	const bookDocs = await db.collection('books').find({})
 
-	// for await (const bookDoc of bookDocs) {
-	// 	await db.collection('books').updateOne(
-	// 		{ _id: bookDoc._id },
-	// 		{
-	// 			$set: {
-	// 				blurb: defaultBlurb,
-	// 			},
-	// 		}
-	// 	)
-	// }
+	for await (const bookDoc of bookDocs) {
+		await db.collection('books').updateOne(
+			{ _id: bookDoc._id },
+			{
+				$set: {
+					frontCover: frontCover,
+				},
+			}
+		)
+	}
 }
 
 const EMPTY_STATUS: Status = {
@@ -92,24 +84,35 @@ const EMPTY_COVER: Cover = {
 		status: EMPTY_STATUS,
 	},
 	image: {
+		ar: DEFAULT_AR,
+		status: EMPTY_STATUS,
+		imageOptions: [],
+		generatingImages: [],
 		prompt: {
 			content: '',
 			status: EMPTY_STATUS,
 		},
+		selected: {
+			url: '',
+			messageId: '',
+			type: '',
+		},
 	},
 }
 
-const EMPTY_PAGE_IMAGE: PageImage = {
-	status: EMPTY_STATUS,
-	image: '',
-	ar: DEFAULT_AR,
-	imageOptions: [],
-	prompt: {
-		content: '',
-		status: EMPTY_STATUS,
-	},
-	generatingImages: [],
-}
+// const EMPTY_PAGE_IMAGE: PageImage = {
+// 	status: EMPTY_STATUS,
+// 	image: {
+
+//     },
+// 	ar: DEFAULT_AR,
+// 	imageOptions: [],
+// 	prompt: {
+// 		content: '',
+// 		status: EMPTY_STATUS,
+// 	},
+// 	generatingImages: [],
+// }
 
 // type PageImage = {
 // 	status: Status

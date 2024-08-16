@@ -3,7 +3,11 @@
 import { MongoClient } from 'mongodb'
 
 const uri = process.env.MONGO_URI as string // your mongodb connection string
-const options = {}
+// Set your desired timeout values in milliseconds
+const options = {
+	socketTimeoutMS: 30000, // 30 seconds
+	connectTimeoutMS: 30000, // 30 seconds
+}
 
 declare global {
 	var _mongoClientPromise: Promise<MongoClient>

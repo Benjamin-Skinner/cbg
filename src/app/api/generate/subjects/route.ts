@@ -1,11 +1,8 @@
 import { ensureParams } from '@/util/ensureParams'
-import sleep from '@/util/sleep'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
-import StatusClass from '@/classes/Status'
 import { Subject } from '@/types'
 import clientPromise from '@/util/db'
-import { Book } from '@/types'
 import { generateSubjects } from '@/generate/text/subject'
 import { getAllSubjects } from '@/functions/getAllSubjects'
 

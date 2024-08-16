@@ -63,7 +63,7 @@ export async function generateDoc(
 async function newPage(page: Page, book: Book) {
 	console.log(`Downloading Image for Page ${page.title}`)
 	const { imgPath } = await downloadMidjourneyImage(
-		page.image.image,
+		page.image.selected.url,
 		book,
 		page.title
 	)

@@ -23,10 +23,13 @@ const BookStatus: React.FC<Props> = ({ book, updateBook }) => {
 							...book,
 							status: e.target.value as
 								| 'inProgress'
+								| 'awaitingReview'
 								| 'uploaded'
 								| 'abandoned',
 						},
-						{ clientOnly: false }
+						{
+							fields: ['status'],
+						}
 					)
 				}}
 				value={book.status}
@@ -34,6 +37,7 @@ const BookStatus: React.FC<Props> = ({ book, updateBook }) => {
 				<option value="inProgress">In Progress</option>
 				<option value="uploaded">Uploaded</option>
 				<option value="abandoned">Abandoned</option>
+				<option value="awatingReview">Review</option>
 			</select>
 		</div>
 	)

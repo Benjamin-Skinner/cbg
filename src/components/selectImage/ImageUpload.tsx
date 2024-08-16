@@ -14,6 +14,7 @@ interface Props {
 	setLoading: (loading: boolean) => void
 	setError: (error: string) => void
 	addImageOption: (option: ImageOption) => void
+	imageUploading: boolean
 	// updateImage: (image: PageImage, options?: UpdateBookOptions) => void
 }
 
@@ -22,6 +23,7 @@ const ImageUpload: React.FC<Props> = ({
 	uploadUrl,
 	setError,
 	addImageOption,
+	imageUploading,
 }) => {
 	const inputFileRef = useRef<HTMLInputElement>(null)
 
@@ -58,8 +60,6 @@ const ImageUpload: React.FC<Props> = ({
 		// We just need to update locally (both imageOptions and Page)
 		const newImageOption = await response.json()
 
-		console.log('newImageOption', newImageOption)
-
 		// Update image option on client
 		addImageOption(newImageOption)
 
@@ -81,6 +81,7 @@ const ImageUpload: React.FC<Props> = ({
 					required
 					className="max-w-56"
 					accept="image/png, image/jpeg, image/webp"
+					disabled={imageUploading}
 				/>
 				<button type="submit" className="btn btn-ghost btn-sm mt-0">
 					Upload

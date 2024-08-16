@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import {
 	Document,
-	Packer,
 	Paragraph,
 	ImageRun,
 	PageBreak,
@@ -12,13 +11,14 @@ import { Book, Page, Question, RandR } from '@/types'
 import { downloadMidjourneyImage } from '../image'
 import { saveDoc } from './util'
 import splitText from '../splitText'
+import { RandRIcon } from '@/components/Icons'
 
 export async function generateDoc(
 	book: Book,
 	version: string,
 	filepath: string
 ) {
-	const bulletImg = fs.readFileSync(
+	const rAndRImage = fs.readFileSync(
 		'/Users/Benskinner/Code/cbg/src/assets/bullet.png'
 	)
 
@@ -47,8 +47,16 @@ export async function generateDoc(
 
 			// Add Conclusion
 			await newPage(book.pages.conclusion, book),
-			newRandR(book.recall.questions, bulletImg, 'Recall'),
-			newRandR(book.reflect.questions, bulletImg, 'Reflect'),
+			newRandR(
+				book.recallAndReflect.recall.questions,
+				rAndRImage,
+				'Recall'
+			),
+			newRandR(
+				book.recallAndReflect.reflect.questions,
+				rAndRImage,
+				'Reflect'
+			),
 		],
 	})
 
@@ -77,7 +85,7 @@ type TextLayout = {
 async function newPage(page: Page, book: Book) {
 	console.log(`Downloading Image for Page ${page.title}`)
 	const { imgPath } = await downloadMidjourneyImage(
-		page.image.image,
+		page.image.selected.url,
 		book,
 		page.title
 	)

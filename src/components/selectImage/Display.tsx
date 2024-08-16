@@ -19,7 +19,7 @@ interface ContainerParentProps {
 }
 
 const Container: React.FC<ContainerParentProps> = ({ children, ar }) => {
-	const { square, fullPage, hardcover } = arToBoolean(ar)
+	const { square, fullPage, hardcover, rAndR } = arToBoolean(ar)
 	if (square) {
 		return <SquareContainer>{children}</SquareContainer>
 	}
@@ -29,36 +29,39 @@ const Container: React.FC<ContainerParentProps> = ({ children, ar }) => {
 	if (hardcover) {
 		return <HardcoverContainer>{children}</HardcoverContainer>
 	}
+	if (rAndR) {
+		return <RandRContainer>{children}</RandRContainer>
+	}
 }
 
+// Container = Card background with shadow
 interface ContainerProps {
 	children: React.ReactNode
 }
+// card bg-base-100 shadow-xl m-auto h-full w-3/4 hover:transform hover:scale-105 transition-all duration-250 cursor-pointer`
 
 const SquareContainer: React.FC<ContainerProps> = ({ children }) => {
-	return (
-		<div
-			className={`card bg-base-100 shadow-xl m-auto h-full w-3/4 hover:transform hover:scale-105 transition-all duration-250 cursor-pointer`}
-		>
-			{children}
-		</div>
-	)
+	return <div className="bg-red-500 w-fit">{children}</div>
 }
 
 const HardcoverContainer: React.FC<ContainerProps> = ({ children }) => {
-	return (
-		<div
-			className={`card bg-base-100 shadow-xl m-auto aspect-hardcover h-[60%] hover:transform hover:scale-105 transition-all duration-250 cursor-pointer`}
-		>
-			{children}
-		</div>
-	)
+	return <div className=" bg-red-500 w-fit">{children}</div>
 }
 
 const FullPageContainer: React.FC<ContainerProps> = ({ children }) => {
 	return (
 		<div
-			className={`card bg-base-100 shadow-xl m-auto aspect-hardcover h-[60%] hover:transform hover:scale-105 transition-all duration-250 cursor-pointer`}
+			className={`card bg-base-100 shadow-xl m-auto aspect-fullPage h-[60%] hover:transform hover:scale-105 transition-all duration-250 cursor-pointer`}
+		>
+			{children}
+		</div>
+	)
+}
+
+const RandRContainer: React.FC<ContainerProps> = ({ children }) => {
+	return (
+		<div
+			className={`card bg-base-100 shadow-xl m-auto aspect-fullPage h-[60%] hover:transform hover:scale-105 transition-all duration-250 cursor-pointer`}
 		>
 			{children}
 		</div>
@@ -68,9 +71,11 @@ const FullPageContainer: React.FC<ContainerProps> = ({ children }) => {
 interface Props {
 	image: PageImage
 	newImages: boolean
+	card: boolean
+	openModal: () => void
 }
 
-const Display: React.FC<Props> = ({ image, newImages }) => {
+const Display: React.FC<Props> = ({ image, newImages, card, openModal }) => {
 	const [error, setError] = useState(false)
 
 	const handleError = () => {
@@ -78,23 +83,25 @@ const Display: React.FC<Props> = ({ image, newImages }) => {
 	}
 
 	return (
-		<Container ar={image.ar}>
-			{newImages && <NewImagesBanner />}
-			<div className="card-body items-center justify-center">
-				{error || !image.image ? (
-					<Placeholder ar={image.ar} />
-				) : (
-					<DisplayImage image={image} handleError={handleError} />
-				)}
+		<div
+			className={`w-fit hover:scale-105 transition-all duration-200 ${
+				card ? 'card bg-base-100 p-6 shadow-xl' : ''
+			}`}
+			onClick={openModal}
+		>
+			<div className="w-fit">
+				{newImages && <NewImagesBanner />}
+				{/* <div className="card-body items-center justify-center"> */}
+				<div>
+					{!image.selected.url ? (
+						<Placeholder ar={image.ar} />
+					) : (
+						<DisplayImage image={image} handleError={handleError} />
+					)}
+				</div>
 			</div>
-		</Container>
+		</div>
 	)
-
-	// if (error || !image.image) {
-	// 	return <Placeholder ar={image.ar} />
-	// } else {
-	// 	return <DisplayImage image={image} handleError={handleError} />
-	// }
 }
 
 export default Display
@@ -119,7 +126,7 @@ interface DisplayImageProps {
 const DisplayImage: React.FC<DisplayImageProps> = ({ image, handleError }) => {
 	return (
 		<Image
-			src={image.image}
+			src={image.selected.url}
 			alt="image"
 			onError={handleError}
 			className="rounded-lg object-cover m-auto"

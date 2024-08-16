@@ -1,5 +1,4 @@
 import { ensureParams } from '@/util/ensureParams'
-import sleep from '@/util/sleep'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
 import StatusClass from '@/classes/Status'
@@ -7,6 +6,8 @@ import { RandR } from '@/types'
 import clientPromise from '@/util/db'
 import { Book } from '@/types'
 import generateRecall from '@/generate/text/recall'
+import logStatus from '@/util/statusLog'
+import logger from '@/logging'
 
 export async function POST(req: Request, res: Response) {
 	const params = await req.json()
@@ -17,6 +18,7 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	try {
+		logStatus('RECALL', 'requested', params.book.id)
 		// Set status as generating
 		const newStatus = new StatusClass(params.book.outline.status)
 		newStatus.beginGenerating()
@@ -27,6 +29,7 @@ export async function POST(req: Request, res: Response) {
 		// Generate questions
 		const recall = await generateRecall(params.book)
 		await updateRecall(params.book, recall)
+		logStatus('RECALL', 'completed', params.book.id)
 		return NextResponse.json(
 			{
 				data: recall,
@@ -36,6 +39,9 @@ export async function POST(req: Request, res: Response) {
 			}
 		)
 	} catch (error: any) {
+		logger.error(
+			`RECALL generation for book ${params.book.id}: ${error.message}`
+		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

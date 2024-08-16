@@ -8,7 +8,6 @@ type NavProps = {}
 export default function Nav({}: NavProps) {
 	const [state, setState] = useState(false)
 
-	// Replace javascript:void(0) path with your path
 	const navigation = [
 		{ title: 'Books', path: '/' },
 		{ title: 'New Book', path: '/new' },

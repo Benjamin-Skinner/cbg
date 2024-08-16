@@ -71,7 +71,7 @@ const BookComp: React.FC<BookProps> = ({ book }) => {
 				<figure>
 					{
 						<FullCoverImage
-							image={book.frontCover.hard.image.image}
+							image={book.frontCover.hard.image.selected.url}
 						/>
 					}
 				</figure>

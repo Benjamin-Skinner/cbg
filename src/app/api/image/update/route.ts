@@ -1,11 +1,9 @@
 import CBGError from '@/classes/Error'
 import { ensureParams } from '@/util/ensureParams'
-import sleep from '@/util/sleep'
 import { NextResponse } from 'next/server'
 import { Book, Page, PageImage } from '@/types'
 import updatePageImage from '@/functions/updatePageImage'
 import { updateImages } from '@/generate/image/midjourney'
-import StatusClass from '@/classes/Status'
 
 export async function POST(req: Request) {
 	console.log('UPDATE IMAGE API ROUTE')

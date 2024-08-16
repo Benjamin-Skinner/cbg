@@ -1,3 +1,7 @@
-# Next Steps
+# Children's Book Generator
 
-Children's watercolor book cover collage of Napa vineyards, Golden gate bridge, and state capitol building with "Let's Discover California" text in a simple authentic children's handwriting style on blue sky sunny day background. --ar 17:22 --v 6.0
+## Running the Project Locally
+
+-   Create a .env file with the correct variables (see below)
+-   Install all packages with `npm install`
+-   Run the project with `npm run dev`

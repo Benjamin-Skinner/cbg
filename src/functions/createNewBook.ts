@@ -1,12 +1,20 @@
 import { v4 as uuidv4 } from 'uuid'
 import clientPromise from '@/util/db'
 import { Book, Page } from '@/types'
-import { DEFAULT_AR, HARDCOVER_AR, NUM_CHAPTERS, SQUARE_AR } from '@/constants'
+import {
+	DEFAULT_AR,
+	HARDCOVER_AR,
+	NUM_CHAPTERS,
+	RANDR_IMAGE_AR,
+	SQUARE_AR,
+} from '@/constants'
 import PageClass from '@/classes/Page'
+import logger from '@/logging'
 
 export async function createNewBook(title: string, oneLiner?: string) {
+	const newId = uuidv4()
 	const newBook: Book = {
-		id: uuidv4(),
+		id: newId,
 		createdAt: Date.now(),
 		status: 'inProgress',
 		lastSaved: Date.now(),
@@ -93,7 +101,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				activePages: [],
 			},
 			image: {
-				ar: DEFAULT_AR,
+				ar: RANDR_IMAGE_AR,
 				status: {
 					generating: {
 						inProgress: false,
@@ -105,7 +113,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 						dismissed: false,
 					},
 				},
-				image: '',
+				selected: {
+					url: '',
+					messageId: '',
+					type: '',
+				},
 				imageOptions: [],
 				generatingImages: [],
 				prompt: {
@@ -153,7 +165,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 							dismissed: false,
 						},
 					},
-					image: '',
+					selected: {
+						url: '',
+						messageId: '',
+						type: '',
+					},
 					imageOptions: [],
 					generatingImages: [],
 					prompt: {
@@ -200,7 +216,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 							dismissed: false,
 						},
 					},
-					image: '',
+					selected: {
+						url: '',
+						messageId: '',
+						type: '',
+					},
 					imageOptions: [],
 					generatingImages: [],
 					prompt: {
@@ -248,7 +268,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 						dismissed: false,
 					},
 				},
-				image: '',
+				selected: {
+					url: '',
+					messageId: '',
+					type: '',
+				},
 				imageOptions: [],
 				generatingImages: [],
 				prompt: {
@@ -295,7 +319,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 						dismissed: false,
 					},
 				},
-				image: '',
+				selected: {
+					url: '',
+					messageId: '',
+					type: '',
+				},
 				imageOptions: [],
 				generatingImages: [],
 				prompt: {
@@ -348,7 +376,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 							dismissed: false,
 						},
 					},
-					image: '',
+					selected: {
+						url: '',
+						messageId: '',
+						type: '',
+					},
 					imageOptions: [],
 					generatingImages: [],
 					prompt: {
@@ -400,7 +432,11 @@ export async function createNewBook(title: string, oneLiner?: string) {
 							dismissed: false,
 						},
 					},
-					image: '',
+					selected: {
+						url: '',
+						messageId: '',
+						type: '',
+					},
 					imageOptions: [],
 					generatingImages: [],
 					prompt: {
@@ -427,6 +463,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 	const db = client.db()
 	const collection = db.collection('books')
 	await collection.insertOne(newBook)
+	logger.info(`New book created with id: ${newId}`)
 	return newBook
 }
 

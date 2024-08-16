@@ -7,7 +7,8 @@ export const useGenerateImages = (
 	image: PageImage,
 	updateImage: (image: PageImage, options?: UpdateBookOptions) => void,
 	apiUrl: string,
-	bookId: string
+	bookId: string,
+	pageKey: string
 ) => {
 	const imageRef = useRef(image)
 
@@ -39,6 +40,7 @@ export const useGenerateImages = (
 			method: 'POST',
 			body: JSON.stringify({
 				bookId: bookId,
+				pageKey: pageKey,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -49,7 +51,6 @@ export const useGenerateImages = (
 		if (res.status === 200) {
 			const { data } = (await res.json()) as { data: PageImage }
 			console.log('GENERATION SUCCESS')
-			console.log(data)
 
 			await updateImage(data, {
 				clientOnly: true,

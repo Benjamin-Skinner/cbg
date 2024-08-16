@@ -11,7 +11,6 @@ export async function POST(req: Request, res: Response) {
 		bookId: string
 	} = await req.json()
 
-	console.log('UPDATING IMAGES')
 	const { error, isError } = ensureParams(params, ['bookId'])
 
 	if (isError && error) {
@@ -20,12 +19,6 @@ export async function POST(req: Request, res: Response) {
 
 	try {
 		const book = await getBookById(params.bookId)
-
-		// If there are no generating images, return the current images
-		if (!book.frontCover.hard.image.status.generating.inProgress) {
-			console.log('No generating images')
-			return NextResponse.json(book.frontCover.hard.image)
-		}
 
 		// Get the updated page images
 		const newImages = await updateImages(

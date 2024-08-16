@@ -1,5 +1,8 @@
-import { Book, ImageOption } from '@/types'
+import { Book, ImageOption, Page } from '@/types'
 import { updateBook } from '@/functions/updateBook'
+import getPageFromKey from '@/util/pageFromKey'
+import updatePage from '@/functions/updatePage'
+import logger from '@/logging'
 
 export async function addImageOptionInsideCover(
 	book: Book,
@@ -103,6 +106,59 @@ export async function addImageOptionBackCover(
 			},
 		},
 	}
+
+	await updateBook(newBook)
+}
+
+export async function addImageOptionPage(
+	book: Book,
+	pageKey: string,
+	newImageOption: ImageOption
+) {
+	const page = getPageFromKey(book, pageKey)
+
+	const allImageOptions = [...page.image.imageOptions, newImageOption]
+
+	const newPage: Page = {
+		...page,
+		image: {
+			...page.image,
+			imageOptions: allImageOptions,
+		},
+	}
+
+	const isIntro = pageKey === 'intro'
+	const isConclusion = pageKey === 'conclusion'
+
+	// Save the new page
+	await updatePage(book, newPage, isIntro, isConclusion)
+
+	logger.info(`Uploaded image option to page ${pageKey} for book ${book.id}`)
+}
+
+export async function addImageOptionRecallAndReflect(
+	book: Book,
+	newImageOption: ImageOption
+) {
+	const allImageOptions = [
+		...book.recallAndReflect.image.imageOptions,
+		newImageOption,
+	]
+
+	const newBook = {
+		...book,
+		recallAndReflect: {
+			...book.recallAndReflect,
+			image: {
+				...book.recallAndReflect.image,
+				imageOptions: allImageOptions,
+			},
+		},
+	}
+
+	logger.info(
+		`Uploaded image option to recall and reflect for book ${book.id}`
+	)
 
 	await updateBook(newBook)
 }

@@ -5,6 +5,7 @@ import { generateImages } from '@/generate/image/midjourney'
 import { getBookById } from '@/functions/getBookById'
 import { updateBook } from '@/functions/updateBook'
 import { Book } from '@/types'
+import logger from '@/logging'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -20,6 +21,10 @@ export async function POST(req: Request, res: Response) {
 	const book = await getBookById(params.bookId)
 
 	try {
+		logger.info(
+			`MIDJOURNEY request for front cover hard for book ${book.id}`
+		)
+
 		const newCoverImage = await generateImages(book.frontCover.hard.image)
 
 		// Save the new cover

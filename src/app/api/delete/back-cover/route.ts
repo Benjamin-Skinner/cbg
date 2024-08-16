@@ -3,11 +3,11 @@ import deleteImage from '@/functions/deleteImage'
 import { NextResponse } from 'next/server'
 import { removeImageOptionBackCover } from '@/functions/removeImageOption'
 
-export async function DELETE(request: Request) {
+export async function POST(request: Request) {
 	console.log('Back Cover Delete')
 	try {
-		const newImage = await deleteImage(request, removeImageOptionBackCover)
-		return NextResponse.json(newImage)
+		await deleteImage(request, removeImageOptionBackCover)
+		return NextResponse.json({ success: true })
 	} catch (e: any) {
 		return new CBGError(
 			e.message || 'An error occurred',

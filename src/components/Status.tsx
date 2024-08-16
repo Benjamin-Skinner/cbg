@@ -56,7 +56,7 @@ const Status: React.FC<Props> = ({
 		return (
 			<>
 				<div className="flex flex-col w-full">
-					<div className="badge badge-neutral badge-xl">Waiting</div>
+					{/* <div className="badge badge-neutral badge-xl">Waiting</div> */}
 					<div className="w-full">
 						<Message status={status} section={'description'} />
 					</div>

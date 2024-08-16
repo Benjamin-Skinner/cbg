@@ -42,18 +42,12 @@ export async function POST(req: Request, res: Response) {
 
 		const ar = params.page.image.ar || DEFAULT_AR
 
-		console.log('using AR')
-		console.log(ar)
-
 		// Generate Images
 		const optionGenerating = await sendMidjourneyJob(
 			params.page.image.prompt.content,
 			ar,
 			'no tiling'
 		)
-
-		console.log('optionGenerating')
-		console.log(optionGenerating)
 
 		// Update the page with the new image option
 		const page = params.page

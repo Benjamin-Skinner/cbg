@@ -3,7 +3,6 @@ import React, { useState, useCallback, useEffect } from 'react'
 
 import Navbar from '@/components/Navbar'
 import Title from './Title'
-import Frontcover from './Frontcover'
 import Backcover from './Backcover'
 import Outline from './Outline'
 import Pages from './Pages'
@@ -29,7 +28,7 @@ export type UpdateBookOptions = {
 	updateLayouts?: boolean
 }
 
-export type Field = 'title' | 'description'
+export type Field = 'title' | 'description' | 'status'
 
 const DEBOUNCE_SECONDS = 3
 
@@ -105,7 +104,7 @@ const Client: React.FC<Props> = ({ bookData }) => {
 				warningMessage={warningMessage}
 				setWarningMessage={setWarningMessage}
 			/>
-			<div className="px-8 flex flex-col items-center pt-12">
+			<div className="px-8 flex flex-col items-center pt-12 py-52">
 				<Title book={book} updateBook={updateBook} />
 				<Outline book={book} updateBook={updateBook} />
 

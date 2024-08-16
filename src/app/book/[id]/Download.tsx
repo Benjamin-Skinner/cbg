@@ -35,7 +35,7 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 						<div className="card-body">
 							<h1 className="text-2xl font-bold">Hardcover</h1>
 							<p className="text-lg">
-								Download the hardcover book as a PDF file.
+								Download the hardcover book as a .docx file.
 							</p>
 							<button
 								onClick={() => downloadManuscript('hardcover')}
@@ -43,25 +43,19 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 							>
 								Download Manuscript
 							</button>
-							<button className="btn btn-primary mt-4" disabled>
-								Download Cover
-							</button>
 						</div>
 					</div>
 					<div className="card shadow-xl bg-base-100 w-2/5 m-auto">
 						<div className="card-body">
 							<h1 className="text-2xl font-bold">Softcover</h1>
 							<p className="text-lg">
-								Download the softcover book as a PDF file.
+								Download the softcover book as a .docx file.
 							</p>
 							<button
 								className="btn btn-primary mt-4"
 								onClick={() => downloadManuscript('softcover')}
 							>
 								Download Manuscript
-							</button>
-							<button className="btn btn-primary mt-4" disabled>
-								Download Cover
 							</button>
 						</div>
 					</div>

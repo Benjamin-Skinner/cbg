@@ -3,14 +3,16 @@ import { updateBook } from '@/functions/updateBook'
 import { NextResponse } from 'next/server'
 import generateBlurb from '@/generate/text/blurb'
 import { getBookById } from '@/functions/getBookById'
-import sleep from '@/util/sleep'
 import clientPromise from '@/util/db'
 import { ensureParams } from '@/util/ensureParams'
-import StatusClass from '@/classes/Status'
 import CBGError from '@/classes/Error'
+import logger from '@/logging'
+import logStatus from '@/util/statusLog'
 
 export async function POST(req: Request, res: Response) {
-	const params = await req.json()
+	const params: {
+		book: Book
+	} = await req.json()
 
 	const { error, isError } = ensureParams(params, ['book'])
 
@@ -18,24 +20,22 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
+	logStatus('BLURB', 'requested', params.book.id)
 	try {
-		// Set Status as Generating
-		const newStatus = new StatusClass(params.book.blurb.status)
-		newStatus.beginGenerating()
-		const updatingBlurb: Blurb = {
-			...params.book.blurb,
-			status: newStatus.toObject(),
-		}
-		await updateBlurb(params.book, updatingBlurb)
-
 		// Generate Description
 		const blurb = await generateBlurb(params.book)
 		await updateBlurb(params.book, blurb)
 
+		logStatus('BLURB', 'completed', params.book.id)
 		return NextResponse.json({
 			data: blurb,
 		})
 	} catch (error: any) {
+		logger.error(
+			`BLURB generating for book ${JSON.stringify(params.book.blurb)}: ${
+				error.message
+			}`
+		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

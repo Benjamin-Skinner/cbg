@@ -1,10 +1,14 @@
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
-import { generateImages } from '@/generate/image/midjourney'
+import {
+	generateRemixImages,
+	getHardcoverMessageIdFromUrl,
+} from '@/generate/image/remix'
 import { getBookById } from '@/functions/getBookById'
 import { updateBook } from '@/functions/updateBook'
 import { Book } from '@/types'
+import logger from '@/logging'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -20,7 +24,21 @@ export async function POST(req: Request, res: Response) {
 	const book = await getBookById(params.bookId)
 
 	try {
-		const newCoverImage = await generateImages(book.frontCover.paper.image)
+		logger.info(
+			`MIDJOURNEY request for front cover paper for book ${book.id}`
+		)
+
+		// Make sure a hardcover image has been selected
+		if (!book.frontCover.hard.image.selected.url) {
+			throw new Error('Please select a hardcover image first')
+		}
+
+		const newCoverImage = await generateRemixImages(
+			book.frontCover.paper.image,
+			book.frontCover.hard.image.selected.messageId
+		)
+
+		console.log('newCoverImage', newCoverImage)
 
 		// Save the new cover
 		const newBook: Book = {
@@ -45,6 +63,11 @@ export async function POST(req: Request, res: Response) {
 			}
 		)
 	} catch (error: any) {
+		logger.error(
+			`FRONT COVER PAPER IMAGE generation for book ${
+				book.id
+			}: ${JSON.stringify(error)}`
+		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

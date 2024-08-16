@@ -1,26 +1,30 @@
-import winston from 'winston'
+import { createLogger, format } from 'winston'
+import DailyRotateFile from 'winston-daily-rotate-file'
+import * as path from 'path'
+const { combine, timestamp, printf } = format
+// Define custom format
+const customFormat = printf(({ level, message, timestamp }) => {
+	return `[${timestamp}] ${level.toUpperCase()}: ${message}`
+})
 
-const myFormat = winston.format.combine(
-	winston.format.timestamp({
-		format: 'YYYY-MM-DD hh:mm:ss.SSS A',
-	}),
-	winston.format.printf((info) => {
-		const { message, location, level } = info
-		return `[${info.timestamp}]${
-			level === 'error' ? ` ${level.toUpperCase()}` : ''
-		} ${message} ${location ? ` -- @${location}` : ''}`
-	})
-)
+const logLevels = {
+	error: 0,
+	info: 1,
+}
 
-export const logger = winston.createLogger({
+// Create the logger
+const logger = createLogger({
+	levels: logLevels,
+	format: combine(timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), customFormat),
 	transports: [
-		new winston.transports.File({
-			filename: 'logs/main.log',
-		}),
-		new winston.transports.File({
-			filename: 'logs/error.log',
-			level: 'error',
+		new DailyRotateFile({
+			filename: path.join('logs', 'application-%DATE%.log'),
+			datePattern: 'YYYY-MM-DD',
+			zippedArchive: true,
+			maxSize: '20m',
+			maxFiles: '14d',
 		}),
 	],
-	format: myFormat,
 })
+
+export default logger

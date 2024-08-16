@@ -1,6 +1,7 @@
 import { Blurb, Book } from '@/types'
 import StatusClass from '@/classes/Status'
 import generateText from './openai'
+import { getRandomChapterTitles } from '@/util/random'
 
 async function generateBlurb(book: Book): Promise<Blurb> {
 	const newStatus = new StatusClass(book.blurb.status)
@@ -25,7 +26,7 @@ async function generateBlurb(book: Book): Promise<Blurb> {
 
 export default generateBlurb
 async function generateBlurbGPT(book: Book): Promise<string> {
-	const chapterTitles = getSelectionOfChapterTitles(book, 4)
+	const chapterTitles = getRandomChapterTitles(book, 4)
 	const prompt = `Create a brief, engaging blurb for a children's educational book titled ${
 		book.title
 	} with chapters: ${chapterTitles.join(
@@ -35,16 +36,4 @@ async function generateBlurbGPT(book: Book): Promise<string> {
     `
 	const blurb = await generateText(prompt)
 	return blurb
-}
-
-function getSelectionOfChapterTitles(book: Book, num: number): string[] {
-	const chapterTitles = book.pages.chapters.map((chapter) => chapter.title)
-	// select num random chapter titles
-	const selection = []
-	for (let i = 0; i < num; i++) {
-		const randomIndex = Math.floor(Math.random() * chapterTitles.length)
-		selection.push(chapterTitles[randomIndex])
-		chapterTitles.splice(randomIndex, 1)
-	}
-	return selection
 }

@@ -23,7 +23,6 @@ async function updatePage(
 	intro: boolean,
 	conclusion: boolean
 ) {
-	console.log('updating page in DB')
 	const client = await clientPromise
 	const db = client.db()
 	const books = db.collection('books')

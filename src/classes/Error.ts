@@ -1,3 +1,4 @@
+import logger from '@/logging'
 import { NextResponse } from 'next/server'
 
 class CBGError {

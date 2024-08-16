@@ -9,15 +9,15 @@ const Placeholder: React.FC<Props> = ({ ar }) => {
 	const { hardcover, square, fullPage, rAndR } = arToBoolean(ar)
 
 	const getClassNames = () => {
-		let classNames = 'h-full w-auto bg-red-500 m-auto'
+		let classNames = ''
 		if (hardcover) {
-			classNames += ' aspect-hardcover'
+			classNames += 'w-[500px] h-[688px]'
 		} else if (square) {
-			classNames += ' aspect-square'
+			classNames += 'w-[350px] h-[350px]'
 		} else if (fullPage) {
-			classNames += ' aspect-fullpage'
+			classNames += 'w-[750px] h-[300px]'
 		} else if (rAndR) {
-			classNames += ' aspect-randr'
+			classNames += 'w-[430px] h-[100px]'
 		}
 		return classNames
 	}

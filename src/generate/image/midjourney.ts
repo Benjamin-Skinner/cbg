@@ -7,13 +7,17 @@ import {
 } from '@/types'
 import { ImageOptionGenerating, UpscaleJob } from '@/types'
 import StatusClass from '@/classes/Status'
-import { saveImageAsBlob } from '@/util/image'
+import logger from '@/logging'
+import { saveImageToAWS } from '@/util/aws/upload'
 
 /**
  * *************** EXPORTED FUNCTIONS ***************
  */
 
-export async function generateImages(image: PageImage) {
+export async function generateImages(
+	image: PageImage,
+	tiling?: 'tiling' | 'no tiling'
+): Promise<PageImage> {
 	// Make sure there is a prompt
 	if (image.prompt.content === '') {
 		throw new Error('Please enter a prompt')
@@ -22,10 +26,8 @@ export async function generateImages(image: PageImage) {
 	const optionGenerating = await sendMidjourneyJob(
 		image.prompt.content,
 		image.ar,
-		'no tiling'
+		tiling || 'no tiling'
 	)
-
-	console.log(optionGenerating)
 
 	const newImage = image
 	newImage.generatingImages.push(optionGenerating)
@@ -33,6 +35,7 @@ export async function generateImages(image: PageImage) {
 	// Set the status
 	const newStatus = new StatusClass(newImage.status)
 	newStatus.beginGenerating()
+	newStatus.clearMessage()
 	newImage.status = newStatus.toObject()
 
 	return newImage
@@ -67,8 +70,6 @@ export async function sendMidjourneyJob(
 		tiling === 'no tiling' ? false : true
 	)
 
-	console.log('RESPONSE', response)
-
 	// Create a new midjourney job
 	const midjourneyJob: ImageOptionGenerating = {
 		messageId: response.messageId,
@@ -78,6 +79,10 @@ export async function sendMidjourneyJob(
 		ar: ar,
 		tiling: tiling === 'no tiling' ? false : true,
 	}
+
+	logger.info(
+		`MIDJOURNEY job created with messageId ${midjourneyJob.messageId}`
+	)
 
 	return midjourneyJob
 }
@@ -103,7 +108,7 @@ export async function updateImages(
 	const generatingImages = images.generatingImages
 
 	if (generatingImages.length === 0) {
-		console.log('No generating images')
+		console.log('Stopped Because there are no generating images')
 		let newStatus = new StatusClass(newImages.status)
 		newStatus.clearGenerating()
 		newStatus.setAsSuccess()
@@ -114,12 +119,8 @@ export async function updateImages(
 	for (let i = 0; i < generatingImages.length; i++) {
 		const job = generatingImages[i]
 		if (!job.progress) job.progress = 0
-
-		console.log('JOB', job)
-		console.log('JOB AR', job.ar)
 		// The job is done and all the upscales have already been completed
 		if (job.completed) {
-			console.log('JOB ALREADY COMPLETED')
 			continue
 		}
 
@@ -127,22 +128,18 @@ export async function updateImages(
 
 		// If the image was not done last cycle, refetch it
 		if (job.progress < 100) {
-			console.log('UPDATING PROGRESS')
 			const imageResponse = await getMidJourneyImage(job.messageId)
 			imgResponseProgress = imageResponse.progress
-			// Make sure there's no error
-			// newImages.status.message = {
-			// 	code: '',
-			// 	content: '',
-			// 	dismissed: false,
-			// }
+
 			// Update the progress
 			newImages.generatingImages[i].progress = imageResponse.progress
 			newImages.status.generating.progress =
 				10 + imageResponse.progress * 0.2
 
 			if (imageResponse.status === 'FAIL') {
-				console.log('MAIN IMAGE FAILED')
+				logger.error(
+					`MIDJOURNEY image failed with message ID ${imageResponse.messageId}`
+				)
 				newImages.generatingImages[i].completed = true
 				newImages.status.generating.progress = 100
 				const newStatus = new StatusClass(newImages.status)
@@ -157,15 +154,10 @@ export async function updateImages(
 
 		// The image is complete but hasn't been upscaled yet
 		else if (job.progress === 100 || imgResponseProgress === 100) {
-			console.log(
-				`job.progress = ${job.progress} and imgResponseProgress = ${imgResponseProgress}`
-			)
-			console.log('NEED TO UPSCALE JOB')
 			const currUpscale = job.upscales.length
 
 			// There has not been any upscale requested yet
 			if (currUpscale === 0) {
-				console.log('creating first upscale job')
 				const u1 = await sendUpscaleJob(
 					job.messageId,
 					'U1',
@@ -177,7 +169,6 @@ export async function updateImages(
 
 			// One upscale job has been created; analyze the progress
 			else if (currUpscale === 1) {
-				console.log('currUpscale === 1')
 				// Process the first upscale job and extract the new data plus the new image option (if needed)
 				const { upscale } = await handleUpscaleJob(
 					newImages.generatingImages[i].upscales[0],
@@ -189,7 +180,6 @@ export async function updateImages(
 
 				// Create second upscale job if the first one is done
 				if (upscale.completed) {
-					console.log('Creating a new upscale job')
 					const u2 = await sendUpscaleJob(
 						job.messageId,
 						'U2',
@@ -200,7 +190,6 @@ export async function updateImages(
 					newImages.status.generating.progress = 40
 				}
 			} else if (currUpscale === 2) {
-				console.log('currUpscale === 2')
 				// Process the second upscale job and extract the new data plus the new image option (if needed)
 				const { upscale } = await handleUpscaleJob(
 					newImages.generatingImages[i].upscales[1],
@@ -212,7 +201,6 @@ export async function updateImages(
 
 				// Create third upscale job if the second one is done
 				if (upscale.completed) {
-					console.log('Creating a new upscale job')
 					newImages.status.generating.progress = 60
 					const u3 = await sendUpscaleJob(
 						job.messageId,
@@ -223,7 +211,6 @@ export async function updateImages(
 					newImages.generatingImages[i].upscales.push(u3)
 				}
 			} else if (currUpscale === 3) {
-				console.log('currUpscale === 3')
 				// Process the third upscale job and extract the new data plus the new image option (if needed)
 				const { upscale } = await handleUpscaleJob(
 					newImages.generatingImages[i].upscales[2],
@@ -235,7 +222,6 @@ export async function updateImages(
 
 				// Create fourth upscale job if the third one is done
 				if (upscale.completed) {
-					console.log('Creating a new upscale job')
 					newImages.status.generating.progress = 80
 					const u4 = await sendUpscaleJob(
 						job.messageId,
@@ -246,7 +232,6 @@ export async function updateImages(
 					newImages.generatingImages[i].upscales.push(u4)
 				}
 			} else if (currUpscale === 4) {
-				console.log('currUpscale === 4')
 				// Process the fourth upscale job and extract the new data plus the new image option (if needed)
 				const { upscale } = await handleUpscaleJob(
 					newImages.generatingImages[i].upscales[3],
@@ -262,9 +247,7 @@ export async function updateImages(
 					const newImageOptions = job.upscales.map((upscale) =>
 						upscaleToImageOption(upscale, bookId)
 					)
-					console.log(
-						`There are ${newImageOptions.length} new image options`
-					)
+
 					const resolvedNewImageOptions = await Promise.all(
 						newImageOptions
 					)
@@ -273,13 +256,14 @@ export async function updateImages(
 					)
 					newImages.imageOptions = allImageOptions
 
-					console.log('FINAL UPSCALE IS DONE')
 					newImages.generatingImages[i].completed = true
 					const newStatus = new StatusClass(newImages.status)
 					newStatus.clearGenerating()
 					newStatus.setAsSuccess()
 					newImages.status = newStatus.toObject()
-					console.log('STATUS UPDATED')
+					newImages.status.generating.progress = 100
+					logger.info(`MIDJOURNEY image ${job.messageId} complete`)
+					break
 				}
 			}
 		}
@@ -301,7 +285,6 @@ async function createMidjourneyJob(
 ): Promise<GenerateImageResponse> {
 	const params = midjourneyParams(ar, tiling)
 	const fullPrompt = `${prompt} ${params}`
-	console.log('Creating image with params:', params)
 	const response = await fetch(
 		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/imagine`,
 		{
@@ -321,7 +304,6 @@ async function createMidjourneyJob(
 	if (data.error) {
 		throw new Error(data.error)
 	}
-	// console.log(data)
 	return data as GenerateImageResponse
 }
 
@@ -334,11 +316,6 @@ async function sendUpscaleJob(
 	ar: ImageAR,
 	tiling: boolean
 ): Promise<UpscaleJob> {
-	console.log(
-		`upscaling image with messageId ${messageId} and button ${button} ar ${JSON.stringify(
-			ar
-		)}`
-	)
 	const response = await fetch(
 		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/button`,
 		{
@@ -355,7 +332,6 @@ async function sendUpscaleJob(
 		}
 	)
 	const data = (await response.json()) as GenerateImageResponse
-	// console.log(data)
 	return {
 		messageId: data.messageId,
 		completed: false,
@@ -378,8 +354,6 @@ async function sendUpscaleJob(
 async function getMidJourneyImage(
 	messageId: string
 ): Promise<MidjourneyResponse> {
-	console.log('Fetching image from midjourney')
-
 	const response = await fetch(
 		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/message/${messageId}`,
 		{
@@ -394,15 +368,12 @@ async function getMidJourneyImage(
 
 	const data = (await response.json()) as MidjourneyResponse
 	if (!data.progress) {
-		console.log('no progress, manually setting progress')
 		data.progress = 0
 	}
 
 	if (data.status && data.status === 'FAIL') {
-		console.log('failed')
 		data.progress = 100
 	}
-	// console.log(data)
 	return data
 }
 
@@ -415,7 +386,6 @@ async function handleUpscaleJob(
 ): Promise<{
 	upscale: UpscaleJob
 }> {
-	console.log('handling upscale job')
 	const newUpscale = { ...upscale }
 
 	if (!upscale.completed) {
@@ -423,7 +393,6 @@ async function handleUpscaleJob(
 
 		if (response.status && response.status === 'fail') {
 			// Job failed
-			console.log(`UPSCALE ${i + 1} FAILED`)
 			newUpscale.completed = true
 			newUpscale.progress = 100
 			newUpscale.url = ''
@@ -472,28 +441,29 @@ async function upscaleToImageOption(
 		const stream = blob.stream()
 
 		// Save the image to Blob storage and get the result
-		const res = await saveImageAsBlob(bookId, stream)
+		const { savedUrl } = await saveImageToAWS(bookId, stream)
 
 		return {
-			url: res.url || '',
+			url: savedUrl || '',
 			error: upscale.error || '',
 			type: 'midjourney',
 			ar: upscale.ar,
 			tiling: upscale.tiling,
+			messageId: upscale.messageId,
 		}
 	} catch (error: any) {
-		console.error('Error in upscaleToImageOption:', error)
 		return {
 			url: '',
 			error: upscale.error || error.message,
 			type: 'midjourney',
 			ar: upscale.ar,
 			tiling: upscale.tiling,
+			messageId: upscale.messageId,
 		}
 	}
 }
 
-function midjourneyParams(ar: ImageAR, tiling: boolean): string {
+export function midjourneyParams(ar: ImageAR, tiling: boolean): string {
 	let params = ''
 
 	params += ` --ar ${ar.width}:${ar.height}`

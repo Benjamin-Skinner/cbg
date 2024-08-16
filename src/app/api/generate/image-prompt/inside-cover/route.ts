@@ -5,6 +5,8 @@ import { Cover } from '@/types'
 import generateImagePrompt from '@/generate/text/coverImagePrompt'
 import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
+import logger from '@/logging'
+import logStatus from '@/util/statusLog'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -18,9 +20,10 @@ export async function POST(req: Request, res: Response) {
 	}
 
 	const bookId = params.bookId
+	const book = await getBookById(bookId)
 
 	try {
-		const book = await getBookById(bookId)
+		logStatus('IMAGE_PROMPT_INSIDE_COVER', 'requested', bookId)
 
 		const openAiPrompt = `Generate a description of a feature image for a book called ${book.title}.
     The description should be one short sentence. There should be only one subject, and it should be 
@@ -63,6 +66,8 @@ export async function POST(req: Request, res: Response) {
 			insideCover: newInsideCover,
 		})
 
+		logStatus('IMAGE_PROMPT_INSIDE_COVER', 'completed', bookId)
+
 		return NextResponse.json(
 			{
 				data: newPrompt,
@@ -72,6 +77,11 @@ export async function POST(req: Request, res: Response) {
 			}
 		)
 	} catch (error: any) {
+		logger.error(
+			`IMAGE PROMPT HARD COVER generating for ${JSON.stringify(
+				book.insideCover
+			)}`
+		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

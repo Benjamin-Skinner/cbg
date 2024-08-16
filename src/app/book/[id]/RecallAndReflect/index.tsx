@@ -3,19 +3,24 @@
 import { Recall, Reflect } from './Questions'
 import { Book } from '@/types'
 import Section from '@/components/Section'
-import Mountain from '@/mountain-rr.png'
-import Image from 'next/image'
 import { Question } from '@/types'
 import React from 'react'
-import { useGenerateReflect, useRegenerateRecall } from './hooks'
-import useUpdateQuestions from './updateQuestion'
+import {
+	useGenerateReflect,
+	useRegenerateRecall,
+	useUpdateQuestions,
+} from './hooks'
 import Images from './Images'
-import { UpdateBookOptions } from '../Client'
-import NewImagesBanner from '@/components/NewImagesBanner'
+import SelectImage from '@/components/selectImage/SelectImage'
+import { PageImage } from '@/types'
 
 interface Props {
 	book: Book
 	updateBook: (book: Book) => void
+}
+
+interface SelectProps {
+	id: string
 }
 
 const RecallAndReflect: React.FC<Props> = ({ book, updateBook }) => {
@@ -27,6 +32,29 @@ const RecallAndReflect: React.FC<Props> = ({ book, updateBook }) => {
 
 	const { generateRecall } = useRegenerateRecall(updateBook, book)
 	const { generateReflect } = useGenerateReflect(updateBook, book)
+
+	const updateImage = (image: PageImage) => {
+		updateBook({
+			...book,
+			recallAndReflect: {
+				...book.recallAndReflect,
+				image,
+			},
+		})
+	}
+
+	const Select: React.FC<SelectProps> = ({ id }) => {
+		return (
+			<SelectImage
+				setNewImages={setNewImages}
+				image={book.recallAndReflect.image}
+				updateImage={updateImage}
+				modalId={`recallAndReflect-${id}`}
+				bookId={book.id}
+				newImages={newImages}
+			/>
+		)
+	}
 
 	return (
 		<Section title="Recall and Reflect">
@@ -41,6 +69,12 @@ const RecallAndReflect: React.FC<Props> = ({ book, updateBook }) => {
 						}
 						book={book}
 						updateBook={updateBook}
+						setNewImages={setNewImages}
+						image={book.recallAndReflect.image}
+						updateImage={updateImage}
+						modalId="recallAndReflect1"
+						bookId={book.id}
+						newImages={newImages}
 					/>
 					<QuestionPage
 						questions={book.recallAndReflect.reflect.questions}
@@ -51,13 +85,14 @@ const RecallAndReflect: React.FC<Props> = ({ book, updateBook }) => {
 						}
 						book={book}
 						updateBook={updateBook}
+						setNewImages={setNewImages}
+						image={book.recallAndReflect.image}
+						updateImage={updateImage}
+						modalId="recallAndReflect2"
+						bookId={book.id}
+						newImages={newImages}
 					/>
 				</div>
-				{newImages && (
-					<button className="w-9/12 mx-auto">
-						<NewImagesBanner />
-					</button>
-				)}
 			</Section.Center>
 			<Section.Right>
 				<div role="tablist" className="tabs tabs-boxed my-8">
@@ -113,6 +148,12 @@ interface QuestionPageProps {
 	disabled: boolean
 	book: Book
 	updateBook: (book: Book) => void
+	setNewImages: (newImages: boolean) => void
+	image: PageImage
+	updateImage: (image: PageImage) => void
+	modalId: string
+	bookId: string
+	newImages: boolean
 }
 
 const QuestionPage: React.FC<QuestionPageProps> = ({
@@ -121,6 +162,12 @@ const QuestionPage: React.FC<QuestionPageProps> = ({
 	disabled,
 	book,
 	updateBook,
+	setNewImages,
+	image,
+	updateImage,
+	modalId,
+	bookId,
+	newImages,
 }) => {
 	const { updateQuestion } = useUpdateQuestions(updateBook, book)
 
@@ -154,7 +201,16 @@ const QuestionPage: React.FC<QuestionPageProps> = ({
 					</div>
 				))}
 			</div>
-			<Image alt="Mountains" src={Mountain} className="w-full mt-auto" />
+			<div className="flex-1 flex items-end justify-end">
+				<SelectImage
+					setNewImages={setNewImages}
+					image={image}
+					updateImage={updateImage}
+					modalId={modalId}
+					bookId={bookId}
+					newImages={newImages}
+				/>
+			</div>
 		</div>
 	)
 }

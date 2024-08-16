@@ -75,8 +75,8 @@ export const SQUARE_AR: ImageAR = {
 export const FULL_PAGE_AR: ImageAR = {
 	fullPage: true,
 	square: false,
-	height: 5,
-	width: 2,
+	height: 2,
+	width: 5,
 }
 
 export const HARDCOVER_AR: ImageAR = {

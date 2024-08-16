@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useCallback, useEffect, useRef } from 'react'
-import Chapter from './Chapter'
+import Chapter from './chapter/Chapter'
 import { Book, Page } from '@/types'
 import { UpdateBookOptions } from './Client'
 

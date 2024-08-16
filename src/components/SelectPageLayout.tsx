@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 import { DEFAULT_AR, FULL_PAGE_AR } from '@/constants'
-import { ImageAR, Page } from '@/types'
+import { ImageAR, Page, SelectedImage } from '@/types'
 import { UpdateBookOptions } from '@/app/book/[id]/Client'
 
 interface Props {
@@ -10,26 +10,36 @@ interface Props {
 }
 
 const SelectPageLayout: React.FC<Props> = ({ page, updatePage }) => {
-	const [previousImage, setPreviousImage] = useState<string | null>(null)
+	const [previousImage, setPreviousImage] = useState<SelectedImage | null>(
+		null
+	)
 	const handleLayoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const fullPage = e.target.checked
 
 		// If fullPage has been toggled, clear the selected image
-		let newImageUrl = page.image.image
+		let newImage: SelectedImage = {
+			url: '',
+			messageId: '',
+			type: '',
+		}
+
+		// User has switched this from regular to full-page
 		if (fullPage && page.layout !== 'fullPage') {
+			// If we have stored an image from before, use that
 			if (previousImage) {
-				newImageUrl = previousImage
-			} else {
-				newImageUrl = ''
+				newImage = previousImage
 			}
-			setPreviousImage(page.image.image)
-		} else if (!fullPage && page.layout === 'fullPage') {
+			// Save the full page image
+			setPreviousImage(page.image.selected)
+		}
+		// User has switched this from full-page to regular
+		else if (!fullPage && page.layout === 'fullPage') {
+			// If we have stored an image from before, use that
 			if (previousImage) {
-				newImageUrl = previousImage
-			} else {
-				newImageUrl = ''
+				newImage = previousImage
 			}
-			setPreviousImage(page.image.image)
+			// Save the nonfull page image
+			setPreviousImage(page.image.selected)
 		}
 
 		const newImageAr: ImageAR = fullPage ? FULL_PAGE_AR : DEFAULT_AR
@@ -40,7 +50,7 @@ const SelectPageLayout: React.FC<Props> = ({ page, updatePage }) => {
 				layout: fullPage ? 'fullPage' : 'imageFirst',
 				image: {
 					...page.image,
-					image: newImageUrl,
+					selected: newImage,
 					ar: newImageAr,
 				},
 			},

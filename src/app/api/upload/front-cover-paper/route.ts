@@ -5,7 +5,6 @@ import { SQUARE_AR } from '@/constants'
 import { addImageOptionFrontCoverPaper } from '@/functions/addImageOption'
 
 export async function POST(request: Request) {
-	console.log('Front Cover Paper Upload')
 	try {
 		const newImageOption = await uploadImage(
 			request,

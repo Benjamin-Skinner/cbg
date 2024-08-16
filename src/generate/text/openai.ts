@@ -3,8 +3,6 @@ import OpenAI from 'openai'
 const openai = new OpenAI()
 
 const generateText = async (prompt: string, chaos?: number) => {
-	console.log('Generating text with OpenAI')
-
 	const completion = await openai.chat.completions.create({
 		messages: [{ role: 'user', content: prompt }],
 		temperature: chaos || 1,

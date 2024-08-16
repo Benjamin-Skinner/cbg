@@ -8,7 +8,8 @@ export const useUpdateImages = (
 	updateImage: (image: PageImage, options?: UpdateBookOptions) => void,
 	apiUrl: string,
 	bookId: string,
-	setNewImages: (newImages: boolean) => void
+	setNewImages: (newImages: boolean) => void,
+	pageKey: string
 ) => {
 	const imageRef = useRef(image)
 
@@ -18,12 +19,11 @@ export const useUpdateImages = (
 	}, [image])
 
 	const updateImages = async () => {
-		console.log('UPDATING IMAGES')
-
 		const res = await fetch(apiUrl, {
 			method: 'POST',
 			body: JSON.stringify({
 				bookId,
+				pageKey,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -33,21 +33,21 @@ export const useUpdateImages = (
 		// SUCCESS --> update the state with the new images
 		if (res.status === 200) {
 			const { data } = (await res.json()) as { data: PageImage }
-
-			console.log('new PageImage received ')
-
-			if (
-				!data.status.generating.inProgress &&
-				data.status.message.code !== 'error' &&
-				data.imageOptions.length > 0
-			) {
+			console.log('UPDATE IMAGE RESPONSE')
+			console.log(data)
+			if (data.status.generating.progress === 100) {
 				console.log('no longer generating; job done')
 				setNewImages(true)
 			}
 
-			await updateImage(data, {
-				clientOnly: true,
-			})
+			if (
+				data.status.generating.progress > 0 ||
+				data.status.generating.inProgress
+			) {
+				await updateImage(data, {
+					clientOnly: true,
+				})
+			}
 		} else {
 			const { error, code } = await res.json()
 			console.error(`${code}: ${error}`)

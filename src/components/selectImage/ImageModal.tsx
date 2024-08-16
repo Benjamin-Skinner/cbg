@@ -59,11 +59,9 @@ const ImageModal: React.FC<Props> = ({
 
 	const deleteImage = async (option: ImageOption) => {
 		console.log('deleteImage')
-		console.log(option)
 
 		// Immediately update state
 		const originalImageOptions = [...currImageOptions]
-		// Immediately update the state
 		const updatedImageOptions = currImageOptions.filter(
 			(image) => image.url !== option.url
 		)
@@ -71,7 +69,7 @@ const ImageModal: React.FC<Props> = ({
 
 		// Call the API route
 		const res = await fetch(deleteUrl(option.url), {
-			method: 'DELETE',
+			method: 'POST',
 		})
 
 		// If there is an error, set the error
@@ -83,14 +81,8 @@ const ImageModal: React.FC<Props> = ({
 			return
 		}
 
-		console.log('SUCCESS')
-		const newImage = (await res.json()) as PageImage
-		console.log('newImage', newImage)
+		// Don't update anything based on the result
 		setError('')
-
-		// On success, update the book
-		// Add to local Book (client only)
-		updateImage(newImage, { clientOnly: true })
 	}
 
 	return (
@@ -99,12 +91,17 @@ const ImageModal: React.FC<Props> = ({
 				<div className="">
 					<div className="flex flex-row items-start">
 						<article className="prose">
-							<h3>Select Image for {modalTitle}</h3>
+							<h3>Select image for {modalTitle}</h3>
 						</article>
 
 						<div className="modal-action mt-0 ml-auto">
 							<form method="dialog">
-								<button className="btn">Close</button>
+								<button
+									className="btn"
+									onClick={() => setError('')}
+								>
+									Close
+								</button>
 							</form>
 						</div>
 					</div>
@@ -113,6 +110,7 @@ const ImageModal: React.FC<Props> = ({
 						setLoading={setImageUploading}
 						setError={setError}
 						addImageOption={addImageOption}
+						imageUploading={imageUploading}
 					/>
 					<p
 						className={`${

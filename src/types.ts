@@ -3,16 +3,12 @@ import CBGError from '@/classes/Error'
 export type Book = {
 	id: string
 	title: string
-	status: 'inProgress' | 'uploaded' | 'abandoned'
+	status: 'inProgress' | 'uploaded' | 'abandoned' | 'awaitingReview'
 	blurb: Blurb
 	oneLiner: string
 	description: Description
 	outline: Outline
-	recallAndReflect: {
-		image: PageImage
-		recall: RandR
-		reflect: RandR
-	}
+	recallAndReflect: RecallAndReflect
 	frontCover: {
 		hard: Cover
 		paper: Cover
@@ -22,6 +18,12 @@ export type Book = {
 	pages: BookPages
 	lastSaved: number
 	createdAt: number
+}
+
+export type RecallAndReflect = {
+	image: PageImage
+	recall: RandR
+	reflect: RandR
 }
 
 export type Blurb = {
@@ -80,6 +82,7 @@ export type ImageOption = {
 	url: string
 	error: string
 	tiling: boolean
+	messageId: string
 	type: 'manual' | 'midjourney'
 	ar: ImageAR
 }
@@ -132,9 +135,15 @@ export type ImagePrompt = {
 	content: string
 }
 
+export type SelectedImage = {
+	url: string
+	messageId: string
+	type: 'manual' | 'midjourney' | ''
+}
+
 export type PageImage = {
 	status: Status
-	image: string
+	selected: SelectedImage
 	ar: ImageAR
 	imageOptions: ImageOption[]
 	prompt: ImagePrompt

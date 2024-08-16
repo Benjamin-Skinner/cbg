@@ -3,6 +3,17 @@ import StatusClass from '@/classes/Status'
 import generateText from './openai'
 import { getFullBookDescription } from '@/util/book'
 
+/**
+ * Generate Page Text handles all of the text generation features for a page in a book.
+ *
+ * Based on the page type (intro/conclusiom/chapter) and the mode (generate/add/reduce/edit),
+ * it calls the appropriate function and returns the updated page.
+ *
+ * No matter what it returns a complete page, but if there was an error the page
+ * will have an error. NOTE: throwing an error here updates the page status
+ * but does still sends a 200 response to the client.
+ *
+ */
 async function generatePageText(
 	book: Book,
 	page: Page,
@@ -23,7 +34,6 @@ async function generatePageText(
 		} else if (mode === 'edit') {
 			newPageText = await editText(page)
 		}
-		console.log(newPageText)
 		newStatus.setAsSuccess()
 		return {
 			...page,
@@ -105,10 +115,11 @@ Page:`
 }
 
 async function getIntroText(page: Page, book: Book): Promise<string> {
-	const prompt = `When I give you the title of a book, write an introductory page for the book in as close to 70 words as possible. Use simple words and phrases that are perfect for reading aloud. Base the introduction closely on the following examples. Only use human characters. There should be a parent and one or more children. Do not give the parent a name.:
+	const prompt = `When I give you the title of a book, write an introductory page for the book in as close to 70 words as possible. Use simple words and phrases that are perfect for reading aloud. Base the introduction closely on the following examples. Only use human characters with creative names. There should be a parent and one or more children. Do not give the parent a name.:
 
 Title: Lets' Discover California
 In a sunny backyard, Emma, Jack, and their Mom sat with a colorful map spread out before them. "Let's explore California!" said Mom, pointing to different places in the state. "From the busy streets of Los Angeles and San Francisco to the towering redwoods and sunny beaches, there's so much to see." The children beamed with excitement, eager to discover all the amazing sights of the Golden State.
+
 
 Title: ${book.title}`
 	const text = await generateText(prompt)
@@ -144,6 +155,9 @@ Conclusion:`
 }
 
 async function addSentence(page: Page, book: Book) {
+	if (page.text.content.length === 0) {
+		throw new Error('Please start by generating some text.')
+	}
 	const prompt = `When I give you a subject, book title, and paragraph of an educational, fact-based children's book, add one high-quality sentence to the end of it. Use the same style as the previous sentences. Examples: 
 
 Book Title: Let's Discover California
@@ -176,6 +190,9 @@ New Sentence:`
 }
 
 async function reduceWords(page: Page) {
+	if (page.text.content.length === 0) {
+		throw new Error('Please start by generating some text.')
+	}
 	const prompt = `When I give you a paragraph of an educational, fact-based children's book, reduce it by 10 words. Keep the text interesting, engaging, and educational. Use simple words and phrases that are perfect for reading aloud.
     
     Page: ${page.text.content}
@@ -191,6 +208,9 @@ async function reduceWords(page: Page) {
 }
 
 async function editText(page: Page) {
+	if (page.text.content.length === 0) {
+		throw new Error('Please start by generating some text.')
+	}
 	const prompt = `Take the following paragraph and edit it to make it more suitable for children. 1) Find any words or phrases that are too complex and simply them; 2) Remove any sentences that do not add any new factual information. Surround any edits with a '==' sign. Be conservative and only make at most 2 edits.
     Example:
     Text: Mom pointed to a small black insect crawling on the ground. "That's a beetle," she said. Beetles are insects with hard shells to protect their bodies. There are many different types of beetles, like ladybugs and scarab beetles. Some beetles fly, while others crawl. Beetles eat plants, fruits, and even other bugs. They are important for our environment because they help plants grow and keep other insect populations in check.

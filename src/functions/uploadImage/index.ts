@@ -1,10 +1,7 @@
 import { Book, ImageAR, ImageOption } from '@/types'
 import { getBookById } from '../getBookById'
-import {
-	arFromImageDimesions,
-	getImageDimensions,
-	saveImageAsBlob,
-} from '@/util/image'
+import { arFromImageDimesions, getImageDimensions } from '@/util/image'
+import { saveImageToAWS } from '@/util/aws/upload'
 
 /**
  * Takes a request which should contain a file and a bookId.
@@ -51,23 +48,21 @@ async function uploadImage(
 		)
 	}
 
-	console.log('height', height)
-	console.log('width', width)
-
 	// save the image in the Image Storage and get the URL
-	const blob = await saveImageAsBlob(book.id, stream2)
+
+	const { savedUrl } = await saveImageToAWS(book.id, stream2)
 
 	// Turn it into a new image option
-	const newImageOption = {
-		url: blob.url,
+	const newImageOption: ImageOption = {
+		url: savedUrl,
 		error: '',
 		type: 'manual' as 'manual' | 'midjourney',
 		ar, // extracted from the image
 		tiling: false,
+		messageId: '',
 	}
 
 	// Save the new Image Option in the database
-	console.log('about to save the new image')
 	await addImageOption(book, newImageOption)
 
 	// Return the new image option

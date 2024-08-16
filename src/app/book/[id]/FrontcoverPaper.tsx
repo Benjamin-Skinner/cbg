@@ -62,16 +62,25 @@ const FrontcoverPaper: React.FC<Props> = ({ book, updateBook }) => {
 					bookId={book.id}
 					newImages={newImages}
 					setNewImages={setNewImages}
+					card
 				/>
 			</Section.Center>
 			<Section.Right>
-				<ImageGenerationStatus image={book.frontCover.paper.image} />
-				<ImagePrompt
-					updatePrompt={updateImagePrompt}
-					prompt={book.frontCover.paper.image.prompt}
-					bookId={book.id}
-					id="frontCover-paper"
+				<ImageGenerationStatus
+					image={book.frontCover.paper.image}
+					updateImage={updateImage}
 				/>
+				<div className="card bg-base-100 w-92 shadow-xl">
+					<div className="card-body">
+						{/* <h2 className="card-title">Card title!</h2> */}
+						<p>
+							The paper cover image will be generated from the
+							selected hardcover image
+						</p>
+						<div className="card-actions justify-end"></div>
+					</div>
+				</div>
+
 				<GenerateImages
 					setNewImages={setNewImages}
 					image={book.frontCover.paper.image}

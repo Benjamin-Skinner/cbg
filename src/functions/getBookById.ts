@@ -8,7 +8,11 @@ const status = new StatusClass().toObject()
 
 const emptyPageImage: PageImage = {
 	status: status,
-	image: '',
+	selected: {
+		url: '',
+		messageId: '',
+		type: '',
+	},
 	ar: DEFAULT_AR,
 	imageOptions: [],
 	prompt: {
@@ -38,6 +42,22 @@ export async function getBookById(bookId: string) {
 		createdAt: bookDoc.createdAt,
 		lastSaved: bookDoc.lastSaved,
 		pages: bookDoc.pages,
+	}
+
+	if (!book.pages.intro.image.ar) {
+		book.pages.intro.image.ar = DEFAULT_AR
+	}
+
+	if (!book.pages.intro.layout) {
+		book.pages.intro.layout = 'imageFirst'
+	}
+
+	if (!book.pages.conclusion.image.ar) {
+		book.pages.conclusion.image.ar = DEFAULT_AR
+	}
+
+	if (!book.pages.conclusion.layout) {
+		book.pages.conclusion.layout = 'imageFirst'
 	}
 
 	for (const page of book.pages.chapters) {

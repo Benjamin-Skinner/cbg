@@ -1,5 +1,11 @@
+import { DEFAULT_AR } from '@/constants'
 import StatusClass from './Status'
-import { ImageOption, Page, ImageOptionGenerating } from '@/types'
+import {
+	ImageOption,
+	Page,
+	ImageOptionGenerating,
+	SelectedImage,
+} from '@/types'
 import { extractPngName } from '@/util/url'
 import { v4 as uuid } from 'uuid'
 
@@ -21,7 +27,7 @@ class PageClass {
 	}
 	image: {
 		status: StatusClass
-		image: string
+		selected: SelectedImage
 		imageOptions: ImageOption[]
 		generatingImages: ImageOptionGenerating[]
 		prompt: {
@@ -49,7 +55,11 @@ class PageClass {
 
 		this.image = {
 			status: imageStatus,
-			image: '',
+			selected: {
+				url: '',
+				messageId: '',
+				type: '',
+			},
 			imageOptions: [],
 			generatingImages: [],
 			prompt: {
@@ -86,8 +96,9 @@ class PageClass {
 				content: this.text.content,
 			},
 			image: {
+				ar: DEFAULT_AR,
 				status: this.image.status.toObject(),
-				image: this.image.image,
+				selected: this.image.selected,
 				imageOptions: this.image.imageOptions,
 				generatingImages: this.image.generatingImages,
 				prompt: {
@@ -113,7 +124,7 @@ class PageClass {
 		}
 		newPage.image = {
 			status: new StatusClass(page.image.status),
-			image: page.image.image,
+			selected: page.image.selected,
 			imageOptions: page.image.imageOptions,
 			generatingImages: page.image.generatingImages,
 			prompt: {

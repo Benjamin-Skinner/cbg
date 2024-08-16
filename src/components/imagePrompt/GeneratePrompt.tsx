@@ -8,6 +8,7 @@ interface Props {
 	updatePrompt: (prompt: ImagePrompt) => void
 	bookId: string
 	apiUrl: string
+	pageKey: string
 }
 
 const GeneratePrompt: React.FC<Props> = ({
@@ -15,12 +16,14 @@ const GeneratePrompt: React.FC<Props> = ({
 	bookId,
 	updatePrompt,
 	apiUrl,
+	pageKey,
 }) => {
 	const { generateImagePrompt } = useGenerateImagePrompt(
 		updatePrompt,
 		prompt,
 		apiUrl,
-		bookId
+		bookId,
+		pageKey
 	)
 
 	return (

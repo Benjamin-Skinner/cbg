@@ -64,7 +64,6 @@ async function getNewPages(book: Book): Promise<BookPages> {
 	).length
 
 	if (numLockedChapters === NUM_CHAPTERS) {
-		console.log('All chapters are locked')
 		return book.pages
 	}
 	if (numLockedChapters > 0) {
@@ -75,8 +74,6 @@ async function getNewPages(book: Book): Promise<BookPages> {
 		newChapterTitles = await generateNewOutline(book)
 	}
 
-	console.log('The new chapter titles are:')
-	console.log(newChapterTitles)
 	const newBookChapters: Page[] = []
 
 	for (let i = 0; i < newChapterTitles.length; i++) {

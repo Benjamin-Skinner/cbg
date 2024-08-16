@@ -44,12 +44,10 @@ export async function POST(req: Request, res: Response) {
 		await updatePage(params.book, newPage, params.intro, params.conclusion)
 
 		// Generate new prompt
-		const page = await generateImagePrompt(
-			params.book,
-			newPage,
-			params.intro,
-			params.conclusion
-		)
+		const page = await generateImagePrompt(params.book, newPage)
+
+		const isConclusion = params.page.key === 'conclusion'
+		const isIntro = params.page.key === 'intro'
 		// console.log(page)
 		await updatePage(params.book, page, params.intro, params.conclusion)
 		return NextResponse.json(

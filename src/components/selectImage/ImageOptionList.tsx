@@ -25,10 +25,15 @@ const ImageOptionList: React.FC<Props> = ({
 }) => {
 	// Select an image: Just set the new image option using updateBook
 	const selectImage = async (option: ImageOption) => {
+		console.log(option)
 		// Update book
 		updateImage({
 			...pageImage,
-			image: option.url,
+			selected: {
+				url: option.url,
+				messageId: option.messageId,
+				type: option.type,
+			},
 		})
 	}
 
@@ -41,14 +46,22 @@ const ImageOptionList: React.FC<Props> = ({
 					<ImageCard
 						key={image.url}
 						selected={
-							pageImage.image === image.url && image.url !== ''
+							pageImage.selected.url === image.url &&
+							image.url !== ''
 						}
 						image={image}
 						deleteImage={deleteImage}
 						selectImage={selectImage}
 					/>
 				))}
-			{imageUploading && <Placeholder ar={pageImage.ar} />}
+			{imageUploading && (
+				<div
+					className="w-fit hover:scale-105 transition-all duration-200
+				card bg-base-100 p-6 shadow-xl"
+				>
+					<Placeholder ar={pageImage.ar} />
+				</div>
+			)}
 		</div>
 	)
 }

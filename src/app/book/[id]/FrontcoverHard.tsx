@@ -62,10 +62,14 @@ const FrontcoverHard: React.FC<Props> = ({ book, updateBook }) => {
 					bookId={book.id}
 					newImages={newImages}
 					setNewImages={setNewImages}
+					card
 				/>
 			</Section.Center>
 			<Section.Right>
-				<ImageGenerationStatus image={book.frontCover.hard.image} />
+				<ImageGenerationStatus
+					image={book.frontCover.hard.image}
+					updateImage={updateImage}
+				/>
 				<ImagePrompt
 					updatePrompt={updateImagePrompt}
 					prompt={book.frontCover.hard.image.prompt}

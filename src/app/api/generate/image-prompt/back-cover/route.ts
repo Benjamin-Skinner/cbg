@@ -29,11 +29,11 @@ export async function POST(req: Request, res: Response) {
     Base it closely on the following examples:
     
     Book: Let's Discover California
-    Description: image of the California coast with seaside bluffs
+    Description: watercolor image of the California coast with seaside bluffs
 
     Book: Ocean Odyssey
-    Description: image of different fish swimming in the ocean
-
+    Description: watercolor image of different fish swimming in the ocean
+ 
     Book: ${book.title}
     Description:`
 
