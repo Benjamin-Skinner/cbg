@@ -10,6 +10,7 @@ import { ImageOptionGenerating, UpscaleJob } from '@/types'
 import StatusClass from '@/classes/Status'
 import logger from '@/logging'
 import { saveImageToAWS } from '@/util/aws/upload'
+import { MIDJOURNEY_BASE_URL } from '@/constants'
 
 /**
  * *************** EXPORTED FUNCTIONS ***************
@@ -401,7 +402,7 @@ async function createMidjourneyJob(
 	const params = midjourneyParams(ar, tiling)
 	const fullPrompt = `${prompt} ${params}`
 	const response = await fetch(
-		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/imagine`,
+		`${MIDJOURNEY_BASE_URL}/api/v1/midjourney/imagine`,
 		{
 			method: 'post',
 			headers: {
@@ -432,7 +433,7 @@ async function sendUpscaleJob(
 	tiling: boolean
 ): Promise<UpscaleJob> {
 	const response = await fetch(
-		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/button`,
+		`${MIDJOURNEY_BASE_URL}/api/v1/midjourney/button`,
 		{
 			method: 'post',
 			headers: {
@@ -470,7 +471,7 @@ async function getMidJourneyImage(
 	messageId: string
 ): Promise<MidjourneyResponse> {
 	const response = await fetch(
-		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/message/${messageId}`,
+		`${MIDJOURNEY_BASE_URL}/api/v1/midjourney/message/${messageId}`,
 		{
 			method: 'GET',
 			headers: {

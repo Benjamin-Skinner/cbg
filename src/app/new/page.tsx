@@ -1,6 +1,6 @@
 import Client from './Client'
 import React from 'react'
-import { getAllSubjects, getSavedSubjects } from '@/functions/getAllSubjects'
+import { getAllSubjects } from '@/functions/getAllSubjects'
 
 interface Props {}
 

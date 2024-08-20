@@ -15,6 +15,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 	const newId = uuidv4()
 	const newBook: Book = {
 		id: newId,
+		aiContext: '',
 		createdAt: Date.now(),
 		status: 'inProgress',
 		lastSaved: Date.now(),

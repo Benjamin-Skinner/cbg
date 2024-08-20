@@ -23,6 +23,7 @@ export async function getAllBooks() {
 			status: bookDoc.status || 'inProgress',
 			description: bookDoc.description,
 			outline: bookDoc.outline,
+			aiContext: bookDoc.aiContext,
 			oneLiner: bookDoc.oneLiner,
 			insideCover: bookDoc.insideCover,
 			recallAndReflect: bookDoc.recallAndReflect,

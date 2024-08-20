@@ -99,3 +99,5 @@ export const RANDR_IMAGE_AR: ImageAR = {
 	height: 1,
 	width: 4,
 }
+
+export const MIDJOURNEY_BASE_URL = 'https://api.mymidjourney.ai'

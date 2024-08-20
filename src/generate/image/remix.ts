@@ -8,6 +8,7 @@ import {
 import { midjourneyParams } from './midjourney'
 import logger from '@/logging'
 import StatusClass from '@/classes/Status'
+import { MIDJOURNEY_BASE_URL } from '@/constants'
 
 export async function generateRemixImages(
 	softcoverImage: PageImage,
@@ -84,7 +85,7 @@ async function createRemixJob(
 	const params = midjourneyParams(ar, false) // false for no tiling
 	const fullPrompt = `. ${params}`
 	const response = await fetch(
-		`${process.env.MIDJOURNEY_BASE_URL}/api/v1/midjourney/button`,
+		`${MIDJOURNEY_BASE_URL}/api/v1/midjourney/button`,
 		{
 			method: 'post',
 			headers: {

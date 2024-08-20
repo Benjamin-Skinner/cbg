@@ -2,7 +2,16 @@
 
 import { MongoClient } from 'mongodb'
 
-const uri = process.env.MONGO_URI as string // your mongodb connection string
+if (!process.env.MONGO_USERNAME) {
+	throw new Error('MONGO_USERNAME is not set in the environment variables')
+}
+
+if (!process.env.MONGO_PASSWORD) {
+	throw new Error('MONGO_PASSWORD is not set in the environment variables')
+}
+
+const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.c15sj.mongodb.net/${process.env.DATABASE_NAME}?retryWrites=true&w=majority&appName=Cluster0`
+
 // Set your desired timeout values in milliseconds
 const options = {
 	socketTimeoutMS: 30000, // 30 seconds

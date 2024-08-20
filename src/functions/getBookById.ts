@@ -30,6 +30,7 @@ export async function getBookById(bookId: string) {
 	let book: Book = {
 		id: bookDoc.id.toString(),
 		title: bookDoc.title,
+		aiContext: bookDoc.aiContext,
 		blurb: bookDoc.blurb,
 		status: bookDoc.status || 'inProgress',
 		oneLiner: bookDoc.oneLiner,

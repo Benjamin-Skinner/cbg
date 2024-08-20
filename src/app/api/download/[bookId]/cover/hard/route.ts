@@ -1,6 +1,3 @@
-import { NextResponse } from 'next/server'
-import path from 'path'
-import { promises as fs } from 'fs'
 import { getBookById } from '@/functions/getBookById'
 import { downloadMidjourneyImage } from '@/util/image'
 import { servePng } from '@/util/download'

@@ -1,7 +1,4 @@
-import { Book } from '@/types'
-import { updateBook } from '@/functions/updateBook'
 import { NextResponse } from 'next/server'
-import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { getAllBooks } from '@/functions/getAllBooks'
 
