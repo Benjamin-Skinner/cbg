@@ -83,12 +83,12 @@ const GenerateImages: React.FC<Props> = ({
 			>
 				Generate Images
 			</button>
-			<button
+			{/* <button
 				onClick={updateImages}
 				className="btn btn-info btn-wide mt-12"
 			>
 				Update Images
-			</button>
+			</button> */}
 		</>
 	)
 }

@@ -4,11 +4,6 @@ export const revalidate = 0
 export default async function Home() {
 	const res = await fetch(`${process.env.API_URL}/api/books`, {
 		method: 'POST',
-		headers: {
-			'Cache-Control': 'no-cache, no-store, must-revalidate',
-			Pragma: 'no-cache',
-			Expires: '0',
-		},
 		cache: 'no-store', // Ensure that the response is not stored in any cache
 	})
 	const { books } = await res.json()
