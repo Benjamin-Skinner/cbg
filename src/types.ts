@@ -3,6 +3,7 @@ import CBGError from '@/classes/Error'
 export type Book = {
 	id: string
 	title: string
+	aiContext: string
 	status: 'inProgress' | 'uploaded' | 'abandoned' | 'awaitingReview'
 	blurb: Blurb
 	oneLiner: string
@@ -18,6 +19,13 @@ export type Book = {
 	pages: BookPages
 	lastSaved: number
 	createdAt: number
+	files: BookFiles[]
+}
+
+export type BookFiles = {
+	name: string
+	url: string
+	type: string
 }
 
 export type RecallAndReflect = {
@@ -95,6 +103,13 @@ export type ImageOptionGenerating = {
 	completed: boolean // whether the UpscaleJobs have been created or whether the image is ready
 	upscales: UpscaleJob[]
 	ar: ImageAR
+	processing: boolean
+}
+
+export type ImageUpdateResponse = {
+	newImages: boolean // whether or not there are new images that have been added to ImageOptions
+	newImageOptions: ImageOption[] // the new images that have been added
+	status: Status // the new status of the PageImage
 }
 
 export type UpscaleJob = {

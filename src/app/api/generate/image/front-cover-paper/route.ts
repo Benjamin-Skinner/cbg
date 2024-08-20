@@ -1,73 +1,50 @@
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
-import {
-	generateRemixImages,
-	getHardcoverMessageIdFromUrl,
-} from '@/generate/image/remix'
+import { Cover, PageImage } from '@/types'
 import { getBookById } from '@/functions/getBookById'
-import { updateBook } from '@/functions/updateBook'
-import { Book } from '@/types'
 import logger from '@/logging'
+import { updateFrontCoverPaperPageImage } from '@/functions/updatePageImage'
+import { generateRemixImages } from '@/generate/image/remix'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
 		bookId: string
+		prompt: string
 	} = await req.json()
 
-	const { error, isError } = ensureParams(params, ['bookId'])
+	const { error, isError } = ensureParams(params, ['bookId', 'prompt'])
 
 	if (isError && error) {
 		return error.toResponse()
 	}
 
-	const book = await getBookById(params.bookId)
-
 	try {
 		logger.info(
-			`MIDJOURNEY request for front cover paper for book ${book.id}`
+			`MIDJOURNEY request for front cover paper of book ${params.bookId}`
 		)
 
-		// Make sure a hardcover image has been selected
-		if (!book.frontCover.hard.image.selected.url) {
-			throw new Error('Please select a hardcover image first')
-		}
+		const book = await getBookById(params.bookId)
 
-		const newCoverImage = await generateRemixImages(
-			book.frontCover.paper.image,
-			book.frontCover.hard.image.selected.messageId
-		)
-
-		console.log('newCoverImage', newCoverImage)
-
-		// Save the new cover
-		const newBook: Book = {
-			...book,
-			frontCover: {
-				...book.frontCover,
-				paper: {
-					...book.frontCover.paper,
-					image: newCoverImage,
-				},
+		const frontCoverPaperImage: PageImage = {
+			...book.frontCover.paper.image,
+			prompt: {
+				...book.frontCover.paper.image.prompt,
+				content: params.prompt,
 			},
 		}
 
-		await updateBook(newBook)
-
-		return NextResponse.json(
-			{
-				data: newCoverImage,
-			},
-			{
-				status: 200,
-			}
+		const newPageImage: PageImage = await generateRemixImages(
+			frontCoverPaperImage,
+			book.frontCover.paper.image.selected.messageId
 		)
+
+		await updateFrontCoverPaperPageImage(params.bookId, newPageImage)
+
+		return NextResponse.json(newPageImage, {
+			status: 200,
+		})
 	} catch (error: any) {
-		logger.error(
-			`FRONT COVER PAPER IMAGE generation for book ${
-				book.id
-			}: ${JSON.stringify(error)}`
-		)
 		return new CBGError(
 			error.message || 'Internal server error',
 			500,

@@ -457,6 +457,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 			},
 			chapters: blankChapters(),
 		},
+		files: [],
 	}
 
 	const client = await clientPromise

@@ -1,52 +1,51 @@
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
-import StatusClass from '@/classes/Status'
-import { Page } from '@/types'
-import { Book } from '@/types'
-import updatePage from '@/functions/updatePage'
+import { Cover, PageImage } from '@/types'
 import { generateImages } from '@/generate/image/midjourney'
-import { DEFAULT_AR } from '@/constants'
 import { getBookById } from '@/functions/getBookById'
-import { updateBook } from '@/functions/updateBook'
 import logger from '@/logging'
+import { updateInsideCoverPageImage } from '@/functions/updatePageImage'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
 		bookId: string
+		prompt: string
 	} = await req.json()
 
-	const { error, isError } = ensureParams(params, ['bookId'])
+	const { error, isError } = ensureParams(params, ['bookId', 'prompt'])
 
 	if (isError && error) {
 		return error.toResponse()
 	}
 
-	const book = await getBookById(params.bookId)
-
 	try {
-		logger.info(`MIDJOURNEY request for inside cover for book ${book.id}`)
-		const newCoverImage = await generateImages(book.insideCover.image)
+		logger.info(
+			`MIDJOURNEY request for inside cover of book ${params.bookId}`
+		)
 
-		// Save the new cover
-		const newBook = {
-			...book,
-			insideCover: {
-				...book.insideCover,
-				image: newCoverImage,
+		const book = await getBookById(params.bookId)
+
+		const insideCoverWithUpdatedPrompt: Cover = {
+			...book.insideCover,
+			image: {
+				...book.insideCover.image,
+				prompt: {
+					...book.insideCover.image.prompt,
+					content: params.prompt,
+				},
 			},
 		}
 
-		await updateBook(newBook)
-
-		return NextResponse.json(
-			{
-				data: newCoverImage,
-			},
-			{
-				status: 200,
-			}
+		const newPageImage: PageImage = await generateImages(
+			insideCoverWithUpdatedPrompt.image
 		)
+
+		await updateInsideCoverPageImage(params.bookId, newPageImage)
+
+		return NextResponse.json(newPageImage, {
+			status: 200,
+		})
 	} catch (error: any) {
 		return new CBGError(
 			error.message || 'Internal server error',

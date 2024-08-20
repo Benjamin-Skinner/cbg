@@ -73,7 +73,7 @@ async function getPageText(
 }
 
 async function getChapterText(page: Page, book: Book): Promise<string> {
-	const prompt = `When I give you a subject, book title, and intro to the book write a brief, short page about that subject for the educational, fact-based children's book. The page must be less than 75 words. Use simple language that is natural for reading aloud. Define any difficult words. Do not repeat the subject, just give me the text. The first subject should reference the introduction. Base it on the examples:
+	const prompt = `When I give you a subject, book title, and intro to the book write a brief, short page about that subject for the educational, fact-based children's book. The page must be less than 75 words. Use simple language that is natural for reading aloud. Define any difficult words. Do not repeat the subject, just give me the text. The first subject should reference the introduction. ${book.aiContext} Base it on the examples:
 
 Book Title: Let's Discover California
 Subject: Mt. Shasta
@@ -120,6 +120,11 @@ async function getIntroText(page: Page, book: Book): Promise<string> {
 Title: Lets' Discover California
 In a sunny backyard, Emma, Jack, and their Mom sat with a colorful map spread out before them. "Let's explore California!" said Mom, pointing to different places in the state. "From the busy streets of Los Angeles and San Francisco to the towering redwoods and sunny beaches, there's so much to see." The children beamed with excitement, eager to discover all the amazing sights of the Golden State.
 
+Title: Ocean Adventure
+One summer day, Jessica and Ethan went to the aquarium with their Dad. "Why don't we go on an ocean adventure!" said Dad as they look at the different animals in the tanks. "We can see fish, manatees, whales, and even poisonous jellyfish. The ocean is home to some fascinating animals!" They were thrilled to explore the ocean and learn about the creatures who live there.
+
+Title: Incredible Insects
+In a green meadow, Lily and Max sat with their Grandma, who had a magnifying glass in her hand. "Come over here and look at this little animal" said Grandma, pointing to a small ant in the grass. "There are so many insects all around us. They come in different shapes, sizes, and colors. Let's go learn about them!" The children's eyes sparkled with curiosity as they prepared to explore the world of insects.
 
 Title: ${book.title}`
 	const text = await generateText(prompt)

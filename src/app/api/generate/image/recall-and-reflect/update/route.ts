@@ -1,10 +1,9 @@
 import CBGError from '@/classes/Error'
 import { ensureParams } from '@/util/ensureParams'
 import { NextResponse } from 'next/server'
-import { Book, Page, PageImage } from '@/types'
 import { updateImages } from '@/generate/image/midjourney'
+import { updateRecallAndReflectPageImage } from '@/functions/updatePageImage'
 import { getBookById } from '@/functions/getBookById'
-import { updateBook } from '@/functions/updateBook'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -17,30 +16,18 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
+	const bookId = params.bookId
+
 	try {
-		const book = await getBookById(params.bookId)
+		const book = await getBookById(bookId)
 
-		// Get the updated page images
-		const newImages = await updateImages(
-			book.recallAndReflect.image,
-			book.id
-		)
+		console.log('POLLING IMAGES')
+		// Check the status of the images and update the page
+		const newImages = await updateImages(book.recallAndReflect.image)
 
-		// Save the new cover
-		const newBook = {
-			...book,
-			recallAndReflect: {
-				...book.recallAndReflect,
-				image: newImages,
-			},
-		}
+		updateRecallAndReflectPageImage(bookId, newImages)
 
-		await updateBook(newBook)
-
-		// return the updated images
-		return NextResponse.json({
-			data: newImages,
-		})
+		return NextResponse.json(newImages.status)
 	} catch (e: any) {
 		return new CBGError(
 			e.message || 'An error occurred',

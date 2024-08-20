@@ -38,7 +38,10 @@ const GeneratePrompt: React.FC<Props> = ({
 					onClick={generateImagePrompt}
 				>
 					{prompt.status.generating.inProgress ? (
-						<span className="loading loading-dots loading-md"></span>
+						<>
+							<span className="loading loading-dots loading-md"></span>
+							Retry
+						</>
 					) : (
 						<RefreshIcon />
 					)}

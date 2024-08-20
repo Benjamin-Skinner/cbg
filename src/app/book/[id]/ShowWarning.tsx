@@ -13,7 +13,7 @@ const ShowWarning: React.FC<Props> = ({
 }) => {
 	if (!warningMessage) return null
 	return (
-		<div className="transition-all duration-500 fixed opacity-70 z-50 w-full">
+		<div className="transition-all duration-500 fixed opacity-70 z-50 w-full top-5">
 			<div role="alert" className="alert alert-warning w-11/12 m-auto">
 				<svg
 					xmlns="http://www.w3.org/2000/svg"

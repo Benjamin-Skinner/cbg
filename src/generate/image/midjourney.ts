@@ -2,6 +2,7 @@ import {
 	GenerateImageResponse,
 	ImageAR,
 	ImageOption,
+	ImageUpdateResponse,
 	MidjourneyResponse,
 	PageImage,
 } from '@/types'
@@ -18,6 +19,7 @@ export async function generateImages(
 	image: PageImage,
 	tiling?: 'tiling' | 'no tiling'
 ): Promise<PageImage> {
+	console.log('generateImages')
 	// Make sure there is a prompt
 	if (image.prompt.content === '') {
 		throw new Error('Please enter a prompt')
@@ -63,6 +65,7 @@ export async function sendMidjourneyJob(
 	ar: ImageAR,
 	tiling: 'tiling' | 'no tiling'
 ): Promise<ImageOptionGenerating> {
+	console.log('sendMidjourneyJob')
 	// Send the job to the API, get the messageId
 	const response = await createMidjourneyJob(
 		prompt,
@@ -78,6 +81,7 @@ export async function sendMidjourneyJob(
 		upscales: [],
 		ar: ar,
 		tiling: tiling === 'no tiling' ? false : true,
+		processing: false,
 	}
 
 	logger.info(
@@ -85,6 +89,71 @@ export async function sendMidjourneyJob(
 	)
 
 	return midjourneyJob
+}
+
+export async function createAllImageOptions(
+	image: PageImage,
+	bookId: string,
+	lastTry?: boolean
+): Promise<PageImage> {
+	console.log('Create all image options')
+	const newImages: PageImage = image
+
+	// Right here everything is done but we need to create the new image options
+	const generatingImages = image.generatingImages
+	const i = generatingImages.length - 1
+
+	if (i === -1) {
+		console.log('returning')
+		return newImages
+	}
+	const job = generatingImages[i]
+
+	if (job.completed) {
+		console.log('The job has already been completed')
+		return newImages
+	} else if (job.processing) {
+		console.log('We are already processing the images, just return')
+		return newImages
+	} else {
+		console.log(
+			'The job is not completed and not processing, so save all the images'
+		)
+		console.log('job.upscales', job.upscales)
+
+		// COnvert each of the upscales into a new image option
+		const newImageOptions = job.upscales.map((upscale) =>
+			upscaleToImageOption(upscale, bookId)
+		)
+		const resolvedNewImageOptions = await Promise.all(newImageOptions)
+		// console.log('resolvedNewImageOptions', resolvedNewImageOptions)
+		const allImageOptions = newImages.imageOptions.concat(
+			resolvedNewImageOptions
+		)
+
+		// Add them to the PageImage
+		newImages.imageOptions = allImageOptions
+
+		// Mark the job as completed
+		newImages.generatingImages[i].completed = true
+
+		// Set the status to success
+		const newStatus = new StatusClass(newImages.status)
+		newStatus.clearGenerating()
+		newStatus.setAsSuccess()
+		newImages.status = newStatus.toObject()
+
+		logger.info(`MIDJOURNEY image ${job.messageId} complete`)
+	}
+
+	// Return all the new image options
+
+	if (newImages.imageOptions.length < 3 && !lastTry) {
+		// Try the download again
+		console.log('Trying the download again')
+		return createAllImageOptions(newImages, bookId, true)
+	}
+	return newImages
 }
 
 /**
@@ -100,171 +169,217 @@ export async function sendMidjourneyJob(
  *
  * @remarks
  */
-export async function updateImages(
-	images: PageImage,
-	bookId: string
-): Promise<PageImage> {
-	const newImages = { ...images }
-	const generatingImages = images.generatingImages
+export async function updateImages(images: PageImage): Promise<PageImage> {
+	console.log('images in handlePoll', images)
+	const newImages: PageImage = images
+	newImages.status.generating.inProgress = true
 
-	if (generatingImages.length === 0) {
-		console.log('Stopped Because there are no generating images')
-		let newStatus = new StatusClass(newImages.status)
-		newStatus.clearGenerating()
-		newStatus.setAsSuccess()
-		newImages.status = newStatus.toObject()
-		return newImages
+	const generatingImages = images.generatingImages
+	console.log(`There are ${generatingImages.length} generating images`)
+
+	const i = generatingImages.length - 1
+
+	if (i === -1) {
+		throw new Error(
+			'Job failed due to high request volume; please try again.'
+		)
+	}
+	const job = generatingImages[i]
+
+	if (!job.progress) job.progress = 0
+	// The job is done and all the upscales have already been completed
+	if (job.completed) {
+		console.log('The job has already been completed')
+		throw new Error(
+			'Job failed due to high request volume; please try again.'
+		)
 	}
 
-	for (let i = 0; i < generatingImages.length; i++) {
-		const job = generatingImages[i]
-		if (!job.progress) job.progress = 0
-		// The job is done and all the upscales have already been completed
-		if (job.completed) {
-			continue
+	let imgResponseProgress = job.progress
+
+	// If the image was not done last cycle, refetch it
+	if (job.progress < 100) {
+		console.log(
+			`Progress is less than 100 on main job so checking the status again`
+		)
+		const imageResponse = await getMidJourneyImage(job.messageId)
+		console.log('imageResponse', imageResponse)
+		imgResponseProgress = imageResponse.progress
+
+		// Update the progress
+		newImages.generatingImages[i].progress = imageResponse.progress
+		newImages.status.generating.progress = 10 + imageResponse.progress * 0.2
+
+		if (imageResponse.status === 'FAIL') {
+			console.log('The job failed')
+			logger.error(
+				`MIDJOURNEY image failed with message ID ${imageResponse.messageId}`
+			)
+			newImages.generatingImages[i].completed = true
+			newImages.status.generating.progress = 100
+			const newStatus = new StatusClass(newImages.status)
+			newStatus.clearGenerating()
+			newStatus.setError(
+				imageResponse.error ||
+					'An error occurred while generating the image. Please try again.'
+			)
+			newImages.status = newStatus.toObject()
+		}
+	}
+
+	// The image is complete but hasn't been upscaled yet
+	if (imgResponseProgress === 100) {
+		console.log('The main image is done, moving on to upscaling')
+		const currUpscale = job.upscales.length
+		console.log('currUpscale', currUpscale)
+
+		// There has not been any upscale requested yet
+		if (currUpscale === 0) {
+			const u1 = await sendUpscaleJob(
+				job.messageId,
+				'U1',
+				job.ar,
+				job.tiling
+			)
+			newImages.generatingImages[i].upscales.push(u1)
+			console.log('First upscale job added to generatingImages')
 		}
 
-		let imgResponseProgress = 0
+		// One upscale job has been created; analyze the progress
+		else if (currUpscale === 1) {
+			// Process the first upscale job and extract the new data plus the new image option (if needed)
+			const { upscale } = await handleUpscaleJob(
+				newImages.generatingImages[i].upscales[0],
+				i
+			)
 
-		// If the image was not done last cycle, refetch it
-		if (job.progress < 100) {
-			const imageResponse = await getMidJourneyImage(job.messageId)
-			imgResponseProgress = imageResponse.progress
+			console.log(
+				'status of the first upscale (now updated in generatingImages)',
+				upscale
+			)
 
-			// Update the progress
-			newImages.generatingImages[i].progress = imageResponse.progress
-			newImages.status.generating.progress =
-				10 + imageResponse.progress * 0.2
+			// Add the new data to the page.image
+			newImages.generatingImages[i].upscales[0] = upscale
 
-			if (imageResponse.status === 'FAIL') {
-				logger.error(
-					`MIDJOURNEY image failed with message ID ${imageResponse.messageId}`
+			console.log(
+				`There are now ${newImages.generatingImages[i].upscales.length} items in the upscale array`
+			)
+
+			// Create second upscale job if the first one is done
+			if (upscale.completed) {
+				console.log(
+					'First upscale done, adding second one to generatingImages'
 				)
-				newImages.generatingImages[i].completed = true
-				newImages.status.generating.progress = 100
-				const newStatus = new StatusClass(newImages.status)
-				newStatus.clearGenerating()
-				newStatus.setError(
-					imageResponse.error ||
-						'An error occurred while generating the image. Please try again.'
-				)
-				newImages.status = newStatus.toObject()
-			}
-		}
 
-		// The image is complete but hasn't been upscaled yet
-		else if (job.progress === 100 || imgResponseProgress === 100) {
-			const currUpscale = job.upscales.length
-
-			// There has not been any upscale requested yet
-			if (currUpscale === 0) {
-				const u1 = await sendUpscaleJob(
+				const u2 = await sendUpscaleJob(
 					job.messageId,
-					'U1',
+					'U2',
 					job.ar,
 					job.tiling
 				)
-				newImages.generatingImages[i].upscales.push(u1)
+				newImages.generatingImages[i].upscales.push(u2)
+				newImages.status.generating.progress = 40
+				console.log('Setting pageImage progress to 40%')
 			}
+		} else if (currUpscale === 2) {
+			// Process the second upscale job and extract the new data plus the new image option (if needed)
+			const { upscale } = await handleUpscaleJob(
+				newImages.generatingImages[i].upscales[1],
+				i
+			)
 
-			// One upscale job has been created; analyze the progress
-			else if (currUpscale === 1) {
-				// Process the first upscale job and extract the new data plus the new image option (if needed)
-				const { upscale } = await handleUpscaleJob(
-					newImages.generatingImages[i].upscales[0],
-					i
+			console.log(
+				'status of the second upscale (now updated in generatingImages)',
+				upscale
+			)
+
+			// Add the new data to the page.image
+			newImages.generatingImages[i].upscales[1] = upscale
+
+			console.log(
+				`There are now ${newImages.generatingImages[i].upscales.length} items in the upscale array`
+			)
+
+			// Create third upscale job if the second one is done
+			if (upscale.completed) {
+				console.log(
+					'Second upscale done, adding third one to generatingImages'
 				)
-
-				// Add the new data to the page.image
-				newImages.generatingImages[i].upscales[0] = upscale
-
-				// Create second upscale job if the first one is done
-				if (upscale.completed) {
-					const u2 = await sendUpscaleJob(
-						job.messageId,
-						'U2',
-						job.ar,
-						job.tiling
-					)
-					newImages.generatingImages[i].upscales.push(u2)
-					newImages.status.generating.progress = 40
-				}
-			} else if (currUpscale === 2) {
-				// Process the second upscale job and extract the new data plus the new image option (if needed)
-				const { upscale } = await handleUpscaleJob(
-					newImages.generatingImages[i].upscales[1],
-					i
+				newImages.status.generating.progress = 60
+				console.log('Setting pageImage progress to 60%')
+				const u3 = await sendUpscaleJob(
+					job.messageId,
+					'U3',
+					job.ar,
+					job.tiling
 				)
+				newImages.generatingImages[i].upscales.push(u3)
+			}
+		} else if (currUpscale === 3) {
+			// Process the third upscale job and extract the new data plus the new image option (if needed)
+			const { upscale } = await handleUpscaleJob(
+				newImages.generatingImages[i].upscales[2],
+				i
+			)
 
-				// Add the new data to the page.image
-				newImages.generatingImages[i].upscales[1] = upscale
+			console.log(
+				'status of the third upscale (now updated in generatingImages)',
+				upscale
+			)
 
-				// Create third upscale job if the second one is done
-				if (upscale.completed) {
-					newImages.status.generating.progress = 60
-					const u3 = await sendUpscaleJob(
-						job.messageId,
-						'U3',
-						job.ar,
-						job.tiling
-					)
-					newImages.generatingImages[i].upscales.push(u3)
-				}
-			} else if (currUpscale === 3) {
-				// Process the third upscale job and extract the new data plus the new image option (if needed)
-				const { upscale } = await handleUpscaleJob(
-					newImages.generatingImages[i].upscales[2],
-					i
+			// Add the new data to the page.image
+			newImages.generatingImages[i].upscales[2] = upscale
+
+			console.log(
+				`There are now ${newImages.generatingImages[i].upscales.length} items in the upscale array`
+			)
+
+			// Create fourth upscale job if the third one is done
+			if (upscale.completed) {
+				console.log(
+					'Third upscale done, adding fourth one to generatingImages'
 				)
-
-				// Add the new data to the page.image
-				newImages.generatingImages[i].upscales[2] = upscale
-
-				// Create fourth upscale job if the third one is done
-				if (upscale.completed) {
-					newImages.status.generating.progress = 80
-					const u4 = await sendUpscaleJob(
-						job.messageId,
-						'U4',
-						job.ar,
-						job.tiling
-					)
-					newImages.generatingImages[i].upscales.push(u4)
-				}
-			} else if (currUpscale === 4) {
-				// Process the fourth upscale job and extract the new data plus the new image option (if needed)
-				const { upscale } = await handleUpscaleJob(
-					newImages.generatingImages[i].upscales[3],
-					i
+				newImages.status.generating.progress = 80
+				console.log('Setting pageImage progress to 80%')
+				const u4 = await sendUpscaleJob(
+					job.messageId,
+					'U4',
+					job.ar,
+					job.tiling
 				)
+				newImages.generatingImages[i].upscales.push(u4)
+			}
+		} else if (currUpscale === 4) {
+			// Process the fourth upscale job and extract the new data plus the new image option (if needed)
+			const { upscale } = await handleUpscaleJob(
+				newImages.generatingImages[i].upscales[3],
+				i
+			)
 
-				newImages.generatingImages[i].upscales[3] = upscale
+			console.log(
+				'status of the fourth upscale (now updated in generatingImages)',
+				upscale
+			)
 
-				// If this one is done, the entire job is done
-				if (upscale.completed) {
-					newImages.status.generating.progress = 100
-					// Make all the new image options
-					const newImageOptions = job.upscales.map((upscale) =>
-						upscaleToImageOption(upscale, bookId)
-					)
+			newImages.generatingImages[i].upscales[3] = upscale
 
-					const resolvedNewImageOptions = await Promise.all(
-						newImageOptions
-					)
-					const allImageOptions = newImages.imageOptions.concat(
-						resolvedNewImageOptions
-					)
-					newImages.imageOptions = allImageOptions
+			console.log(
+				`There are now ${newImages.generatingImages[i].upscales.length} items in the upscale array`
+			)
 
-					newImages.generatingImages[i].completed = true
-					const newStatus = new StatusClass(newImages.status)
-					newStatus.clearGenerating()
-					newStatus.setAsSuccess()
-					newImages.status = newStatus.toObject()
-					newImages.status.generating.progress = 100
-					logger.info(`MIDJOURNEY image ${job.messageId} complete`)
-					break
-				}
+			// If this one is done, the entire job is done
+			if (upscale.completed) {
+				console.log('Setting processing to true')
+				console.log('Fourth upscale done, the entire job is done')
+
+				console.log(
+					'setting the pageImage status.generating.progress to 100%'
+				)
+				newImages.status.generating.progress = 100
+
+				console.log(
+					'now we just need to create the newImageOptions from upscales'
+				)
 			}
 		}
 	}
@@ -390,6 +505,7 @@ async function handleUpscaleJob(
 
 	if (!upscale.completed) {
 		const response = await getMidJourneyImage(upscale.messageId)
+		console.log('getMJResponse', response)
 
 		if (response.status && response.status === 'fail') {
 			// Job failed
@@ -410,6 +526,7 @@ async function handleUpscaleJob(
 
 			// Mark as complete
 			newUpscale.completed = true
+			newUpscale.progress = 100
 		}
 	}
 
@@ -430,18 +547,17 @@ async function upscaleToImageOption(
 	bookId: string
 ): Promise<ImageOption> {
 	try {
-		const response = await fetch(upscale.url)
-		if (!response.ok) {
-			throw new Error(`Failed to fetch image: ${response.statusText}`)
-		}
-		// Convert the response to a Blob
-		const blob = await response.blob()
+		const imageBlob = await fetchImageWithRetry(upscale.url, 3, 4)
 
 		// Convert the Blob to a ReadableStream<Uint8Array>
-		const stream = blob.stream()
+		const stream = imageBlob.stream()
 
 		// Save the image to Blob storage and get the result
-		const { savedUrl } = await saveImageToAWS(bookId, stream)
+		const { savedUrl } = await saveImageToAWS(
+			bookId,
+			stream,
+			upscale.messageId
+		)
 
 		return {
 			url: savedUrl || '',
@@ -461,6 +577,38 @@ async function upscaleToImageOption(
 			messageId: upscale.messageId,
 		}
 	}
+}
+
+async function fetchImageWithRetry(
+	url: string,
+	retries: number,
+	delay: number
+): Promise<Blob> {
+	let response: Response
+	console.log('Trying to fetch image')
+	if (url === '' || url === null || url === undefined) {
+		throw new Error('URL returned from Midjourney is empty')
+	}
+
+	for (let attempt = 1; attempt <= retries; attempt++) {
+		response = await fetch(url)
+		const blob = await response.blob()
+
+		if (response.ok && blob.size > 0) {
+			console.log('Image fetched successfully')
+			return blob
+		} else {
+			console.log(
+				`Attempt ${attempt} failed, trying again in ${delay} seconds`
+			)
+		}
+
+		// Wait for the specified delay before the next attempt
+		await new Promise((resolve) => setTimeout(resolve, delay * 1000))
+	}
+
+	// If all attempts fail, throw an error
+	throw new Error('Failed to fetch image after multiple attempts')
 }
 
 export function midjourneyParams(ar: ImageAR, tiling: boolean): string {

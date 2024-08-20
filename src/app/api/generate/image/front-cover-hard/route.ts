@@ -1,54 +1,51 @@
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
+import { Cover, PageImage } from '@/types'
 import { generateImages } from '@/generate/image/midjourney'
 import { getBookById } from '@/functions/getBookById'
-import { updateBook } from '@/functions/updateBook'
-import { Book } from '@/types'
 import logger from '@/logging'
+import { updateFrontCoverHard } from '@/functions/updatePageImage'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
 		bookId: string
+		prompt: string
 	} = await req.json()
 
-	const { error, isError } = ensureParams(params, ['bookId'])
+	const { error, isError } = ensureParams(params, ['bookId', 'prompt'])
 
 	if (isError && error) {
 		return error.toResponse()
 	}
 
-	const book = await getBookById(params.bookId)
-
 	try {
 		logger.info(
-			`MIDJOURNEY request for front cover hard for book ${book.id}`
+			`MIDJOURNEY request for front cover hard of book ${params.bookId}`
 		)
 
-		const newCoverImage = await generateImages(book.frontCover.hard.image)
+		const book = await getBookById(params.bookId)
 
-		// Save the new cover
-		const newBook: Book = {
-			...book,
-			frontCover: {
-				...book.frontCover,
-				hard: {
-					...book.frontCover.hard,
-					image: newCoverImage,
+		const frontCoverHard: Cover = {
+			...book.frontCover.hard,
+			image: {
+				...book.frontCover.hard.image,
+				prompt: {
+					...book.frontCover.hard.image.prompt,
+					content: params.prompt,
 				},
 			},
 		}
 
-		await updateBook(newBook)
-
-		return NextResponse.json(
-			{
-				data: newCoverImage,
-			},
-			{
-				status: 200,
-			}
+		const newPageImage: PageImage = await generateImages(
+			frontCoverHard.image
 		)
+
+		await updateFrontCoverHard(params.bookId, newPageImage)
+
+		return NextResponse.json(newPageImage, {
+			status: 200,
+		})
 	} catch (error: any) {
 		return new CBGError(
 			error.message || 'Internal server error',

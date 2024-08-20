@@ -9,6 +9,10 @@ import Navbar from '../Navbar'
 import UserSubject from './UserSubject'
 import GenerateSubjects from './GenerateSubjects'
 import { BiSolidSave } from 'react-icons/bi'
+import { BsArrowLeft } from 'react-icons/bs'
+import Link from 'next/link'
+import Image from 'next/image'
+import Logo from '@/assets/logo.png'
 
 interface Props {
 	oldSubjects: Subject[]
@@ -93,8 +97,21 @@ const Client: React.FC<Props> = ({ oldSubjects }) => {
 	}
 
 	return (
-		<div>
-			<Navbar />
+		<div className="pb-24">
+			<div className="flex-1">
+				<Link href="/" className={`btn btn-ghost text-xl h-auto mb-7`}>
+					<Image
+						src={Logo}
+						height={100}
+						width={100}
+						alt="Young and Bright Publishing logo"
+					/>
+					<div className="flex flex-row items-center justify-center">
+						<BsArrowLeft size={25} />
+						<h2 className="ml-3">Return home</h2>
+					</div>
+				</Link>
+			</div>
 			<Error error={error} close={() => setError('')} />
 
 			<div className="m-auto flex flex-row gap-x-8 px-8">

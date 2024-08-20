@@ -7,9 +7,7 @@ import { getAllBooks } from '@/functions/getAllBooks'
 
 export async function POST(req: Request) {
 	try {
-		console.log('GETTING ALL BOOKS')
 		const books = await getAllBooks()
-		console.log('BOOKS', books)
 		return NextResponse.json({
 			books,
 		})

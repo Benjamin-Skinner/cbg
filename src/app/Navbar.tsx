@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Book } from '@/types'
+import Image from 'next/image'
+import Logo from '@/assets/logo.png'
 
 type NavProps = {}
 export default function Nav({}: NavProps) {
@@ -18,9 +20,12 @@ export default function Nav({}: NavProps) {
 		<nav className="rounded-lg mb-12 w-full border-b md:border-0">
 			<div className="items-center px-4 w-full mx-auto md:flex md:px-8">
 				<div className="flex items-center justify-between py-3 md:py-5 md:block">
-					<h2 className="text-xl font-bold">
-						Children's Book Generator
-					</h2>
+					<Image
+						src={Logo}
+						height={100}
+						width={100}
+						alt="Young and Bright Publishing logo"
+					/>
 				</div>
 
 				<div
@@ -28,7 +33,7 @@ export default function Nav({}: NavProps) {
 						state ? 'block' : 'hidden'
 					}`}
 				>
-					<ul className="justify-center items-center space-y-8 md:flex md:space-x-6 md:space-y-0">
+					{/* <ul className="justify-center items-center space-y-8 md:flex md:space-x-6 md:space-y-0">
 						{navigation.map((item, idx) => {
 							return (
 								<li
@@ -39,14 +44,11 @@ export default function Nav({}: NavProps) {
 								</li>
 							)
 						})}
-					</ul>
+					</ul> */}
 				</div>
 				<div className="hidden md:inline-block">
-					<Link
-						href="/new"
-						className="py-3 px-4 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md shadow"
-					>
-						New Book
+					<Link href="/new" className="btn btn-large btn-primary">
+						Create New Book
 					</Link>
 				</div>
 			</div>

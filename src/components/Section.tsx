@@ -15,10 +15,10 @@ const Section: React.FunctionComponent<SectionProps> & SectionComponent = ({
 	title,
 }) => {
 	return (
-		<div className="flex flex-row w-full mt-36">
-			<div className="w-2/12 flex justify-center">
+		<div className="flex flex-row mt-36 w-full">
+			<div className="w-96 pl-2">
 				<article className="prose mt-3">
-					<h2>{title}</h2>
+					<h2 className="text-base md:text-xl">{title}</h2>
 				</article>
 			</div>
 			{children}
@@ -30,7 +30,7 @@ interface CenterProps {
 }
 
 const Center: React.FC<CenterProps> = ({ children }) => {
-	return <div className="w-7/12">{children}</div>
+	return <div className="w-full ">{children}</div>
 }
 
 interface RightProps {
@@ -39,7 +39,7 @@ interface RightProps {
 }
 const Right: React.FC<RightProps> = ({ children, sectionName }) => {
 	return (
-		<div className="w-3/12 flex flex-col pl-12">
+		<div className="w-96 lg:pl-8">
 			{children}
 			{sectionName && (
 				<div>

@@ -19,9 +19,11 @@ const AllBooks: React.FC<Props> = ({ books }) => {
 			<Navbar />
 			<SearchBar setCurrBooks={setCurrBooks} allBooks={books} />
 			<div className="grid grid-cols-4 gap-x-8 gay-y-8 w-full pb-24">
-				{currBooks.map((book) => (
-					<BookComp key={book.id} book={book} />
-				))}
+				{currBooks
+					.sort((a, b) => (a.createdAt > b.createdAt ? 1 : -1))
+					.map((book) => (
+						<BookComp key={book.id} book={book} />
+					))}
 			</div>
 		</div>
 	)
@@ -54,6 +56,12 @@ const BookComp: React.FC<BookProps> = ({ book }) => {
 						Abandoned
 					</div>
 				)
+			case 'awatingReview':
+				return (
+					<div className="badge badge-warning badge-lg mt-2">
+						Review
+					</div>
+				)
 			default:
 				return (
 					<div className="badge badge-info badge-lg mt-2">
@@ -65,19 +73,19 @@ const BookComp: React.FC<BookProps> = ({ book }) => {
 	return (
 		<div className="flex flex-col items-center justify-center mt-8">
 			<Link
-				className="card w-96 shadow-xl hover:scale-105 transition-all transition-200 active:scale-100"
+				className="card w-96 shadow-xl hover:scale-105 transition-all transition-200 active:scale-100 border border-gray-600 rounded-md"
 				href={`/book/${book.id}`}
 			>
-				<figure>
-					{
-						<FullCoverImage
-							image={book.frontCover.hard.image.selected.url}
-						/>
-					}
+				<figure className="overflow-hidden h-[380px]">
+					<FullCoverImage
+						image={book.frontCover.hard.image.selected.url}
+					/>
 				</figure>
 				<div className="card-body bg-white rounded-md">
-					<article className="prose">
-						<h2 className="card-title">{book.title}</h2>
+					<article className="prose h-14 overflow-hidden">
+						<h2 className="card-title truncate-multiline">
+							{book.title}
+						</h2>
 					</article>
 					<p className="italic">
 						Last updated <TimeSince time={book.lastSaved} />

@@ -2,6 +2,7 @@
 
 import clientPromise from '@/util/db'
 import { Book, PageImage } from '@/types'
+import { getPageIndexInChapters } from '@/util/pageFromKey'
 
 /**
  * @function updatePage
@@ -9,32 +10,30 @@ import { Book, PageImage } from '@/types'
  * @summary
  * Updates the page subfield of a page in the database.
  *
- * @param {Book} book - The book to update
+ * @param {string} bookId - The book to update
  * @param {Page} images - The new page.image to update
  * @param {string} pageKey - The key of the page to update
- * @param {boolean} intro - Whether the page is an intro
- * @param {boolean} conclusion - Whether the page is a conclusion
+
  *
  * @returns
  *
  * @remarks
  */
 async function updatePageImage(
-	book: Book,
+	bookId: string,
 	images: PageImage,
-	pageKey: string,
-	intro: boolean,
-	conclusion: boolean
+	pageKey: string
 ) {
-	console.log('updating page image in DB')
+	console.log('Updating page image')
+
 	const client = await clientPromise
 	const db = client.db()
 	const books = db.collection('books')
 
-	if (intro) {
+	if (pageKey === 'intro') {
 		// Update the intro page
 		await books.updateOne(
-			{ id: book.id },
+			{ id: bookId },
 			{
 				$set: {
 					'pages.intro.image': images,
@@ -44,10 +43,10 @@ async function updatePageImage(
 		return
 	}
 
-	if (conclusion) {
+	if (pageKey === 'conclusion') {
 		// Update the conclusion page
 		await books.updateOne(
-			{ id: book.id },
+			{ id: bookId },
 			{
 				$set: {
 					'pages.conclusion.image': images,
@@ -58,9 +57,9 @@ async function updatePageImage(
 	}
 
 	// Update the chapter page
-	await books.updateOne(
+	const res = await books.updateOne(
 		{
-			id: book.id,
+			id: bookId,
 		},
 		{
 			$set: {
@@ -73,3 +72,85 @@ async function updatePageImage(
 	)
 }
 export default updatePageImage
+
+export async function updateInsideCoverPageImage(
+	bookId: string,
+	image: PageImage
+) {
+	const client = await clientPromise
+	const db = client.db()
+
+	await db.collection('books').findOneAndUpdate(
+		{ id: bookId },
+		{
+			$set: {
+				'insideCover.image': image,
+			},
+		}
+	)
+}
+
+export async function updateBackCoverPageImage(
+	bookId: string,
+	image: PageImage
+) {
+	const client = await clientPromise
+	const db = client.db()
+
+	await db.collection('books').findOneAndUpdate(
+		{ id: bookId },
+		{
+			$set: {
+				'backCover.image': image,
+			},
+		}
+	)
+}
+
+export async function updateFrontCoverHard(bookId: string, image: PageImage) {
+	const client = await clientPromise
+	const db = client.db()
+
+	await db.collection('books').findOneAndUpdate(
+		{ id: bookId },
+		{
+			$set: {
+				'frontCover.hard.image': image,
+			},
+		}
+	)
+}
+
+export async function updateFrontCoverPaperPageImage(
+	bookId: string,
+	image: PageImage
+) {
+	const client = await clientPromise
+	const db = client.db()
+
+	await db.collection('books').findOneAndUpdate(
+		{ id: bookId },
+		{
+			$set: {
+				'frontCover.paper.image': image,
+			},
+		}
+	)
+}
+
+export async function updateRecallAndReflectPageImage(
+	bookId: string,
+	image: PageImage
+) {
+	const client = await clientPromise
+	const db = client.db()
+
+	await db.collection('books').findOneAndUpdate(
+		{ id: bookId },
+		{
+			$set: {
+				'recallAndReflect.image': image,
+			},
+		}
+	)
+}

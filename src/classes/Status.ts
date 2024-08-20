@@ -38,6 +38,10 @@ class StatusClass {
 		this.status.generating.progress = 0
 	}
 
+	setIsGenerating(isGenerating: boolean) {
+		this.status.generating.inProgress = isGenerating
+	}
+
 	clearMessage() {
 		this.status.message.code = ''
 		this.status.message.content = ''

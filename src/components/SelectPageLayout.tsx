@@ -77,6 +77,7 @@ const SelectPageLayout: React.FC<Props> = ({ page, updatePage }) => {
 				<label className="label cursor-pointer">
 					<span className="label-text">Full-page</span>
 					<input
+						disabled={page.image.status.generating.inProgress}
 						type="checkbox"
 						className="toggle"
 						checked={page.layout === 'fullPage'}

@@ -2,13 +2,17 @@ import CBGError from '@/classes/Error'
 import { ensureParams } from '@/util/ensureParams'
 import { NextResponse } from 'next/server'
 import { Book, Page, PageImage } from '@/types'
-import { updateImages } from '@/generate/image/midjourney'
+import {
+	updateImages,
+	createAllImageOptions,
+} from '@/generate/image/midjourney'
+import updatePageImage from '@/functions/updatePageImage'
 import { getBookById } from '@/functions/getBookById'
-import updatePage from '@/functions/updatePage'
 import getPageFromKey from '@/util/pageFromKey'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
+		// image: PageImage
 		bookId: string
 		pageKey: string
 	} = await req.json()
@@ -19,28 +23,24 @@ export async function POST(req: Request, res: Response) {
 		return error.toResponse()
 	}
 
+	const bookId = params.bookId
+	const pageKey = params.pageKey
+
 	try {
-		const book = await getBookById(params.bookId)
-		const page = getPageFromKey(book, params.pageKey)
+		const book = await getBookById(bookId)
+		const page = getPageFromKey(book, pageKey)
+		console.log(
+			'page.image.status in fetched book in Update route',
+			page.image.status
+		)
+		console.log('POLLING IMAGES')
+		// Check the status of the images and update the page
+		const newImages = await updateImages(page.image)
+		// newImages.status.generating.inProgress = false
 
-		// Get the updated page images
-		const newPageImage: PageImage = await updateImages(page.image, book.id)
+		updatePageImage(bookId, newImages, pageKey)
 
-		const newPage: Page = {
-			...page,
-			image: newPageImage,
-		}
-
-		const isIntro = params.pageKey === 'intro'
-		const isConclusion = params.pageKey === 'conclusion'
-
-		// Save the new page
-		await updatePage(book, newPage, isIntro, isConclusion)
-
-		// return the updated images
-		return NextResponse.json({
-			data: newPageImage,
-		})
+		return NextResponse.json(newImages.status)
 	} catch (e: any) {
 		return new CBGError(
 			e.message || 'An error occurred',

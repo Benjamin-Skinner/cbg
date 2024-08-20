@@ -17,6 +17,8 @@ import { getNewPageLayouts } from '@/util/calculatePageLayout'
 import InsideCover from './InsideCover'
 import FrontcoverHard from './FrontcoverHard'
 import FrontcoverPaper from './FrontcoverPaper'
+import Upload from './Upload'
+import Context from './Context'
 
 interface Props {
 	bookData: Book
@@ -59,6 +61,13 @@ const Client: React.FC<Props> = ({ bookData }) => {
 	)
 
 	// Called when the book is updated
+
+	// useEffect(() => {
+	// 	updateBook(bookData, {
+	// 		updateLayouts: true,
+	// 	})
+	// }, [])
+
 	const updateBook = async (book: Book, funcOptions?: UpdateBookOptions) => {
 		let updatedBook = { ...book }
 		const options = funcOptions || {
@@ -77,6 +86,7 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 		!options.clientOnly && setSaving(true)
 		// Update in state
+		console.log('updatedBook', updatedBook)
 		setBook(updatedBook)
 
 		// // Update in Database after DEBOUNCE_SECONDS seconds
@@ -104,7 +114,7 @@ const Client: React.FC<Props> = ({ bookData }) => {
 				warningMessage={warningMessage}
 				setWarningMessage={setWarningMessage}
 			/>
-			<div className="px-8 flex flex-col items-center pt-12 py-52">
+			<div className="lg:px-8 flex flex-col items-center pt-12 py-52">
 				<Title book={book} updateBook={updateBook} />
 				<Outline book={book} updateBook={updateBook} />
 
@@ -116,6 +126,7 @@ const Client: React.FC<Props> = ({ bookData }) => {
 
 				<Blurb book={book} updateBook={updateBook} />
 
+				<Context book={book} updateBook={updateBook} />
 				<Pages book={book} updateBook={updateBook} />
 
 				<RecallAndReflect book={book} updateBook={updateBook} />
@@ -127,6 +138,12 @@ const Client: React.FC<Props> = ({ bookData }) => {
 					updateBook={updateBook}
 					setWarningMessage={setWarningMessage}
 				/>
+
+				{/* <Upload
+					book={book}
+					updateBook={updateBook}
+					setWarningMessage={setWarningMessage}
+				/> */}
 			</div>
 		</>
 	)

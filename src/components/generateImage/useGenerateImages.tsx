@@ -8,7 +8,8 @@ export const useGenerateImages = (
 	updateImage: (image: PageImage, options?: UpdateBookOptions) => void,
 	apiUrl: string,
 	bookId: string,
-	pageKey: string
+	pageKey: string,
+	setResponseReceived: (responseReceived: boolean) => void
 ) => {
 	const imageRef = useRef(image)
 
@@ -22,8 +23,8 @@ export const useGenerateImages = (
 
 		// Update the status
 		const newStatus = new StatusClass(imageRef.current.status)
-		newStatus.beginGenerating()
 		newStatus.clearMessage()
+		newStatus.beginGenerating()
 
 		// Update the book with the new status
 		await updateImage(
@@ -41,6 +42,7 @@ export const useGenerateImages = (
 			body: JSON.stringify({
 				bookId: bookId,
 				pageKey: pageKey,
+				prompt: imageRef.current.prompt.content,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -49,10 +51,11 @@ export const useGenerateImages = (
 
 		// SUCCESS --> update the state with the new generated prompt
 		if (res.status === 200) {
-			const { data } = (await res.json()) as { data: PageImage }
-			console.log('GENERATION SUCCESS')
+			const pageImage = (await res.json()) as PageImage
+			setResponseReceived(true)
+			console.log('Response received; begin polling')
 
-			await updateImage(data, {
+			await updateImage(pageImage, {
 				clientOnly: true,
 			})
 		} else {

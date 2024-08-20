@@ -41,7 +41,7 @@ const SinglePageContent: React.FC<Props> = ({
 	// Image on top
 	if (page.layout === 'imageFirst') {
 		return (
-			<div className="card w-7/12 m-auto aspect-hardcover bg-base-100 shadow-xl">
+			<div className="card w-11/12 lg:w-7/12 m-auto aspect-hardcover bg-base-100 shadow-xl">
 				<div className="card-body w-full">
 					<div className="m-auto w-5/6 p-2 pb-8">
 						<SelectImage
@@ -116,7 +116,7 @@ const SinglePageContent: React.FC<Props> = ({
 		)
 	} else {
 		return (
-			<div className="card w-7/12 m-auto aspect-hardcover bg-base-100 shadow-xl">
+			<div className="card  w-11/12 lg:w-7/12 m-auto aspect-hardcover bg-base-100 shadow-xl">
 				<div className="card-body w-full">
 					<article className="prose m-auto text-md px-6 w-full h-full mt-5">
 						<textarea

@@ -8,14 +8,18 @@ import { v4 as uuidv4 } from 'uuid'
  */
 export async function saveImageToAWS(
 	bookId: string,
-	stream: ReadableStream
+	stream: ReadableStream,
+	messageId?: string
 ): Promise<{ savedUrl: string }> {
 	try {
 		// Convert the ReadableStream to a Buffer
 		const buffer = await readableStreamToBuffer(stream)
 
 		// Generate a unique filename using the bookId and a UUID
-		const filename = `${bookId}/${uuidv4()}.png`
+		let filename = `${bookId}/${uuidv4()}.png`
+		if (messageId) {
+			filename = `${bookId}/${messageId}.png`
+		}
 
 		const bucket = process.env.S3_BUCKET_NAME
 		if (!bucket) {

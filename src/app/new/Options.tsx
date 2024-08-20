@@ -69,7 +69,7 @@ const Options: React.FC<Props> = ({ options, setOptions }) => {
 						<FaPaintBrush size={50} />
 						<article className="text-center">Art</article>
 					</button>
-					<button
+					{/* <button
 						className={classNames('Career')}
 						onClick={() =>
 							setOptions({
@@ -81,7 +81,7 @@ const Options: React.FC<Props> = ({ options, setOptions }) => {
 						<FaHammer size={50} />
 
 						<article className="text-center">Career</article>
-					</button>
+					</button> */}
 					<button
 						className={classNames('Other')}
 						onClick={() =>

@@ -3,6 +3,9 @@ import Link from 'next/link'
 import TimeSince from './TimeAgo'
 import { SavedIcon } from './Icons'
 import { IoSaveOutline as SaveIcon } from 'react-icons/io5'
+import Image from 'next/image'
+import Logo from '@/assets/logo.png'
+import { BsArrowLeft } from 'react-icons/bs'
 
 interface Props {
 	lastSaved: number
@@ -13,10 +16,24 @@ interface Props {
 const Navbar: React.FC<Props> = ({ lastSaved, saving, manualSave }) => {
 	return (
 		<div className="">
-			<div className="navbar bg-transparent">
+			<div className="navbar bg-transparent flex items-start ">
 				<div className="flex-1">
-					<Link href="/" className="btn btn-ghost text-xl">
-						Children's Book Generator
+					<Link
+						href="/"
+						className={`btn btn-ghost text-xl h-auto ${
+							saving ? 'pointer-events-none' : ''
+						}`}
+					>
+						<Image
+							src={Logo}
+							height={100}
+							width={100}
+							alt="Young and Bright Publishing logo"
+						/>
+						<div className="flex flex-row items-center justify-center">
+							<BsArrowLeft size={25} />
+							<h2 className="ml-3">Return home</h2>
+						</div>
 					</Link>
 				</div>
 				<div className="flex-none transition-all duration-500 fixed right-0 bg-slate-200 z-50 py-0 h-fit items-center justify-center opacity-75 rounded-full">
@@ -25,7 +42,7 @@ const Navbar: React.FC<Props> = ({ lastSaved, saving, manualSave }) => {
 							className="btn btn-square btn-ghost text-gray-500"
 							onClick={manualSave}
 						>
-							<SaveIcon size={5} />
+							<SaveIcon size={25} />
 						</button>
 					</div>
 					<div className="flex flex-row items-center mr-6 justify-start text-left w-40">
@@ -51,21 +68,6 @@ const Navbar: React.FC<Props> = ({ lastSaved, saving, manualSave }) => {
 							</>
 						)}
 					</div>
-					<button className="btn btn-square btn-ghost">
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							className="inline-block w-5 h-5 stroke-current"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="2"
-								d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"
-							></path>
-						</svg>
-					</button>
 				</div>
 			</div>
 		</div>

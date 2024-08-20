@@ -31,6 +31,7 @@ export async function getAllBooks() {
 			createdAt: bookDoc.createdAt,
 			lastSaved: bookDoc.lastSaved,
 			pages: bookDoc.pages,
+			files: bookDoc.files,
 		}
 		books.push(book)
 	}

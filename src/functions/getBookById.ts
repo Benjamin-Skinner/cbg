@@ -42,6 +42,7 @@ export async function getBookById(bookId: string) {
 		createdAt: bookDoc.createdAt,
 		lastSaved: bookDoc.lastSaved,
 		pages: bookDoc.pages,
+		files: bookDoc.files,
 	}
 
 	if (!book.pages.intro.image.ar) {
@@ -72,6 +73,10 @@ export async function getBookById(bookId: string) {
 				option.ar = DEFAULT_AR
 			}
 		}
+	}
+
+	if (!book.files) {
+		book.files = []
 	}
 
 	// if (!book.recallAndReflect) {

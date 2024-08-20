@@ -58,7 +58,9 @@ const Card: React.FC<CardProps> = ({ subject, onClick, onSave }) => {
 							Grade: {subject.options.grade}
 						</div> */}
 						<div className="badge badge-accent">
-							{subject.options.subject}
+							{subject.options.subject === 'User'
+								? 'Manual Subject'
+								: subject.options.subject}
 						</div>
 					</div>
 					{/* </div> */}

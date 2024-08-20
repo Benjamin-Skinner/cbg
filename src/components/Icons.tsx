@@ -1,5 +1,6 @@
 import { FaSquareFull } from 'react-icons/fa6'
 import { BiSolidRectangle } from 'react-icons/bi'
+import { TbNumber123 } from 'react-icons/tb'
 
 interface Props {
 	size?: number
@@ -7,6 +8,10 @@ interface Props {
 }
 
 const DEFAULT_ICON_SIZE = 4
+
+export const NumberIcon: React.FC<Props> = ({ size = DEFAULT_ICON_SIZE }) => {
+	return <TbNumber123 className={`w-${size} h-${size}`} />
+}
 
 export const Lock: React.FC<Props> = ({ size = DEFAULT_ICON_SIZE }) => {
 	return (

@@ -36,9 +36,9 @@ const FullCoverImage: React.FC<Props> = ({ image }) => {
 		<Image
 			src={image}
 			alt="Full cover image"
-			className="w-full"
-			width={400}
-			height={400}
+			className="object-cover object-top h-full w-full"
+			width={380}
+			height={380}
 		/>
 	)
 }

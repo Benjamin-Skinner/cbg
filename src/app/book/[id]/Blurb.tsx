@@ -22,6 +22,24 @@ const Blurb: React.FC<Props> = ({ book, updateBook }) => {
 	const { generateBlurb } = useGenerateBlurb(updateBook, book)
 	const { updateBlurb } = useUpdateBlurb(book, updateBook)
 
+	const bookRef = useRef(book)
+
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	const cancelGeneration = () => {
+		const newStatus = new StatusClass(book.blurb.status)
+		newStatus.clearGenerating()
+		updateBook({
+			...bookRef.current,
+			blurb: {
+				...bookRef.current.blurb,
+				status: newStatus.toObject(),
+			},
+		})
+	}
+
 	return (
 		<Section title="Blurb">
 			<Section.Center>
@@ -45,7 +63,17 @@ const Blurb: React.FC<Props> = ({ book, updateBook }) => {
 				</div>
 			</Section.Center>
 			<Section.Right>
-				<Status status={book.blurb.status} />
+				<div className="flex flex-row mb-6">
+					<Status status={book.blurb.status} />
+					{book.blurb.status.generating.inProgress && (
+						<button
+							className="btn btn-sm btn-outline ml-6"
+							onClick={cancelGeneration}
+						>
+							Cancel
+						</button>
+					)}
+				</div>
 				<Stat
 					title="Word Count"
 					value={countWords(book.blurb.text).toString()}
@@ -105,13 +133,18 @@ const useGenerateBlurb = (
 		const newStatus = new StatusClass(book.blurb.status)
 		newStatus.beginGenerating()
 
-		updateBook({
-			...bookRef.current,
-			blurb: {
-				...bookRef.current.blurb,
-				status: newStatus.toObject(),
+		updateBook(
+			{
+				...bookRef.current,
+				blurb: {
+					...bookRef.current.blurb,
+					status: newStatus.toObject(),
+				},
 			},
-		})
+			{
+				clientOnly: true,
+			}
+		)
 		const res = await fetch('/api/generate/blurb', {
 			method: 'POST',
 			body: JSON.stringify({
@@ -137,9 +170,9 @@ const useGenerateBlurb = (
 			newStatus.setError(error)
 			newStatus.clearGenerating()
 			updateBook({
-				...book,
+				...bookRef.current,
 				blurb: {
-					...book.blurb,
+					...bookRef.current.blurb,
 					status: newStatus.toObject(),
 				},
 			})

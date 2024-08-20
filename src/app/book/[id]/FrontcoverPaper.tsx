@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Book, ImagePrompt as ImagePromptT, PageImage } from '@/types'
+import React, { useState, useRef, useEffect } from 'react'
+import { Book, PageImage } from '@/types'
 import Section from '@/components/Section'
 import SelectImage from '@/components/selectImage/SelectImage'
 import { UpdateBookOptions } from './Client'
@@ -14,37 +14,22 @@ interface Props {
 
 const FrontcoverPaper: React.FC<Props> = ({ book, updateBook }) => {
 	const [newImages, setNewImages] = useState(false)
+
+	const bookRef = useRef(book)
+
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
 	const updateImage = (image: PageImage, options?: UpdateBookOptions) => {
 		updateBook(
 			{
-				...book,
+				...bookRef.current,
 				frontCover: {
-					...book.frontCover,
+					...bookRef.current.frontCover,
 					paper: {
-						...book.frontCover.paper,
+						...bookRef.current.frontCover.paper,
 						image,
-					},
-				},
-			},
-			options
-		)
-	}
-
-	const updateImagePrompt = (
-		prompt: ImagePromptT,
-		options?: UpdateBookOptions
-	) => {
-		updateBook(
-			{
-				...book,
-				frontCover: {
-					...book.frontCover,
-					paper: {
-						...book.frontCover.paper,
-						image: {
-							...book.frontCover.paper.image,
-							prompt,
-						},
 					},
 				},
 			},
@@ -87,6 +72,11 @@ const FrontcoverPaper: React.FC<Props> = ({ book, updateBook }) => {
 					updateImage={updateImage}
 					id="frontCover-paper"
 					bookId={book.id}
+					disabled={
+						book.frontCover.hard.image.status.generating
+							.inProgress ||
+						book.frontCover.hard.image.selected.url === ''
+					}
 				/>
 			</Section.Right>
 		</Section>

@@ -16,18 +16,20 @@ const Title: React.FC<Props> = ({ book, updateBook }) => {
 	}
 
 	return (
-		<div className="flex flex-row w-full m-auto">
-			<input
-				type="text"
-				value={book.title}
-				placeholder="Title"
-				onChange={(e) => updateTitle(e.target.value)}
-				className="w-full h-12 text-4xl font-bold text-center"
-			/>
-			<div className="absolute right-10 w-52">
-				<BookStatus book={book} updateBook={updateBook} />
+		<>
+			<div className="flex flex-col md:flex-row w-full m-auto">
+				<input
+					type="text"
+					value={book.title}
+					placeholder="Title"
+					onChange={(e) => updateTitle(e.target.value)}
+					className="w-full h-12 text-4xl font-bold text-center"
+				/>
+				<div className="absolute right-10 w-52">
+					<BookStatus book={book} updateBook={updateBook} />
+				</div>
 			</div>
-		</div>
+		</>
 	)
 }
 

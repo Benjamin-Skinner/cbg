@@ -3,6 +3,12 @@ import { ImageAR } from './types'
 export const NUM_CHAPTERS = 12 // not including intro and conclusion
 
 export const SECTION_GUIDELINES = {
+	context: [
+		'Fed to the AI as context when writing the pages.',
+		'Will not be applied to the intro or conclusion.',
+		'Leave the section blank to start.',
+		'Add content later if needed',
+	],
 	page: [
 		'TEXT: Wording of the text is appropriate for children.',
 		'TEXT: The flow of the text is effective and engaging',
@@ -52,6 +58,7 @@ export const PROMPT_TIPS = {
 	recall: [],
 	reflect: [],
 	outline: [],
+	context: [],
 }
 
 export const IMAGE_POLL_TIME = 5 // seconds

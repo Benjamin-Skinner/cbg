@@ -34,11 +34,6 @@ export async function POST(req: Request, res: Response) {
 	)
 
 	try {
-		// Update the page with the new status; Book is now generating
-		// const newPage = params.page
-		// newPage.text.status = newStatus.toObject()
-		// await updatePage(params.book, newPage, params.intro, params.conclusion)
-
 		// Generate new text
 		const page = await generatePageText(
 			params.book,

@@ -1,51 +1,49 @@
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
 import { NextResponse } from 'next/server'
+import { Cover, PageImage } from '@/types'
 import { generateImages } from '@/generate/image/midjourney'
 import { getBookById } from '@/functions/getBookById'
-import { updateBook } from '@/functions/updateBook'
 import logger from '@/logging'
-import { Book } from '@/types'
+import {
+	updateInsideCoverPageImage,
+	updateRecallAndReflectPageImage,
+} from '@/functions/updatePageImage'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
 		bookId: string
+		prompt: string
 	} = await req.json()
 
-	const { error, isError } = ensureParams(params, ['bookId'])
+	const { error, isError } = ensureParams(params, ['bookId', 'prompt'])
 
 	if (isError && error) {
 		return error.toResponse()
 	}
 
-	const book = await getBookById(params.bookId)
-
 	try {
-		logger.info(`MIDJOURNEY request for RAND for book ${book.id}`)
-		const newImage = await generateImages(
-			book.recallAndReflect.image,
-			'tiling'
+		logger.info(
+			`MIDJOURNEY request for recall and reflect of book ${params.bookId}`
 		)
 
-		// Save the new image
-		const newBook: Book = {
-			...book,
-			recallAndReflect: {
-				...book.recallAndReflect,
-				image: newImage,
+		const book = await getBookById(params.bookId)
+
+		const imageWithPrompt: PageImage = {
+			...book.recallAndReflect.image,
+			prompt: {
+				...book.recallAndReflect.image.prompt,
+				content: params.prompt,
 			},
 		}
 
-		await updateBook(newBook)
+		const newPageImage: PageImage = await generateImages(imageWithPrompt)
 
-		return NextResponse.json(
-			{
-				data: newImage,
-			},
-			{
-				status: 200,
-			}
-		)
+		await updateRecallAndReflectPageImage(params.bookId, newPageImage)
+
+		return NextResponse.json(newPageImage, {
+			status: 200,
+		})
 	} catch (error: any) {
 		return new CBGError(
 			error.message || 'Internal server error',

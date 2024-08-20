@@ -7,6 +7,7 @@ import {
 	RectangleIcon,
 	SquareIcon,
 	UploadIcon,
+	NumberIcon,
 } from '../Icons'
 import { ImageOption } from '@/types'
 import Image from 'next/image'
@@ -14,6 +15,7 @@ import mj_logo from '@/assets/midjourney.png'
 import Link from 'next/link'
 import { DEFAULT_AR } from '@/constants'
 import { arToBoolean } from '@/util/aspectRatio'
+import { BiInfoCircle } from 'react-icons/bi'
 
 interface Props {
 	selected: boolean
@@ -66,14 +68,16 @@ const ImageCard: React.FC<Props> = ({
 						>
 							Select
 						</button>
+						<div className="flex items-center justify-end w-full">
+							<Link
+								target="_blank"
+								href={`/image?url=${image?.url}&messageId=${image?.messageId}&aspectRatio=${image?.ar?.width}:${image?.ar?.height}&type=${image?.type}`}
+								className="btn btn-ghost btn-sm text-gray-500"
+							>
+								<OpenInNewWindowIcon size={4} />
+							</Link>
+						</div>
 					</div>
-					<Link
-						target="_blank"
-						href={`/image?url=${image?.url}`}
-						className="btn btn-ghost btn-sm text-gray-500 ml-auto"
-					>
-						<OpenInNewWindowIcon size={4} />
-					</Link>
 				</div>
 			</div>
 		</div>
@@ -98,41 +102,63 @@ const ImageIcons: React.FC<ImageIconsProps> = ({ image }) => {
 		<>
 			<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
 				{image.type === 'midjourney' ? (
-					<Image
-						src={mj_logo}
-						className="rounded-full"
-						alt="Midjourney logo"
-						width={30}
-						height={30}
-					/>
+					<div
+						className="tooltip tooltip-bottom"
+						data-tip="Image was generated using Midjourney"
+					>
+						<Image
+							src={mj_logo}
+							className="rounded-full"
+							alt="Midjourney logo"
+							width={30}
+							height={30}
+						/>
+					</div>
 				) : (
-					<UploadIcon size={4} />
+					<div
+						className="tooltip tooltip-bottom"
+						data-tip="Image was manually uploaded"
+					>
+						<UploadIcon size={4} />
+					</div>
 				)}
 			</div>
 
 			<div className="border border-gray-400 w-8 aspect-square rounded-full flex items-center justify-center">
 				{fullPage && (
-					<span title="Image is full page">
+					<div
+						className="tooltip tooltip-bottom"
+						data-tip="Image is full-page"
+					>
 						<RectangleIcon size={4} />
-					</span>
+					</div>
 				)}
 
 				{square && (
-					<span title="Image is square">
+					<div
+						className="tooltip tooltip-bottom"
+						data-tip="Image is square"
+					>
 						<SquareIcon size={4} />
-					</span>
+					</div>
 				)}
 
 				{hardcover && (
-					<span title="Image is hardcover size">
+					<div
+						className="tooltip tooltip-bottom"
+						data-tip="Image is hardcover size"
+					>
 						<HardcoverIcon size={4} />
-					</span>
+					</div>
 				)}
 
 				{rAndR && (
-					<span title="Image is 4 to 1">
+					<div
+						className="tooltip tooltip-bottom"
+						data-tip="Image has an aspect ratio of 4:1"
+					>
 						<RandRIcon size={4} />
-					</span>
+					</div>
 				)}
 			</div>
 		</>

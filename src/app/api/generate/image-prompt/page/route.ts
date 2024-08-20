@@ -32,7 +32,11 @@ export async function POST(req: Request, res: Response) {
 			params.bookId
 		)
 
-		const openAiPrompt = `Given the a paragraph of a children's book, create a short description of an image to accompany it. Add one specific relevant detail from the page. Make the prompt short and simple. Base the description closely on the examples below:
+		if (page.text.content === '') {
+			throw new Error('Page text is empty')
+		}
+
+		const openAiPrompt = `Given the a paragraph of a children's book, create a short description of an image to accompany it. Add one specific relevant detail from the page. Make the prompt short and simple. Base the description closely on the examples below. Never use character names:
 
     Page: Pirate ships are big boats that sailed the seas long ago. They had big, billowing sails and flags with scary skulls on them. Pirates wore eye patches and carried swords and cannons to fight other ships. They looked for treasure to steal and buried it on secret islands. Pirate ships had names like "Black Pearl" and "Queen Anne's Revenge." They sailed the oceans in search of adventure and gold.
     Image: pirate on a ship, hyperrealistic.

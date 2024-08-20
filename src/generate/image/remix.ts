@@ -19,9 +19,8 @@ export async function generateRemixImages(
 		)
 	}
 	console.log(`remixing image ${messageId}`)
-	const optionGenerating = await sendRemixJob(messageId, softcoverImage.ar)
 
-	console.log('optionGenerating', optionGenerating)
+	const optionGenerating = await sendRemixJob(messageId, softcoverImage.ar)
 
 	const newImage = softcoverImage
 	newImage.generatingImages.push(optionGenerating)
@@ -65,6 +64,7 @@ export async function sendRemixJob(
 		upscales: [],
 		ar: ar,
 		tiling: false,
+		processing: false,
 	}
 
 	logger.info(
@@ -110,18 +110,18 @@ async function createRemixJob(
 	return data as GenerateImageResponse
 }
 
-export function getHardcoverMessageIdFromUrl(book: Book, url: string): string {
-	const hardcoverImage = book.frontCover.hard.image
+// function getHardcoverMessageIdFromUrl(book: Book, url: string): string {
+// 	const hardcoverImage = book.frontCover.hard.image
 
-	for (const option of hardcoverImage.generatingImages) {
-		console.log(option)
-		for (const upscale of option.upscales) {
-			console.log(upscale)
-			if (upscale.url === url) {
-				return upscale.messageId
-			}
-		}
-	}
+// 	for (const option of hardcoverImage.generatingImages) {
+// 		console.log(option)
+// 		for (const upscale of option.upscales) {
+// 			console.log(upscale)
+// 			if (upscale.url === url) {
+// 				return upscale.messageId
+// 			}
+// 		}
+// 	}
 
-	throw new Error('Hardcover image not found')
-}
+// 	throw new Error('Hardcover image not found')
+// }

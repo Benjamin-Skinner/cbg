@@ -12,47 +12,54 @@ import { updateBook } from '@/functions/updateBook'
 import getPageFromKey from '@/util/pageFromKey'
 import logStatus from '@/util/statusLog'
 import logger from '@/logging'
+import updatePageImage from '@/functions/updatePageImage'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
 		bookId: string
 		pageKey: string
+		prompt: string
 	} = await req.json()
 
-	const { error, isError } = ensureParams(params, ['bookId'])
+	const { error, isError } = ensureParams(params, [
+		'bookId',
+		'prompt',
+		'pageKey',
+	])
 
 	if (isError && error) {
 		return error.toResponse()
 	}
 
-	const book = await getBookById(params.bookId)
-	const page = getPageFromKey(book, params.pageKey)
-
 	try {
 		logger.info(
-			`MIDJOURNEY request for page ${page.title} for book ${book.id}`
+			`MIDJOURNEY request for page ${params.pageKey} for book ${params.bookId}`
 		)
 
-		const newPageImage: PageImage = await generateImages(page.image)
-		const newPage: Page = {
+		const book = await getBookById(params.bookId)
+		const page = getPageFromKey(book, params.pageKey)
+
+		const pageWithPrompt: Page = {
 			...page,
-			image: newPageImage,
+			image: {
+				...page.image,
+				prompt: {
+					...page.image.prompt,
+					content: params.prompt,
+				},
+			},
 		}
 
-		const isIntro = params.pageKey === 'intro'
-		const isConclusion = params.pageKey === 'conclusion'
-
-		// Save the new page
-		await updatePage(book, newPage, isIntro, isConclusion)
-
-		return NextResponse.json(
-			{
-				data: newPageImage,
-			},
-			{
-				status: 200,
-			}
+		const newPageImage: PageImage = await generateImages(
+			pageWithPrompt.image
 		)
+
+		await updatePageImage(params.bookId, newPageImage, params.pageKey)
+		console.log('newPageImage returned from generateImages', newPageImage)
+
+		return NextResponse.json(newPageImage, {
+			status: 200,
+		})
 	} catch (error: any) {
 		return new CBGError(
 			error.message || 'Internal server error',

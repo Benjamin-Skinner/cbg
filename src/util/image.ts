@@ -20,10 +20,21 @@ import { isApproximatelyEqual } from './math'
 export async function downloadMidjourneyImage(
 	url: string,
 	book: Book,
-	pageTitle: string
+	pageTitle?: string
 ) {
 	if (url === '') {
-		throw new Error(`No image has been selected for ${pageTitle}`)
+		throw new Error(
+			`No image has been selected for ${pageTitle || 'this page'}`
+		)
+	}
+
+	// Check if the image directory exists; if not create it
+	const imageDir = `${process.env.IMAGE_DIR}/${book.id}`
+	if (!fs.existsSync(imageDir)) {
+		console.log('Creating image directory', imageDir)
+		fs.mkdirSync(imageDir)
+	} else {
+		console.log('Image directory already exists')
 	}
 
 	const imagePath = getImagePath(url, book)
@@ -34,8 +45,6 @@ export async function downloadMidjourneyImage(
 		return { imgPath: imagePath }
 	}
 
-	console.log('Downloading image:', url)
-	console.log(`Image path: ${imagePath}`)
 	const options = {
 		url: url,
 		dest: imagePath,
@@ -53,8 +62,8 @@ export async function downloadMidjourneyImage(
 		})
 }
 
-export function getImagePath(url: string, book: Book) {
-	const imageDir = '/Users/Benskinner/Code/cbg/images'
+function getImagePath(url: string, book: Book) {
+	const imageDir = process.env.IMAGE_DIR
 
 	const urlId = getImageUrlId(url)
 

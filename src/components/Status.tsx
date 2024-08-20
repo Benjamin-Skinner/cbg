@@ -45,10 +45,14 @@ const Status: React.FC<Props> = ({
 				</div>
 
 				<Message status={status} section={'description'} />
-				{image && (
+				{image && status.generating.progress === 100 ? (
+					<p className="text-info text-sm mt-3">Saving images...</p>
+				) : image ? (
 					<p className="text-info text-sm mt-3">
 						Image {getImageNum(status.generating.progress)}/4
 					</p>
+				) : (
+					<></>
 				)}
 			</div>
 		)

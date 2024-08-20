@@ -23,11 +23,7 @@ const RegenerateButton: React.FC<Props> = ({ loading, regenerateSubjects }) => {
 							<span className="loading loading-bars loading-md text-info ml-4"></span>
 						</div>
 					) : (
-						<div className="flex flex-col">
-							<div className="badge badge-neutral badge-xl">
-								Waiting
-							</div>
-						</div>
+						<></>
 					)}
 				</div>
 			</div>

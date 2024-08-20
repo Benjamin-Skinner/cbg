@@ -38,7 +38,7 @@ const ImageOptionList: React.FC<Props> = ({
 	}
 
 	return (
-		<div className="grid grid-cols-3 pb-[700px] gap-y-14 pt-4 gap-x-8">
+		<div className="grid grid-cols-4 pb-[700px] gap-y-14 pt-4 gap-x-8">
 			{currImageOptions
 				// Remove any images where there is something wrong with the URL
 				.filter((image) => image.url !== '' && image.url !== null)
