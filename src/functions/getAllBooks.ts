@@ -3,15 +3,10 @@ import clientPromise from '@/util/db'
 import { DEFAULT_AR, EXCLUDE } from '@/constants'
 
 export async function getAllBooks() {
-	console.log('Getting all books function')
 	// setFieldOnAllBookDocs()
 	const client = await clientPromise
-	console.log('client')
 	const db = client.db()
-	console.log('connected to db')
 	const bookDocs = await db.collection('books').find({})
-
-	console.log('BOOK DOCS', bookDocs)
 
 	const books = []
 

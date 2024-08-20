@@ -10,7 +10,6 @@ export default async function Home() {
 			Expires: '0',
 		},
 		cache: 'no-store', // Ensure that the response is not stored in any cache
-		next: { revalidate: 0 }, // Next.js setting to disable ISR and always revalidate
 	})
 	const { books } = await res.json()
 
