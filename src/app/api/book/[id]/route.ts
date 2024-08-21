@@ -3,6 +3,7 @@ import { updateBook } from '@/functions/updateBook'
 import { NextResponse } from 'next/server'
 import { ensureParams } from '@/util/ensureParams'
 import CBGError from '@/classes/Error'
+import { revalidatePath } from 'next/cache'
 
 export async function PUT(
 	req: Request,
@@ -20,6 +21,7 @@ export async function PUT(
 	try {
 		// For any fields that have generating.inProgress, do not update them
 		const lastSaved = await updateBook(book, fields)
+		revalidatePath(`/`)
 		return NextResponse.json({
 			lastUpdated: lastSaved,
 		})
