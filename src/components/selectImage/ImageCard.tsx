@@ -30,11 +30,11 @@ const ImageCard: React.FC<Props> = ({
 	deleteImage,
 	selectImage,
 }) => {
-	const { fullPage } = arToBoolean(image.ar)
+	const { fullPage, rAndR } = arToBoolean(image.ar)
 	return (
 		<div
 			className={`card bg-base-100 shadow-xl w-full p-2 border-4 ${
-				fullPage && 'col-span-2'
+				fullPage || (rAndR && 'col-span-2')
 			} ${selected ? 'border-green-600' : 'border-transparent'}`}
 		>
 			<div className="flex flex-row space-x-4 pb-2">

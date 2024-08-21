@@ -7,6 +7,7 @@ import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
 import logger from '@/logging'
 import logStatus from '@/util/statusLog'
+import { updateInsideCoverPrompt } from '@/functions/updateImagePrompt'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -53,19 +54,7 @@ export async function POST(req: Request, res: Response) {
 			openAiPrompt
 		)
 
-		const newInsideCover: Cover = {
-			...book.insideCover,
-			image: {
-				...book.insideCover.image,
-				prompt: newPrompt,
-			},
-		}
-
-		await updateBook({
-			...book,
-			insideCover: newInsideCover,
-		})
-
+		await updateInsideCoverPrompt(bookId, newPrompt)
 		logStatus('IMAGE_PROMPT_INSIDE_COVER', 'completed', bookId)
 
 		return NextResponse.json(

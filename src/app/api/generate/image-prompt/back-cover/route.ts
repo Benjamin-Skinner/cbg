@@ -7,6 +7,7 @@ import updatePage from '@/functions/updatePage'
 import generateImagePrompt from '@/generate/text/coverImagePrompt'
 import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
+import { updateBackCoverPrompt } from '@/functions/updateImagePrompt'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -42,18 +43,7 @@ export async function POST(req: Request, res: Response) {
 			openAiPrompt
 		)
 
-		const newBackCover: Cover = {
-			...book.backCover,
-			image: {
-				...book.backCover.image,
-				prompt: newPrompt,
-			},
-		}
-
-		await updateBook({
-			...book,
-			backCover: newBackCover,
-		})
+		await updateBackCoverPrompt(bookId, newPrompt)
 
 		return NextResponse.json(
 			{

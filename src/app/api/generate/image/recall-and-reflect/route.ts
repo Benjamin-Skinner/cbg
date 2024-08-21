@@ -37,7 +37,10 @@ export async function POST(req: Request, res: Response) {
 			},
 		}
 
-		const newPageImage: PageImage = await generateImages(imageWithPrompt)
+		const newPageImage: PageImage = await generateImages(
+			imageWithPrompt,
+			'tiling'
+		)
 
 		await updateRecallAndReflectPageImage(params.bookId, newPageImage)
 

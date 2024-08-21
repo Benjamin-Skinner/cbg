@@ -62,17 +62,6 @@ const SelectPageLayout: React.FC<Props> = ({ page, updatePage }) => {
 
 	return (
 		<div className="w-1/2">
-			{/* <select
-				className="select w-full max-w-xs"
-				value={page.layout}
-				defaultValue="imageFirst"
-				onChange={handleLayoutChange}
-			>
-				<option value="imageFirst">Image on top</option>
-				<option value="textFirst">Text on top</option>
-
-				<option value="fullPage">Full page</option>
-			</select> */}
 			<div className="form-control">
 				<label className="label cursor-pointer">
 					<span className="label-text">Full-page</span>

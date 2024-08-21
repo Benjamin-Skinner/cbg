@@ -7,6 +7,7 @@ import { updateBook } from '@/functions/updateBook'
 import { getBookById } from '@/functions/getBookById'
 import logger from '@/logging'
 import logStatus from '@/util/statusLog'
+import { updateRAndRPrompt } from '@/functions/updateImagePrompt'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -56,18 +57,7 @@ export async function POST(req: Request, res: Response) {
 			openAiPrompt
 		)
 
-		const newRecallAndReflect: RecallAndReflect = {
-			...book.recallAndReflect,
-			image: {
-				...book.recallAndReflect.image,
-				prompt: newPrompt,
-			},
-		}
-
-		await updateBook({
-			...book,
-			recallAndReflect: newRecallAndReflect,
-		})
+		await updateRAndRPrompt(bookId, newPrompt)
 
 		logStatus('IMAGE_PROMPT_RANDR', 'completed', bookId)
 

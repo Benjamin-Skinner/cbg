@@ -42,7 +42,7 @@ const Right: React.FC<RightProps> = ({ children, sectionName }) => {
 		<div className="w-96 lg:pl-8">
 			{children}
 			{sectionName && (
-				<div>
+				<div className="w-80 lg:mr-8">
 					<div className="stats shadow w-full mt-12">
 						<div className="stat">
 							<div className="stat-title">Section Checklist</div>

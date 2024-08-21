@@ -9,6 +9,7 @@ import logStatus from '@/util/statusLog'
 import { getBookById } from '@/functions/getBookById'
 import updatePage from '@/functions/updatePage'
 import getPageFromKey from '@/util/pageFromKey'
+import { updatePageImagePrompt } from '@/functions/updateImagePrompt'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -56,18 +57,7 @@ export async function POST(req: Request, res: Response) {
 			'watercolor clip art on a white background of'
 		)
 
-		const newPage: Page = {
-			...page,
-			image: {
-				...page.image,
-				prompt: newPrompt,
-			},
-		}
-
-		const isConclusion = page.key === 'conclusion'
-		const isIntro = page.key === 'intro'
-
-		await updatePage(book, newPage, isIntro, isConclusion)
+		await updatePageImagePrompt(params.bookId, newPrompt, params.pageKey)
 
 		logStatus(
 			`IMAGE_PROMPT for page ${page.title}`,

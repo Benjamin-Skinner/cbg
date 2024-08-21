@@ -4,35 +4,45 @@ import { ImagePrompt as ImagePromptT, PageImage } from '@/types'
 import ImagePrompt from '@/components/imagePrompt/ImagePrompt'
 import GenerateImages from '@/components/generateImage/GenerateImage'
 import ImageGenerationStatus from '@/components/generateImage/ImageGenerationStatus'
+import { UpdateBookOptions } from '../Client'
 
 interface Props {
 	book: Book
-	updateBook: (book: Book) => void
+	updateBook: (book: Book, options?: UpdateBookOptions) => void
 	setNewImages: (newImages: boolean) => void
 }
 
 const Images: React.FC<Props> = ({ book, updateBook, setNewImages }) => {
-	const updateImagePrompt = (prompt: ImagePromptT) => {
-		updateBook({
-			...book,
-			recallAndReflect: {
-				...book.recallAndReflect,
-				image: {
-					...book.recallAndReflect.image,
-					prompt,
+	const updateImagePrompt = (
+		prompt: ImagePromptT,
+		options?: UpdateBookOptions
+	) => {
+		updateBook(
+			{
+				...book,
+				recallAndReflect: {
+					...book.recallAndReflect,
+					image: {
+						...book.recallAndReflect.image,
+						prompt,
+					},
 				},
 			},
-		})
+			options
+		)
 	}
 
-	const updateImage = (image: PageImage) => {
-		updateBook({
-			...book,
-			recallAndReflect: {
-				...book.recallAndReflect,
-				image,
+	const updateImage = (image: PageImage, options?: UpdateBookOptions) => {
+		updateBook(
+			{
+				...book,
+				recallAndReflect: {
+					...book.recallAndReflect,
+					image,
+				},
 			},
-		})
+			options
+		)
 	}
 
 	return (

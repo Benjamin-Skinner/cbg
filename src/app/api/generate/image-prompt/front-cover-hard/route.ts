@@ -8,6 +8,7 @@ import { getBookById } from '@/functions/getBookById'
 import { getRandomChapterTitles } from '@/util/random'
 import logger from '@/logging'
 import logStatus from '@/util/statusLog'
+import { updateHardcoverPrompt } from '@/functions/updateImagePrompt'
 
 export async function POST(req: Request, res: Response) {
 	const params: {
@@ -53,21 +54,7 @@ export async function POST(req: Request, res: Response) {
 			openAiPrompt
 		)
 
-		const newCover: Cover = {
-			...book.frontCover.hard,
-			image: {
-				...book.frontCover.hard.image,
-				prompt: newPrompt,
-			},
-		}
-
-		await updateBook({
-			...book,
-			frontCover: {
-				...book.frontCover,
-				hard: newCover,
-			},
-		})
+		await updateHardcoverPrompt(bookId, newPrompt)
 
 		logStatus('IMAGE_PROMPT_HARD_COVER', 'completed', bookId)
 

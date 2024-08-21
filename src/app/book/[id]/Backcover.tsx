@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Section from '@/components/Section'
 import { Book, PageImage, ImagePrompt as ImagePromptT } from '@/types'
 import SelectImage from '@/components/selectImage/SelectImage'
@@ -16,25 +16,37 @@ interface Props {
 const Backcover: React.FC<Props> = ({ book, updateBook }) => {
 	const [newImages, setNewImages] = useState(false)
 
-	const updateImagePrompt = (prompt: ImagePromptT) => {
-		updateBook({
-			...book,
-			backCover: {
-				...book.backCover,
-				image: {
-					...book.backCover.image,
-					prompt,
+	const bookRef = useRef(book)
+
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
+	const updateImagePrompt = (
+		prompt: ImagePromptT,
+		options?: UpdateBookOptions
+	) => {
+		updateBook(
+			{
+				...bookRef.current,
+				backCover: {
+					...bookRef.current.backCover,
+					image: {
+						...bookRef.current.backCover.image,
+						prompt,
+					},
 				},
 			},
-		})
+			options
+		)
 	}
 
 	const updateImage = (image: PageImage, options?: UpdateBookOptions) => {
 		updateBook(
 			{
-				...book,
+				...bookRef.current,
 				backCover: {
-					...book.backCover,
+					...bookRef.current.backCover,
 					image,
 				},
 			},

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Book, PageImage, ImagePrompt as ImagePromptT } from '@/types'
 import Section from '@/components/Section'
 import SelectImage from '@/components/selectImage/SelectImage'
@@ -14,12 +14,19 @@ interface Props {
 
 const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
 	const [newImages, setNewImages] = useState(false)
+
+	const bookRef = useRef(book)
+
+	useEffect(() => {
+		bookRef.current = book
+	}, [book])
+
 	const updateImage = (image: PageImage, options?: UpdateBookOptions) => {
 		updateBook(
 			{
-				...book,
+				...bookRef.current,
 				insideCover: {
-					...book.insideCover,
+					...bookRef.current.insideCover,
 					image,
 				},
 			},
@@ -33,11 +40,11 @@ const InsideCover: React.FC<Props> = ({ book, updateBook }) => {
 	) => {
 		updateBook(
 			{
-				...book,
+				...bookRef.current,
 				insideCover: {
-					...book.insideCover,
+					...bookRef.current.insideCover,
 					image: {
-						...book.insideCover.image,
+						...bookRef.current.insideCover.image,
 						prompt,
 					},
 				},

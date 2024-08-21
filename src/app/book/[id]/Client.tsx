@@ -84,6 +84,8 @@ const Client: React.FC<Props> = ({ bookData }) => {
 			}
 		}
 
+		console.log('options', options)
+
 		!options.clientOnly && setSaving(true)
 		// Update in state
 		console.log('updatedBook', updatedBook)
