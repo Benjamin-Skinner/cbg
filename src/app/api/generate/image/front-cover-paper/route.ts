@@ -36,7 +36,7 @@ export async function POST(req: Request, res: Response) {
 
 		const newPageImage: PageImage = await generateRemixImages(
 			frontCoverPaperImage,
-			book.frontCover.paper.image.selected.messageId
+			book.frontCover.hard.image.selected.messageId
 		)
 
 		await updateFrontCoverPaperPageImage(params.bookId, newPageImage)
