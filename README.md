@@ -47,4 +47,4 @@ Specifically:
 
 ## Notes
 
-1. Note that the project is built to be user by one user at a time.
+1. Note that the project is built to be used by one user at a time.
