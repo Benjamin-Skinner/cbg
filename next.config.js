@@ -26,6 +26,12 @@ const nextConfig = {
 				port: '',
 				pathname: '/**',
 			},
+			{
+				protocol: 'https',
+				hostname: 'cbgstorage-prod.s3.eu-north-1.amazonaws.com',
+				port: '',
+				pathname: '/**',
+			},
 		],
 	},
 }
