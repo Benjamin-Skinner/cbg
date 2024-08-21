@@ -1,5 +1,9 @@
 # To update the software:
 
+Run the script `./update`
+
+Or, to manually update:
+
 1. `git pull origin main`
 2. `npm run build`
 3. `pm2 list` --> get the current PID
