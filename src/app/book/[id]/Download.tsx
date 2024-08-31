@@ -20,23 +20,45 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 	})
 
 	const downloadManuscript = async (version: 'hard' | 'paper') => {
-		const res = await fetch(
-			`/api/download/${book.id}/manuscript/${version}`,
-			{
-				method: 'GET',
-			}
+		if (version === 'hard') {
+			setLoading({ ...loading, hardcoverManuscript: true })
+		} else {
+			setLoading({ ...loading, paperbackManuscript: true })
+		}
+		const response = await fetch(
+			`/api/download/${book.id}/manuscript/${version}`
 		)
 
-		if (res.status === 200) {
-			const { filepath } = await res.json()
-			alert(`File downloaded to ${filepath}`)
+		if (response.status === 200) {
+			const blob = await response.blob()
+			const url = window.URL.createObjectURL(blob)
+			const a = document.createElement('a')
+			a.href = url
+			a.download = `${book.title}-${version}.docx`
+			document.body.appendChild(a)
+			a.click()
+			a.remove()
 		} else {
-			const { error, code } = await res.json()
+			const { error, code } = await response.json()
 			setWarningMessage(error)
+		}
+
+		if (version === 'hard') {
+			setLoading({ ...loading, hardcoverManuscript: false })
+		} else {
+			setLoading({ ...loading, paperbackManuscript: false })
 		}
 	}
 
 	const downloadCoverAssets = async (version: 'hard' | 'paper' | 'back') => {
+		if (version === 'hard') {
+			setLoading({ ...loading, frontcoverHard: true })
+		} else if (version === 'paper') {
+			setLoading({ ...loading, frontcoverPaper: true })
+		} else {
+			setLoading({ ...loading, backcover: true })
+		}
+
 		const response = await fetch(
 			`/api/download/${book.id}/cover/${version}`
 		)
@@ -52,6 +74,14 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 		} else {
 			const { error, code } = await response.json()
 			setWarningMessage(error)
+		}
+
+		if (version === 'hard') {
+			setLoading({ ...loading, frontcoverHard: false })
+		} else if (version === 'paper') {
+			setLoading({ ...loading, frontcoverPaper: false })
+		} else {
+			setLoading({ ...loading, backcover: false })
 		}
 	}
 
@@ -72,40 +102,71 @@ const Download: React.FC<Props> = ({ book, setWarningMessage }) => {
 								className="btn btn-primary mt-4"
 								disabled={loading.hardcoverManuscript}
 							>
-								<BsDownload size={25} />
-								Download Hardcover Manuscript
+								{loading.hardcoverManuscript ? (
+									<span className="loading loading-spinner loading-lg"></span>
+								) : (
+									<>
+										{' '}
+										<BsDownload size={25} />
+										Download Hardcover Manuscript
+									</>
+								)}
 							</button>
 							<button
 								onClick={() => downloadManuscript('paper')}
 								className="btn btn-primary mt-4"
 								disabled={loading.paperbackManuscript}
 							>
-								<BsDownload size={25} />
-								Download Paperback Manuscript
+								{loading.paperbackManuscript ? (
+									<span className="loading loading-spinner loading-lg"></span>
+								) : (
+									<>
+										<BsDownload size={25} />
+										Download Paperback Manuscript
+									</>
+								)}
 							</button>
 							<button
 								onClick={() => downloadCoverAssets('back')}
 								className="btn btn-primary mt-4"
 								disabled={loading.backcover}
 							>
-								<BsDownload size={25} />
-								Download Back Cover
+								{loading.backcover ? (
+									<span className="loading loading-spinner loading-lg"></span>
+								) : (
+									<>
+										<BsDownload size={25} />
+										Download Back Cover
+									</>
+								)}
 							</button>
 							<button
 								onClick={() => downloadCoverAssets('paper')}
 								className="btn btn-primary mt-4"
 								disabled={loading.frontcoverPaper}
 							>
-								<BsDownload size={25} />
-								Download Front Cover Paper
+								{loading.frontcoverPaper ? (
+									<span className="loading loading-spinner loading-lg"></span>
+								) : (
+									<>
+										<BsDownload size={25} />
+										Download Front Cover Paper
+									</>
+								)}
 							</button>
 							<button
 								onClick={() => downloadCoverAssets('hard')}
 								className="btn btn-primary mt-4"
 								disabled={loading.frontcoverHard}
 							>
-								<BsDownload size={25} />
-								Download Front Cover Hard
+								{loading.frontcoverHard ? (
+									<span className="loading loading-spinner loading-lg"></span>
+								) : (
+									<>
+										<BsDownload size={25} />
+										Download Front Cover Hard
+									</>
+								)}
 							</button>
 						</div>
 					</div>

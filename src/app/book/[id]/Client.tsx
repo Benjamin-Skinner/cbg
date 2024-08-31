@@ -32,7 +32,7 @@ export type UpdateBookOptions = {
 
 export type Field = 'title' | 'description' | 'status'
 
-const DEBOUNCE_SECONDS = 3
+const DEBOUNCE_SECONDS = 1.5
 
 const Client: React.FC<Props> = ({ bookData }) => {
 	// The book state
