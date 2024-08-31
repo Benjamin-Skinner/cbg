@@ -78,6 +78,19 @@ async function generateOneQuestion(book: Book) {
     Page: Butterflies are beautiful insects that live in the jungle. They start as tiny eggs, then hatch into caterpillars. These caterpillars munch on leaves. After a while, they wrap themselves in a cozy blanket called a chrysalis, just like you snuggle in your blanket at night. Inside, they transform into beautiful butterflies with colorful wings. Butterflies flutter from flower to flower, sipping nectar like a straw in a sweet drink.
     Question: What do butterflies like to drink?
 
+    Page: Mom pointed to a new spot on the map and said, "That's San Diego!" San Diego is a sunny city by the ocean. It has beautiful beaches, where you can play in the sand and surf in the waves. San Diego has a famous zoo with animals from all around the world. The city is full of fun things to do, such as visit museums and eat delicious food.
+    Question: What activities can you do in San Diego?
+
+
+    Page: As Jack and Emma looked at the map, Mom showed them a place called Silicon Valley. Silicon Valley is a special place where many smart people work on amazing inventions. It's a big playground for science and technology! Google, Apple, and Facebook all started in Silicon Valley. They make websites and technology that are used by people from all over the world. Silicon Valley is an exciting place to work!
+    Question: What do people do in Silicon Valley?
+
+    Page: Now Emma and Jack looked at Napa Valley. Napa Valley is a special place in California known for its vineyards and wineries. Rows of grapevines grow there to make wine. The weather in Napa Valley is perfect for growing grapes, not too hot and not too cold. "Did you know that Napa Valley has over 400 wineries?" asked Mom. "That's a lot of grapes!" said Jack.
+    Question: Why is Napa Valley perfect for growing delicious grapes?
+
+    Page: "California is also home to Redwood trees" Mom said with a smile. Redwoods are the tallest trees on Earth. They have thick bark to protect them from fires. Redwoods can grow as tall as a 30-story building. Some redwood trees are over 2,000 years old. Redwood forests are quiet places with many different animals. These trees help clean the air, provide homes for creatures, and create a peaceful environment. 
+    Question: What do you call the really tall trees that live in Northern California?
+
     Page: ${page.text.content}
     Question:`
 

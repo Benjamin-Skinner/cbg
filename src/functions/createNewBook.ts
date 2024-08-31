@@ -401,7 +401,7 @@ export async function createNewBook(title: string, oneLiner?: string) {
 				},
 			},
 			conclusion: {
-				layout: 'imageFirst',
+				layout: 'textFirst',
 				title: 'Conclusion',
 				key: 'conclusion',
 				currPosition: 15,

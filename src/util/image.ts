@@ -31,17 +31,14 @@ export async function downloadMidjourneyImage(
 	// Check if the image directory exists; if not create it
 	const imageDir = `${process.env.IMAGE_DIR}/${book.id}`
 	if (!fs.existsSync(imageDir)) {
-		console.log('Creating image directory', imageDir)
 		fs.mkdirSync(imageDir)
-	} else {
-		console.log('Image directory already exists')
 	}
 
 	const imagePath = getImagePath(url, book)
 
 	// Check if image already exists
 	if (fs.existsSync(imagePath)) {
-		console.log('Image already exists, skipping download')
+		// console.log('Image already exists, skipping download')
 		return { imgPath: imagePath }
 	}
 
@@ -53,7 +50,7 @@ export async function downloadMidjourneyImage(
 	return download
 		.image(options)
 		.then(({ filename }) => {
-			console.log('Image successfully downloaded')
+			// console.log('Image successfully downloaded')
 			return { imgPath: filename }
 		})
 		.catch((err: Error) => {
