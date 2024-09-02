@@ -43,18 +43,18 @@ const RecallAndReflect: React.FC<Props> = ({ book, updateBook }) => {
 		})
 	}
 
-	const Select: React.FC<SelectProps> = ({ id }) => {
-		return (
-			<SelectImage
-				setNewImages={setNewImages}
-				image={book.recallAndReflect.image}
-				updateImage={updateImage}
-				modalId={`recallAndReflect-${id}`}
-				bookId={book.id}
-				newImages={newImages}
-			/>
-		)
-	}
+	// const Select: React.FC<SelectProps> = ({ id }) => {
+	// 	return (
+	// 		<SelectImage
+	// 			setNewImages={setNewImages}
+	// 			image={book.recallAndReflect.image}
+	// 			updateImage={updateImage}
+	// 			modalId={`recallAndReflect-${id}`}
+	// 			bookId={book.id}
+	// 			newImages={newImages}
+	// 		/>
+	// 	)
+	// }
 
 	return (
 		<Section title="Recall and Reflect">

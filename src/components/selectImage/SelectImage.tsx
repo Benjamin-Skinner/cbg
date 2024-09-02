@@ -20,7 +20,8 @@ type ModalIdOptions =
 	| 'insideCover'
 	| 'frontCover-hard'
 	| 'frontCover-paper'
-	| 'recallAndReflect'
+	| 'recallAndReflect1'
+	| 'recallAndReflect2'
 	| string
 
 interface Props {
@@ -81,7 +82,7 @@ function uploadApiRouteFromId(id: ModalIdOptions, bookId: string) {
 		return `/api/upload/front-cover-hard?bookId=${bookId}`
 	} else if (id === 'frontCover-paper') {
 		return `/api/upload/front-cover-paper?bookId=${bookId}`
-	} else if (id === 'recallAndReflect') {
+	} else if (id === 'recallAndReflect1' || id === 'recallAndReflect2') {
 		return `/api/upload/recall-and-reflect?bookId=${bookId}`
 	} else {
 		return `/api/upload/page?bookId=${bookId}&pageKey=${id}`
@@ -105,7 +106,7 @@ function deleteApiRouteFromIds(id: ModalIdOptions, bookId: string) {
 		const endpoint = (url: string) =>
 			`/api/delete/front-cover-paper?bookId=${bookId}&url=${url}`
 		return endpoint
-	} else if (id === 'recallAndReflect') {
+	} else if (id === 'recallAndReflect1' || id === 'recallAndReflect2') {
 		const endpoint = (url: string) =>
 			`/api/delete/recall-and-reflect?bookId=${bookId}&url=${url}`
 		return endpoint
@@ -128,7 +129,7 @@ function modalTitleFromModalId(id: ModalIdOptions, title?: string) {
 		return 'Hardback Front Cover'
 	} else if (id === 'frontCover-paper') {
 		return 'Paperback Front Cover'
-	} else if (id === 'recallAndReflect') {
+	} else if (id === 'recallAndReflect1' || id === 'recallAndReflect2') {
 		return 'Recall and Reflect'
 	} else return 'Image'
 }

@@ -617,9 +617,9 @@ export function midjourneyParams(ar: ImageAR, tiling: boolean): string {
 
 	params += ` --ar ${ar.width}:${ar.height}`
 
-	if (tiling) {
-		params += ' --tile'
-	}
+	// if (tiling) {
+	// 	params += ' --tile'
+	// }
 
 	return params
 }
