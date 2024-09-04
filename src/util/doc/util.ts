@@ -1,20 +1,25 @@
-import * as fs from 'fs'
+import * as fs from 'fs/promises'
+import { existsSync, mkdirSync } from 'fs'
 import { Document, Packer } from 'docx'
 import { Book } from '@/types'
 import { countWords } from '../wordCount'
 
-export function saveDoc(doc: Document, filepath: string) {
+export async function saveDoc(doc: Document, filepath: string) {
 	if (!process.env.DOCUMENT_DIR) {
 		throw new Error('DOCUMENT_DIR env variable not set')
 	}
+
 	// Make sure the document dir exists, if not create it
-	if (!fs.existsSync(process.env.DOCUMENT_DIR)) {
-		fs.mkdirSync(process.env.DOCUMENT_DIR)
+	if (!existsSync(process.env.DOCUMENT_DIR)) {
+		mkdirSync(process.env.DOCUMENT_DIR)
 	}
 
-	Packer.toBuffer(doc).then((buffer) => {
-		fs.writeFileSync(filepath, buffer)
-	})
+	try {
+		const buffer = await Packer.toBuffer(doc)
+		await fs.writeFile(filepath, buffer)
+	} catch (error: any) {
+		throw new Error(`Failed to save document: ${error.message}`)
+	}
 }
 
 export function bookName(title: string, version: string) {
@@ -27,7 +32,7 @@ export function bookName(title: string, version: string) {
 	return `${replaceSpaceWithDash(title)}-${name}`
 }
 
-function replaceSpaceWithDash(str: string) {
+export function replaceSpaceWithDash(str: string) {
 	return str.replace(/\s/g, '-')
 }
 

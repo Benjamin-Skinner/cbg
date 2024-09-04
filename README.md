@@ -18,6 +18,7 @@
 -   `AWS_REGION`
 -   `S3_BUCKET_NAME` "cbgstorage" for development or "cbgstorage-prod" for production
 -   `IMAGE_DIR` Wherever you want locally downloaded images to be stored
+-   `DOCUMENT_DIR` Wherever you want locally downloaded images to be stored
 
 ## Account Info
 

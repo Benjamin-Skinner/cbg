@@ -1,12 +1,21 @@
 import CBGError from '@/classes/Error'
+import { getBookById } from '@/functions/getBookById'
 import logger from '@/logging'
+import { generateDoc } from '@/util/doc/soft'
+import { validateBook } from '@/util/doc/util'
+import { serveWordDocument } from '@/util/download'
 
-export async function GET() {
+export async function GET(
+	req: Request,
+	{ params }: { params: { bookId: string } }
+) {
 	try {
-		logger.error('Tried to download manuscript')
-		throw new Error(
-			'The manuscript download feature is not yet implemented'
-		)
+		const book = await getBookById(params.bookId)
+		logger.error('Downloading softcover manuscript')
+		validateBook(book)
+		const { filepath, filename } = await generateDoc(book)
+		const file = await serveWordDocument(filepath, filename)
+		return file
 	} catch (e: any) {
 		return new CBGError(
 			e.message || 'Internal server error',

@@ -9,7 +9,7 @@ import {
 } from 'docx'
 import { Book, Cover, Page, Question, RandR } from '@/types'
 import { downloadMidjourneyImage } from '../image'
-import { saveDoc } from './util'
+import { replaceSpaceWithDash, saveDoc } from './util'
 import splitText from '../splitText'
 
 export async function generateDoc(book: Book) {
@@ -67,9 +67,9 @@ export async function generateDoc(book: Book) {
 		],
 	})
 
-	const filename = `${book.title}-hard.docx`
+	const filename = `${replaceSpaceWithDash(book.title)}-hard.docx`
 	const filepath = `${process.env.DOCUMENT_DIR}/${filename}`
-	saveDoc(doc, filepath)
+	await saveDoc(doc, filepath)
 	return {
 		filepath,
 		filename,
